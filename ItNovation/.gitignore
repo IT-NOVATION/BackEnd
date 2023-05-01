@@ -38,3 +38,4 @@ out/
 
 application-oauth.yml
 application-prod.yml
+application-ttkey.yml

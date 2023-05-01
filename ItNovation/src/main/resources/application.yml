@@ -11,5 +11,5 @@ spring:
 
   profiles:
     include: oauth
-    active: prod
+    active: prod, ttkey
 
