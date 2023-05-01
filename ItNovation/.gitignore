@@ -37,3 +37,4 @@ out/
 .vscode/
 
 application-oauth.yml
+application-prod.yml
