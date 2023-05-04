@@ -22,11 +22,9 @@ public class MovieRepoService {
 
 
     @Transactional
-    public Optional<Movie> findById(Movie movie){
-        return movieRepository.findById(movie.getMovieId());
+    public Optional<Movie> findById(Long id){
+        return movieRepository.findById(id);
     }
-
-
 
 
 }
