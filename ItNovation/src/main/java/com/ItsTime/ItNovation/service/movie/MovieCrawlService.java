@@ -37,7 +37,7 @@ public class MovieCrawlService {
         return titleAndPoster;
     }
 
-    private Map<String, String> getTitleAndPoster(RestTemplate restTemplate) {
+    private Map<String, String> getTitleAndPoster(RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
         Map<String, String> titleAndPoster = new HashMap<>();
         for (int i = 1; i < 400; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
