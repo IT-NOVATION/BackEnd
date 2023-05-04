@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,12 @@ public class Movie {
     private String movieTitle;
 
     private String moviePosterUrl;
+
+    public Movie(String title, String url) {
+       this.movieTitle=title;
+       this.moviePosterUrl=url;
+    }
+
 
 
 
