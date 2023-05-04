@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
-public class MovieService {
+public class MovieCrawlService {
 
     @Value("${ttkey}")
     public String API_KEY;
