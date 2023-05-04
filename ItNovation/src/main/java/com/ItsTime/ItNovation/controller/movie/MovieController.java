@@ -24,7 +24,7 @@ public class MovieController {
         Map<String, String> movieAndPoster = movieService.getMovieAndPoster();
         System.out.println("hi");
         model.addAttribute("movieInfo", movieAndPoster);
-        return "hi";
+        return "movie";
     }
 
 }
