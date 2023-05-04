@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.controller.movie;
 
 import com.ItsTime.ItNovation.entity.movie.Movie;
+import com.ItsTime.ItNovation.entity.movie.dto.MovieSaveRequestDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class MovieController {
 
     private void saveMovie(Map<String, String> movieAndPoster) {
         for (String s : movieAndPoster.keySet()) {
-            Movie saveMovie = new Movie(s, movieAndPoster.get(s));
+            Movie saveMovie = new MovieSaveRequestDto(s, movieAndPoster.get(s)).toEntity();
             movieRepoService.save(saveMovie);
         }
     }

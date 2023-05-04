@@ -24,6 +24,7 @@ public class Movie {
 
     private String moviePosterUrl;
 
+    @Builder
     public Movie(String title, String url) {
        this.movieTitle=title;
        this.moviePosterUrl=url;
