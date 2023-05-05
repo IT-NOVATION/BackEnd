@@ -1,6 +1,6 @@
 package com.ItsTime.ItNovation.config.auth;
 
-경import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()
 //                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+//                .and()
                 .formLogin().disable()
                 .logout()
                 .logoutSuccessUrl("/home")

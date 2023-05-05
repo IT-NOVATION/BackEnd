@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.config.auth.dto;
 
+
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.User;
