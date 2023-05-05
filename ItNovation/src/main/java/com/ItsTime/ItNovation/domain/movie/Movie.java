@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.entity.movie;
+package com.ItsTime.ItNovation.domain.movie;
 
 
 import jakarta.persistence.Entity;

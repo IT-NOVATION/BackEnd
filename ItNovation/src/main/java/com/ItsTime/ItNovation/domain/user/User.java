@@ -1,6 +1,6 @@
-package com.ItsTime.ItNovation.entity.user;
+package com.ItsTime.ItNovation.domain.user;
 
-import com.ItsTime.ItNovation.entity.BaseTimeEntity;
+import com.ItsTime.ItNovation.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

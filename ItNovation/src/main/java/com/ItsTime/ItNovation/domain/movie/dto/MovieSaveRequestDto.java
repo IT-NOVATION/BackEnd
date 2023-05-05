@@ -1,7 +1,6 @@
-package com.ItsTime.ItNovation.entity.movie.dto;
+package com.ItsTime.ItNovation.domain.movie.dto;
 
-import com.ItsTime.ItNovation.entity.movie.Movie;
-import com.ItsTime.ItNovation.service.movie.MovieRepoService;
+import com.ItsTime.ItNovation.domain.movie.Movie;
 import lombok.Builder;
 
 public class MovieSaveRequestDto {

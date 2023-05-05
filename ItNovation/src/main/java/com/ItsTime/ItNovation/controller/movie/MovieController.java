@@ -1,7 +1,7 @@
 package com.ItsTime.ItNovation.controller.movie;
 
-import com.ItsTime.ItNovation.entity.movie.Movie;
-import com.ItsTime.ItNovation.entity.movie.dto.MovieSaveRequestDto;
+import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieSaveRequestDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import java.util.Map;

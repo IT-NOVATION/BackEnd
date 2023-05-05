@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.entity;
+package com.ItsTime.ItNovation.domain;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

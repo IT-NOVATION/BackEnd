@@ -1,11 +1,12 @@
-package com.ItsTime.ItNovation.entity.user;
+package com.ItsTime.ItNovation.domain.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Role {
-    USER("ROLE_USER"), ADMIN("ROLE_ADMIN");
+public enum Grade {
+    VIP("vip"), COMMON("common");
+
     private final String key;
 }
