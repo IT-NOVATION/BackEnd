@@ -10,6 +10,8 @@ spring:
 
 
   profiles:
-    include: oauth
+    include:
+      - oauth
+      - ttkey
     active: prod
 

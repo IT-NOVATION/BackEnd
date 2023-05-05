@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
-public class MovieService {
+public class MovieCrawlService {
 
     @Value("${ttkey}")
     public String API_KEY;
@@ -30,25 +30,20 @@ public class MovieService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        Map<String, List<Map<String, Object>>> res = restTemplate.getForObject(BASE_URL + API_KEY,
-            Map.class);
+        total_Pages(restTemplate);
 
+        Map<String, String> titleAndPoster = getTitleAndPoster(restTemplate);
 
-        Object totalPages = res.get("total_pages");
-        log.info("totalpages= " + totalPages);
+        return titleAndPoster;
+    }
 
-
-
+    private Map<String, String> getTitleAndPoster(RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
         Map<String, String> titleAndPoster = new HashMap<>();
         for (int i = 1; i < 400; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
                 + "&with_watch_providers=337&watch_region=KR&language=ko&page=" + i;
-
             Map<String, List<Map<String, Object>>> res1 = restTemplate.getForObject(url, Map.class);
-            //System.out.println(res1);
-
             List<Map<String, Object>> results1 = res1.get("results");
-
             for (Map<String, Object> stringObjectMap : results1) {
                 Object originalTitle = stringObjectMap.get("original_title");
                 Object posterPath = stringObjectMap.get("poster_path");
@@ -56,10 +51,15 @@ public class MovieService {
                 posterPath = "https://www.themoviedb.org/t/p/original/" + posterPath;
                 titleAndPoster.put((String) originalTitle, (String) posterPath);
             }
-
         }
-
         return titleAndPoster;
+    }
+
+    private void total_Pages(RestTemplate restTemplate) {
+        Map<String, List<Map<String, Object>>> res = restTemplate.getForObject(BASE_URL + API_KEY,
+            Map.class);
+        Object totalPages = res.get("total_pages");
+        log.info("totalpages= " + totalPages);
     }
 
 }
