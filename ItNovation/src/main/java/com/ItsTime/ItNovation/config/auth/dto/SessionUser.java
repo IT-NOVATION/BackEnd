@@ -1,6 +1,6 @@
 package com.ItsTime.ItNovation.config.auth.dto;
 
-import com.ItsTime.ItNovation.entity.user.User;
+import com.ItsTime.ItNovation.domain.user.User;
 import lombok.Getter;
 
 import java.io.Serializable;

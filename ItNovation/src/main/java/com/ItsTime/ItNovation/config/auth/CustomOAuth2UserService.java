@@ -2,8 +2,8 @@ package com.ItsTime.ItNovation.config.auth;
 
 import com.ItsTime.ItNovation.config.auth.dto.OAuthAttributes;
 import com.ItsTime.ItNovation.config.auth.dto.SessionUser;
-import com.ItsTime.ItNovation.entity.user.User;
-import com.ItsTime.ItNovation.entity.user.UserRepository;
+import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

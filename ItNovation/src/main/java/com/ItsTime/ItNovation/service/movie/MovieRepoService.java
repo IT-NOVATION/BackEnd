@@ -1,7 +1,7 @@
 package com.ItsTime.ItNovation.service.movie;
 
-import com.ItsTime.ItNovation.entity.movie.Movie;
-import com.ItsTime.ItNovation.entity.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

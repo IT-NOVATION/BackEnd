@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.entity.user;
+package com.ItsTime.ItNovation.domain.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

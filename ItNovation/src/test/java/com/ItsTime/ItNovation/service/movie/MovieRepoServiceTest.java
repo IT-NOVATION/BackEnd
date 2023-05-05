@@ -1,9 +1,6 @@
 package com.ItsTime.ItNovation.service.movie;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import com.ItsTime.ItNovation.entity.movie.Movie;
-import com.ItsTime.ItNovation.entity.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.Movie;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;

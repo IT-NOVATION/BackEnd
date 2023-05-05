@@ -1,17 +1,13 @@
 package com.ItsTime.ItNovation.config.auth.dto;
 
-import com.ItsTime.ItNovation.entity.BaseTimeEntity;
-import com.ItsTime.ItNovation.entity.user.Role;
-import com.ItsTime.ItNovation.entity.user.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import com.ItsTime.ItNovation.domain.BaseTimeEntity;
+import com.ItsTime.ItNovation.domain.user.Role;
+import com.ItsTime.ItNovation.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 @Getter
 @Builder
