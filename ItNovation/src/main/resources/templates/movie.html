@@ -1,0 +1,21 @@
+<!-- movies.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Movies</title>
+</head>
+<body>
+<h1>Movies</h1>
+<table>
+  <tr>
+    <th>Title</th>
+    <th>Poster</th>
+  </tr>
+  <tr th:each="entry : ${movieInfo}">
+    <td th:text="${entry.key}"></td>
+    <td><img th:src="${entry.value}" width="200px"/></td>
+  </tr>
+</table>
+</body>
+</html>
