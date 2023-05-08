@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
@@ -33,20 +34,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
                 .formLogin().disable()
-                .logout()
-                .logoutSuccessUrl("/home")
-                .and()
                 .httpBasic().disable()
                 .authorizeHttpRequests()
-                    .requestMatchers("/", "/oauth2/**", "/login/**", "/css/**", "/images/**", "/js/**", "/console/**").permitAll()
-                    .anyRequest().authenticated()
-                    .and()
-                .oauth2Login()
-                    .userInfoEndpoint()
-                        .userService(customOAuth2UserService);
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/**").permitAll();
+
+//                    .and()
+//                .oauth2Login()
+//                    .userInfoEndpoint()
+//                        .userService(customOAuth2UserService);
 
 
         return http.build();

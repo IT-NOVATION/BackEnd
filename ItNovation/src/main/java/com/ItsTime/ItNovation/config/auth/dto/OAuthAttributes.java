@@ -69,7 +69,7 @@ public class OAuthAttributes extends BaseTimeEntity {
 
     public User toEntity() {
         return User.builder()
-                .name(name)
+                .nickname(name)
                 .email(email)
                 .password("oauth")
                 .role(Role.USER)
