@@ -14,7 +14,7 @@
   </tr>
   <tr th:each="entry : ${movieInfo}">
     <td th:text="${entry.key}"></td>
-    <td><img th:src="${entry.value}" width="200px"/></td>
+    <td><img th:src="${movieInfo[entry.key].moviePosterUrl}" width="200px"/></td>
   </tr>
 </table>
 </body>
