@@ -6,21 +6,16 @@ import lombok.Builder;
 public class MovieSaveRequestDto {
 
     private String title;
-    private String posterUrl;
+    private Movie movie;
 
 
 
     @Builder
-    public MovieSaveRequestDto(String title, String posterUrl){
+    public MovieSaveRequestDto(String title, Movie movie){
         this.title=title;
-        this.posterUrl=posterUrl;
+        this.movie=movie;
     }
 
-    public Movie toEntity(){
-        return Movie.builder().
-            title(title).
-            url(posterUrl).
-            build();
-    }
+
 
 }
