@@ -1,7 +1,6 @@
 package com.ItsTime.ItNovation.controller.movie;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
-import com.ItsTime.ItNovation.domain.movie.dto.MovieSaveRequestDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import java.util.Map;
@@ -21,15 +20,15 @@ public class MovieController {
     private final MovieRepoService movieRepoService;
 
 
-    @GetMapping("/movies")
+    @GetMapping("/movies") // 테스트 하실때는 SecurityConfig에 /movies url 추가후 진행하세요!
     public String getMovieName(Model model) {
-        Map<String, String> movieAndPoster = movieCrawlService.getMovieAndPoster(); // 이 부분 무조건 고쳐야 함. 동기적으로 데이터 가져와서 스케줄링 같은 작업으로 일정 주기에 끌어오는 방법 고안.
+        Map<String, Movie> titleAndMovie = movieCrawlService.getTitleAndMovie(); // 이 부분 무조건 고쳐야 함. 동기적으로 데이터 가져와서 스케줄링 같은 작업으로 일정 주기에 끌어오는 방법 고안.
 
-        saveMovie(movieAndPoster);
+        saveMovie(titleAndMovie);
 
         System.out.println("hi");
-        model.addAttribute("movieInfo", movieAndPoster);
-        return "movie";
+        model.addAttribute("movieInfo", titleAndMovie);
+        return "movie"; // 여기까지 2분 32초
     }
 
     @GetMapping("/movies/winter") // 겨울왕국 배경이미지 테스트
@@ -41,9 +40,9 @@ public class MovieController {
     }
 
 
-    private void saveMovie(Map<String, String> movieAndPoster) {
-        for (String s : movieAndPoster.keySet()) {
-            Movie saveMovie = new MovieSaveRequestDto(s, movieAndPoster.get(s)).toEntity();
+    private void saveMovie(Map<String, Movie> titleAndMovie) {
+        for (String s : titleAndMovie.keySet()) {
+            Movie saveMovie = titleAndMovie.get(s);
             movieRepoService.save(saveMovie);
         }
     }
