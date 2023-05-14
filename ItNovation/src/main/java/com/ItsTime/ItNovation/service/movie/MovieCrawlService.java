@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.service.movie;
 
+import com.ItsTime.ItNovation.domain.movie.Movie;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class MovieCrawlService {
         "https://api.themoviedb.org/3/discover/movie?api_key=";
 
 
-    public Map<String, String> getMovieAndPoster() {
+    public Map<String, Movie> getTitleAndMovie() {
         //여기 참고 https://developers.themoviedb.org/3/movies/get-movie-images
 
         log.info(BASE_URL + API_KEY);
@@ -31,9 +32,9 @@ public class MovieCrawlService {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         total_Pages(restTemplate);
-        Map<String, String> titleAndPoster = getTitleAndPoster(restTemplate);
+        Map<String, Movie> titleAndMovie = getTitleAndPoster(restTemplate);
 
-        return titleAndPoster;
+        return titleAndMovie;
     }
 
     public String findBgImg(){
@@ -47,22 +48,41 @@ public class MovieCrawlService {
 
 
 
-    private Map<String, String> getTitleAndPoster(RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
-        Map<String, String> titleAndPoster = new HashMap<>();
+    private Map<String, Movie> getTitleAndPoster(RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
+        Map<String, Movie> titleAndMovie = new HashMap<>();
         for (int i = 1; i < 400; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
-                + "&with_watch_providers=337&watch_region=KR&language=ko&page=" + i;
+                + "&page=" + i;
             Map<String, List<Map<String, Object>>> res1 = restTemplate.getForObject(url, Map.class); //여기에서도 끌고 올 수 있음. backdropPath 끌고 올 수 있음.
             List<Map<String, Object>> results1 = res1.get("results");
-            for (Map<String, Object> stringObjectMap : results1) {
-                Object originalTitle = stringObjectMap.get("original_title");
-                Object posterPath = stringObjectMap.get("poster_path");
+
+            for (Map<String, Object> movieInfoMap : results1) {
+
+                Object originalTitle = movieInfoMap.get("original_title");
+                Object posterPath = movieInfoMap.get("poster_path");
+                Object backdropPath = movieInfoMap.get("backdrop_path");
 
                 posterPath = "https://www.themoviedb.org/t/p/original/" + posterPath;
-                titleAndPoster.put((String) originalTitle, (String) posterPath);
+                backdropPath = "https://www.themoviedb.org/t/p/original/" + backdropPath;
+
+                Movie movie= Movie.builder().
+                    adult((Boolean) movieInfoMap.get("adult")).
+                    backdrop_path((String)backdropPath).
+                    original_language((String)movieInfoMap.get("original_language")).
+                    movieTitle((String)movieInfoMap.get("original_title")).
+                    overview((String) movieInfoMap.get("overview")).
+                    release_date((String) movieInfoMap.get("release_date")).
+                    movie_unique_id((Integer) movieInfoMap.get("id")).
+                    moviePosterUrl((String) posterPath).
+                    build();
+                //[adult, backdrop_path, id, original_language, overview, popularity, release_date, title,  vote_average, vote_count]
+
+
+                log.info(movie.toString());
+                titleAndMovie.put(movie.getMovieTitle(), movie);
             }
         }
-        return titleAndPoster;
+        return titleAndMovie;
     }
 
     private String getBgImgUrl(RestTemplate restTemplate){
