@@ -23,9 +23,7 @@ public class MovieController {
     @GetMapping("/movies") // 테스트 하실때는 SecurityConfig에 /movies url 추가후 진행하세요!
     public String getMovieName(Model model) {
         Map<String, Movie> titleAndMovie = movieCrawlService.getTitleAndMovie(); // 이 부분 무조건 고쳐야 함. 동기적으로 데이터 가져와서 스케줄링 같은 작업으로 일정 주기에 끌어오는 방법 고안.
-
         saveMovie(titleAndMovie);
-
         System.out.println("hi");
         model.addAttribute("movieInfo", titleAndMovie);
         return "movie"; // 여기까지 2분 32초
