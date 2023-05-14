@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Data
 @NoArgsConstructor
 public class Movie {
 //[adult, backdrop_path, id, original_language, overview, popularity, release_date, title,  vote_average, vote_count]
@@ -22,20 +21,14 @@ public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Boolean adult;
     private String backdrop_path;
-
     private Integer movie_unique_id;
-
     private String original_language;
-
     @Column(columnDefinition="LONGTEXT")
     private String overview;
-
     private String release_date;
     private String movieTitle;
-
     private String moviePosterUrl;
 
     @Builder // 끌고 올 수 있는 최대한의 의미있는 데이터들
