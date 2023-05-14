@@ -17,40 +17,57 @@ import org.hibernate.annotations.NaturalId;
 public class Movie {
 //[adult, backdrop_path, id, original_language, overview, popularity, release_date, title,  vote_average, vote_count]
 
+//   "movie_id" bigint [pk, not null, increment]
+//   "movie_name" VARCHAR(255)
+//  "movie_img" VARCHAR(255)
+//  "movie_bgImg" VARCHAR(255)
+//  "movie_actor" varchar(255)
+//  "movie_director" varchar(255)
+//  "movie_date" DATE
+//  "movie_genre" VARCHAR(255)
+//  "movie_country" VARCHAR(255)
+//  "movie_detail" text
+//  "movie_running_time" INT
+
+// 장르 러닝타임 감독 배우 줄거리 - 한국어(요청 url 변경)
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Boolean adult;
-    private String backdrop_path;
-    private Integer movie_unique_id;
-    private String original_language;
+    private String movieName;
+    private String movieImg;
+    private String movieBgImg;
+    private String movieActor;
+    private String movieDirector;
+    private String movieDate;
+    private String movieGenre;
+    private String movieCountry;
     @Column(columnDefinition="LONGTEXT")
-    private String overview;
-    private String release_date;
-    private String movieTitle;
-    private String moviePosterUrl;
+    private String movieDetail;
+    private Integer movieRunningTime;
 
-    @Builder // 끌고 올 수 있는 최대한의 의미있는 데이터들
-    public Movie(Boolean adult, String backdrop_path, Integer movie_unique_id, String original_language,
-        String overview, String release_date,
-        String movieTitle, String moviePosterUrl) {
-        this.adult = adult;
-        this.backdrop_path = backdrop_path;
-        this.movie_unique_id = movie_unique_id;
-        this.original_language = original_language;
-        this.overview = overview;
-        this.release_date = release_date;
-        this.movieTitle = movieTitle;
-        this.moviePosterUrl = moviePosterUrl;
+    private String language;
+
+
+
+
+
+    public Movie(Long id, String movieName, String movieImg, String movieBgImg, String movieActor,
+        String movieDirector, String movieDate, String movieGenre, String movieCountry,
+        String movieDetail, Integer movieRunningTime) {
+        this.id = id;
+        this.movieName = movieName;
+        this.movieImg = movieImg;
+        this.movieBgImg = movieBgImg;
+        this.movieActor = movieActor;
+        this.movieDirector = movieDirector;
+        this.movieDate = movieDate;
+        this.movieGenre = movieGenre;
+        this.movieCountry = movieCountry;
+        this.movieDetail = movieDetail;
+        this.movieRunningTime = movieRunningTime;
     }
-
-    @Builder // 테스트를 위하여 남겨놓은 곳
-    public Movie(String title, String url) {
-       this.movieTitle=title;
-       this.moviePosterUrl=url;
-    }
-
 
 
 
