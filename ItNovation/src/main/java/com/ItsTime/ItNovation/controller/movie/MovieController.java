@@ -32,6 +32,15 @@ public class MovieController {
         return "movie";
     }
 
+    @GetMapping("/movies/winter") // 겨울왕국 배경이미지 테스트
+    public String getBackgroundImg(Model model) {
+        String bgImg = movieCrawlService.findBgImg();
+        System.out.println("hi");
+        model.addAttribute("bgImg", bgImg);
+        return "movieBgImgTest";
+    }
+
+
     private void saveMovie(Map<String, String> movieAndPoster) {
         for (String s : movieAndPoster.keySet()) {
             Movie saveMovie = new MovieSaveRequestDto(s, movieAndPoster.get(s)).toEntity();
