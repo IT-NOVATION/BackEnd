@@ -4,6 +4,8 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,11 +40,23 @@ public class MovieController {
     }
 
 
-    private void saveMovie(Map<String, Movie> titleAndMovie) {
-        for (String s : titleAndMovie.keySet()) {
-            Movie saveMovie = titleAndMovie.get(s);
-            movieRepoService.save(saveMovie);
+    private void saveMovie(Map<String, Movie> titleAndMovie){
+        System.out.println("system");
+        int index=0;
+
+        for (Entry<String, Movie> stringMovieEntry : titleAndMovie.entrySet()) {
+            System.out.println(stringMovieEntry.getKey());
+            movieRepoService.save(stringMovieEntry.getValue());
         }
+
+//        for (String s :
+//            entries) {
+//            Movie saveMovie = titleAndMovie.get(s);
+//            index+=1;
+//            System.out.println(saveMovie.getTitle());
+//            movieRepoService.save(saveMovie);
+//        }
+        System.out.println(index);
     }
 
 }
