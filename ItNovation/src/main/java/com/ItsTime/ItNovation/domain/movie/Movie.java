@@ -9,11 +9,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @NoArgsConstructor
+@Getter
+@Setter
 public class Movie {
 //[adult, backdrop_path, id, original_language, overview, popularity, release_date, title,  vote_average, vote_count]
 
@@ -35,7 +39,7 @@ public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String movieName;
+    private String title;
     private String movieImg;
     private String movieBgImg;
     private String movieActor;
@@ -46,18 +50,18 @@ public class Movie {
     @Column(columnDefinition="LONGTEXT")
     private String movieDetail;
     private Integer movieRunningTime;
-
+    private Long real_movieId;
     private String language;
 
 
 
 
-
-    public Movie(Long id, String movieName, String movieImg, String movieBgImg, String movieActor,
+    @Builder
+    public Movie(Long real_movieId, String title, String movieImg, String movieBgImg, String movieActor,
         String movieDirector, String movieDate, String movieGenre, String movieCountry,
         String movieDetail, Integer movieRunningTime) {
-        this.id = id;
-        this.movieName = movieName;
+        this.real_movieId = real_movieId;
+        this.title = title;
         this.movieImg = movieImg;
         this.movieBgImg = movieBgImg;
         this.movieActor = movieActor;
