@@ -41,9 +41,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info(accessToken);
                 log.info(refreshToken);
 
-                //TODO: response 응답에서 authorization오나 확인해보기
+
                 jwtService.sendAccessTokenAndRefreshToken(response, accessToken, refreshToken);
-                log.info(oAuth2User.getEmail());
+                log.info(response.getHeader("Authorization"));
+
+
 
                 userRepository.findByEmail(oAuth2User.getEmail())
                         .ifPresent(user->{
@@ -74,8 +76,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         String refreshToken = jwtService.createRefreshToken();
-        response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
-        response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);
+//        response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
+//        response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);
 
         jwtService.sendAccessTokenAndRefreshToken(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
