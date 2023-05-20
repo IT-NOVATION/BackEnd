@@ -21,6 +21,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * 클라이언트가 헤더에 JWT 토큰을 담아서 /login이외의 요청을 보낼 시 해당 토큰들의
+ * 유효성을 검사하며 인증처리, 인증 실패, 토큰 재발급 등을 수행하는 역할의 필함
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {// 인증 처리, 인증 실패, 토큰 재발급 역할 -> 이후에는 권한 처리하는 필터로 이동

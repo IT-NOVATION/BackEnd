@@ -16,6 +16,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * Form Login 시 기본적으로 사용되는
+ * UsernamePasswordAuthenticationFilter에서
+ * AbstractAuthenticationProcessingFilter를 상속받아 구현하기 때문에,
+ * 커스텀 JSON 필터에서도 AbstractAuthenticationProcessingFilter를 상속받아 구현
+ */
 public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private static final String DEFAULT_LOGIN_REQUEST_URL = "/login"; // "/login"으로 오는 요청을 처리
     private static final String HTTP_METHOD = "POST"; // 로그인 HTTP 메소드는 POST
@@ -31,6 +37,7 @@ public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuth
         /**
          * super()를 통해 부모 클래스인 AbstractAuthenticationProcessingFilter()의
          * 생성자 파라미터로 위에서 상수로 선언한 "/login" URL을 설정
+         * 이 필터는 /login 이 요청시 작동함
          */
         super(DEFAULT_LOGIN_PATH_REQUEST_MATCHER);
         this.objectMapper = objectMapper;
