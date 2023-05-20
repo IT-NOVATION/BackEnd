@@ -30,8 +30,8 @@ public class UserController {
 
 
 
-    @GetMapping("oauth2/next-sign-up")
+    @GetMapping("next-signup")
     public String secondSignup() {
-        return "소개글페이지";
+        return "리다이렉트";
     }
 }

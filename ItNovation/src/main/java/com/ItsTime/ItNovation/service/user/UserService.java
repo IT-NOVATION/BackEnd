@@ -36,7 +36,7 @@ public class UserService {
             User user = User.builder()
                     .email(signUpRequestDto.getEmail())
                     .password(signUpRequestDto.getPassword())
-                    .role(Role.USER)
+                    .role(Role.GUEST) //TODO: 두번째 로그인 진행해야함. 소개글과 별명 입력하면 Role.GUEST로 권한 변경됨
                     .build();
 
             user.passwordEncode(passwordEncoder);
