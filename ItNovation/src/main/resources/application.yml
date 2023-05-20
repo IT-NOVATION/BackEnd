@@ -13,5 +13,6 @@ spring:
     include:
       - oauth
       - ttkey
+      - jwt
     active: prod
 

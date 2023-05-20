@@ -5,10 +5,7 @@ import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import com.ItsTime.ItNovation.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -27,6 +24,14 @@ public class UserController {
     //signature: 서버가 가지고 있는 개인키를 통해 암호화되어있음, 외부에서 복호화 불가능
     @GetMapping("/jwt-test")
     public String jwtTest() {
+        log.info("jwt-test");
         return "jwt 인증 성공";
+    }
+
+
+
+    @GetMapping("oauth2/next-sign-up")
+    public String secondSignup() {
+        return "소개글페이지";
     }
 }

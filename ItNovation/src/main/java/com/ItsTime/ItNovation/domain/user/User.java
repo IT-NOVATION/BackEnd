@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED) //
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 
 @Entity
 public class User extends BaseTimeEntity {
