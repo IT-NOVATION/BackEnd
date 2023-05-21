@@ -54,7 +54,7 @@ public class SecurityConfig {
                 //== URL별 권한 관리 옵션 ==//
                 .authorizeHttpRequests()
                 .requestMatchers("/","/oauth2/**","/css/**", "/images/**", "/js/**").permitAll()
-                .requestMatchers("/signup","next-signup").permitAll() // 회원가입 접근 가능, 리다이렉용
+                .requestMatchers("/signup","next-signup","/api/v1/movies").permitAll() // 회원가입 접근 가능, 리다이렉용
                 .anyRequest().authenticated()// 위의 경로 이외에는 모두 인증된 사용자만 접근 가능
                 .and()
                 //== 소셜 로그인 설정 ==//
