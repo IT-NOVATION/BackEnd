@@ -22,12 +22,13 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * 클라이언트가 헤더에 JWT 토큰을 담아서 /login이외의 요청을 보낼 시 해당 토큰들의
- * 유효성을 검사하며 인증처리, 인증 실패, 토큰 재발급 등을 수행하는 역할의 필함
+ * 실제 필터링 로직 수행, request header에서 Authorization 값 꺼내 토큰 검사하고
+ * 여러가지 검사 후 유저 정보 꺼내서 SecurityContext에 저장한다.
+ * 가입.로그인.재발급을 제외한 모든 Request요청은 이 필터를 거쳐 토큰 정보가 없거나 유효하지 않으면 정상적으로 수행되지 않음
  */
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {// 인증 처리, 인증 실패, 토큰 재발급 역할 -> 이후에는 권한 처리하는 필터로 이동
+public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private static final String NO_CHECK_URL = "/login";
     private final JwtService jwtService;
     private final UserRepository userRepository;

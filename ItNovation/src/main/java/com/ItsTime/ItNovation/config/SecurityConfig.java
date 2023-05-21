@@ -51,11 +51,11 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                //== URL별 권한 관리 옵션 ==//
+                //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
                 .requestMatchers("/","/oauth2/**","/css/**", "/images/**", "/js/**").permitAll()
-                .requestMatchers("/signup","next-signup","/api/v1/movies").permitAll() // 회원가입 접근 가능, 리다이렉용
-                .anyRequest().authenticated()// 위의 경로 이외에는 모두 인증된 사용자만 접근 가능
+                .requestMatchers("/test/**","api/v1/signup","/api/v1/profile","/api/v1/movies").permitAll() // 회원가입 접근 가능, 리다이렉용
+                .anyRequest().authenticated()// 인증필터를 거치지 않고 인가 처리를 해준다(이미 인증된 사용자로 처리했기에 인가 처리 해주는 것임)
                 .and()
                 //== 소셜 로그인 설정 ==//
                 .oauth2Login()
@@ -90,12 +90,8 @@ public class SecurityConfig {
         return customJsonUsernamePasswordLoginFilter;
     }
     /**
-     * AuthenticationManager 설정 후 등록
-     * PasswordEncoder를 사용하는 AuthenticationProvider 지정 (PasswordEncoder는 위에서 등록한 PasswordEncoder 사용)
-     * FormLogin(기존 스프링 시큐리티 로그인)과 동일하게 DaoAuthenticationProvider 사용
      * UserDetailsService는 커스텀 LoginService로 등록
-     * 또한, FormLogin과 동일하게 AuthenticationManager로는 구현체인 ProviderManager 사용(return ProviderManager)
-     *
+     * 또한, FormLogin과 동일하게 AuthenticationManager로는 ProviderManager 사용하고 구현체로는 DaoAuthenticationProvider
      */
     @Bean
     public AuthenticationManager authenticationManager() {

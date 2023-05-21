@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @RestController
+@RequestMapping("/api/v1")
 public class UserController {
     private final UserService userService;
 
@@ -18,19 +19,7 @@ public class UserController {
         return userService.join(signUpRequestDto);
     }
 
-    //jwt는 JSON 데이터를 Base64 URL-safe Encode를 통해 인코딩하여 직렬화한 것
-    //header: base64UrlEncode를 사용하여 암호화
-    //payload: base64UrlEncode를 사용하여 암호화
-    //signature: 서버가 가지고 있는 개인키를 통해 암호화되어있음, 외부에서 복호화 불가능
-    @GetMapping("/jwt-test")
-    public String jwtTest() {
-        log.info("jwt-test");
-        return "jwt 인증 성공";
-    }
-
-
-
-    @GetMapping("next-signup")
+    @GetMapping("/profile")
     public String secondSignup() {
         return "리다이렉트";
     }
