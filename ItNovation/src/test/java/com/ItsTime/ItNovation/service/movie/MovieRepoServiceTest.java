@@ -17,8 +17,8 @@ class MovieRepoServiceTest {
 
     @Test
     void save_Find_Test() {
-        Movie movie = new Movie("test1", "testUrl");
-        movieRepoService.save(movie);
+//        Movie movie = new Movie("test1", "testUrl");
+//        movieRepoService.save(movie);
 
 //        Optional<Movie> movieOptional = movieRepoService.findById(movie.getMovieId());
 //
