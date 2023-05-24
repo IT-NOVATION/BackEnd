@@ -1,6 +1,9 @@
 package com.ItsTime.ItNovation.service.movie;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +63,12 @@ public class MovieCrawlService {
         return titleAndMovie;
     }
 
+
+    /**
+     *
+     * JsonObject 겹치는 부분 발생해서 JsonNode로 변경해야 될듯
+     */
+
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
         for (int i = 1; i < 10; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
@@ -67,40 +76,44 @@ public class MovieCrawlService {
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
 //여기에서도 끌고 올 수 있음. backdropPath 끌고 올 수 있음.
             String json = responseEntity.getBody();
-            JSONObject jsonObject = new JSONObject(json);
-            JSONArray results = jsonObject.getJSONArray("results");
-            nowPagesMovieCrawl(titleAndMovie, results);
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                JsonNode jsonNode = objectMapper.readTree(json);
+                JsonNode results = jsonNode.get("results");
+                nowPagesMovieCrawl(titleAndMovie, results);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
-    private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JSONArray results) {
+    private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JsonNode results) {
         final String posterBasicPath= "https://www.themoviedb.org/t/p/original/";
-        for (int j=0; j< results.length(); j++ ) {
-            JSONObject movieObject = results.getJSONObject(j);
+        for (JsonNode movieNode : results ) {
             Map<String, String> movie_Info = new HashMap<>();
-            String title = movie_Info.put("title", movieObject.getString("original_title"));
-            movieDiscoverCrawl(posterBasicPath, movieObject, movie_Info);
-            Integer movieId = movieObject.getInt("id");
+            String title = movie_Info.put("title", movieNode.get("original_title").asText());
+            movieDiscoverCrawl(posterBasicPath, movieNode, movie_Info);
+            Integer movieId = movieNode.get("id").asInt();
             // 이제 긁어올것 장르, 배우, 감독, 나라, 러닝타임,
             long real_movieId = movieId.longValue();
             movieCreditCrawl(movieId, movie_Info);
             movieDetails(movieId, movie_Info);
-            movie_Info.put("country", movieObject.getString("original_language"));
+            movie_Info.put("country", movieNode.get("original_language").asText());
             Movie movie = setMovie(real_movieId, movie_Info);
             log.info("put this movie", title);
             titleAndMovie.put(title, movie);
         }
     }
 
-    private static void movieDiscoverCrawl(String posterBasicPath, JSONObject movieObject,
+    private static void movieDiscoverCrawl(String posterBasicPath, JsonNode movieNode,
         Map<String, String> movie_Info) {
-        movie_Info.put("movieImg", posterBasicPath + movieObject.get("poster_path").toString());
-        movie_Info.put("movieBgImg", posterBasicPath + movieObject.get("backdrop_path").toString());
-        movie_Info.put("originalLanguage", movieObject.get("original_language").toString());
-        movie_Info.put("movieDetail", movieObject.get("overview").toString());
-        Object releaseDate = movieObject.get("release_date");
-        System.out.println(releaseDate);
-        movie_Info.put("movieDate", movieObject.get("release_date").toString());
+        movie_Info.put("movieImg", posterBasicPath + movieNode.get("poster_path").asText());
+        movie_Info.put("movieBgImg", posterBasicPath + movieNode.get("backdrop_path").asText());
+        movie_Info.put("originalLanguage", movieNode.get("original_language").asText());
+        movie_Info.put("movieDetail", movieNode.get("overview").asText());
+        movie_Info.put("movieDate", movieNode.get("release_date").asText());
+        //System.out.println(releaseDate);
+        //movie_Info.put("movieDate", movieObject.get("release_date").toString());
     }
 
     private static Movie setMovie(long real_movieId, Map<String, String> movieInfo) {
@@ -119,7 +132,8 @@ public class MovieCrawlService {
         return movie;
     }
 
-    private void movieCreditCrawl(Integer movieId, Map<String, String> movieInfo) {
+    private void movieCreditCrawl(Integer movieId, Map<String, String> movieInfo)
+        throws JsonProcessingException {
         String movieUrl = String.format(
             "https://api.themoviedb.org/3/movie/%d/credits?api_key=%s&language=ko-KR",
             movieId, API_KEY);
@@ -128,23 +142,25 @@ public class MovieCrawlService {
         Map<String, String> actorAndDirector = new HashMap<>();
         ResponseEntity<String> creditEntity = restTemplate2.getForEntity(movieUrl, String.class);
         String json2 = creditEntity.getBody();
-        JSONObject jsonObject = new JSONObject(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
 
         //JSONObject credits = jsonObject.getJSONObject("credits");
-        JSONArray crew = jsonObject.getJSONArray("crew");
-        for (int i = 0; i < crew.length(); i++) {
-            JSONObject member = crew.getJSONObject(i);
-            if (member.getString("job").equals("Director")) {
-                movieInfo.put("movieDirector", member.getString("name"));
+        JsonNode crew = jsonNode.get("crew");
+        for (JsonNode member : crew) {
+            if (member.get("job").asText().equals("Director")) {
+                movieInfo.put("movieDirector", member.get("name").asText());
             }
-            if (member.getString("known_for_department").equals("Acting")) {
-                movieInfo.put("movieActor", member.getString("name"));
+            if (member.get("known_for_department").asText().equals("Acting")) {
+                movieInfo.put("movieActor", member.get("name").asText());
             }
 
         }
     }
 
-    private void movieDetails(Integer movieId, Map<String, String> movieInfo) {
+    private void movieDetails(Integer movieId, Map<String, String> movieInfo)
+        throws JsonProcessingException {
         String movieUrl = String.format(
             "https://api.themoviedb.org/3/movie/%d?api_key=%s&language=ko-KR", movieId,
             API_KEY);
@@ -152,14 +168,16 @@ public class MovieCrawlService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> creditEntity = restTemplate.getForEntity(movieUrl, String.class);
         String json2 = creditEntity.getBody();
-        JSONObject jsonObject = new JSONObject(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
-        Integer runtime = jsonObject.getInt("runtime");
-        JSONArray genres = jsonObject.getJSONArray("genres");
-        JSONObject member = genres.getJSONObject(0);
-        String genre = member.getString("name");
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode jsonNode = objectMapper.readTree(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
+        Integer runtime = jsonNode.get("runtime").asInt();
+        JsonNode genresArray = jsonNode.get("genres");
+        JsonNode genre = genresArray.get(0);
+        String real_genre = genre.get("name").asText();
         System.out.println(movieInfo.get("title") + "= "+ runtime.toString());
         movieInfo.put("movieRunningTime", runtime.toString());
-        movieInfo.put("genre", genre);
+        movieInfo.put("genre", real_genre);
     }
 
     private String getBgImgUrl(RestTemplate restTemplate) {
