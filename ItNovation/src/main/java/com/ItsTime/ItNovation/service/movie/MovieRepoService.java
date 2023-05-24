@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import javax.swing.text.html.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,6 @@ public class MovieRepoService {
     private final MovieRepository movieRepository;
 
 
-    @Transactional
-    public Movie save(Movie movie){
-        return movieRepository.save(movie);
-    }
-
 
     @Transactional
     public void saveMovie(Map<String, Movie> titleAndMovie){
@@ -30,9 +26,16 @@ public class MovieRepoService {
         }
     }
 
+
     @Transactional
     public Optional<Movie> findById(Long id){
         return movieRepository.findById(id);
+    }
+
+
+    @Transactional
+    public Optional<Movie> findByTitle(String title){
+        return movieRepository.findByTitle(title);
     }
 
 
