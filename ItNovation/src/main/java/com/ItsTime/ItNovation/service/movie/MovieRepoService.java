@@ -3,6 +3,8 @@ package com.ItsTime.ItNovation.service.movie;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import jakarta.transaction.Transactional;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,13 @@ public class MovieRepoService {
         return movieRepository.save(movie);
     }
 
+
+    @Transactional
+    public void saveMovie(Map<String, Movie> titleAndMovie){
+        for (Entry<String, Movie> stringMovieEntry : titleAndMovie.entrySet()) {
+            movieRepository.save(stringMovieEntry.getValue());
+        }
+    }
 
     @Transactional
     public Optional<Movie> findById(Long id){
