@@ -1,5 +1,4 @@
 package com.ItsTime.ItNovation.service.movie;
-
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,10 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -59,7 +55,6 @@ public class MovieCrawlService {
         RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
         Map<String, Movie> titleAndMovie = new HashMap<>();
         crawlMovieInfo(restTemplate, titleAndMovie);
-        System.out.println(titleAndMovie.toString());
         return titleAndMovie;
     }
 
@@ -87,21 +82,26 @@ public class MovieCrawlService {
         }
     }
 
-    private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JsonNode results) {
-        final String posterBasicPath= "https://www.themoviedb.org/t/p/original/";
+    private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JsonNode results)
+         {
+        final String posterBasicPath= "https://www.themoviedb.org/t/p/original";
         for (JsonNode movieNode : results ) {
             Map<String, String> movie_Info = new HashMap<>();
-            String title = movie_Info.put("title", movieNode.get("original_title").asText());
+            movie_Info.put("title", movieNode.get("title").asText());
             movieDiscoverCrawl(posterBasicPath, movieNode, movie_Info);
             Integer movieId = movieNode.get("id").asInt();
             // 이제 긁어올것 장르, 배우, 감독, 나라, 러닝타임,
             long real_movieId = movieId.longValue();
-            movieCreditCrawl(movieId, movie_Info);
-            movieDetails(movieId, movie_Info);
+            try {
+                movieCreditCrawl(movieId, movie_Info);
+                movieDetails(movieId, movie_Info);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             movie_Info.put("country", movieNode.get("original_language").asText());
             Movie movie = setMovie(real_movieId, movie_Info);
-            log.info("put this movie", title);
-            titleAndMovie.put(title, movie);
+            titleAndMovie.put(movie.getTitle(), movie);
+
         }
     }
 
@@ -117,6 +117,7 @@ public class MovieCrawlService {
     }
 
     private static Movie setMovie(long real_movieId, Map<String, String> movieInfo) {
+        log.info("==========\n In setMovie =============");
         Movie movie = Movie.builder().
             title(movieInfo.get("title")).
             movieImg(movieInfo.get("movieImg")).
@@ -129,6 +130,8 @@ public class MovieCrawlService {
             movieRunningTime(Integer.parseInt(movieInfo.get("movieRunningTime"))).
             movieDetail(movieInfo.get("movieDetail")).
             real_movieId(real_movieId).build();
+
+        System.out.println(movieInfo.get("title"));
         return movie;
     }
 
@@ -139,13 +142,11 @@ public class MovieCrawlService {
             movieId, API_KEY);
         log.info(movieUrl);
         RestTemplate restTemplate2 = new RestTemplate();
-        Map<String, String> actorAndDirector = new HashMap<>();
         ResponseEntity<String> creditEntity = restTemplate2.getForEntity(movieUrl, String.class);
         String json2 = creditEntity.getBody();
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
-
         //JSONObject credits = jsonObject.getJSONObject("credits");
         JsonNode crew = jsonNode.get("crew");
         for (JsonNode member : crew) {
