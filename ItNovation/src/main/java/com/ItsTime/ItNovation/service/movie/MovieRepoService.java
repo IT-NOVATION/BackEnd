@@ -3,6 +3,7 @@ package com.ItsTime.ItNovation.service.movie;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -38,5 +39,10 @@ public class MovieRepoService {
         return movieRepository.findByTitle(title);
     }
 
+
+    @Transactional
+    public List<Movie> findAllMovies(){
+        return movieRepository.findAll();
+    }
 
 }
