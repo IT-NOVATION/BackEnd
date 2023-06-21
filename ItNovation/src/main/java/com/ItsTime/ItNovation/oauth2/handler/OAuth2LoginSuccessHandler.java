@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -33,18 +34,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             if (oAuth2User.getRole() == Role.GUEST) {
                 log.info("guest");
-                String redirectUrl = "/next-signup";
-
 
                 String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
                 String refreshToken = jwtService.createRefreshToken();
                 log.info(accessToken);
                 log.info(refreshToken);
 
-
+                HttpSession session=request.getSession();
+                session.setAttribute("accessToken",accessToken);
+                session.setAttribute("refreshToken",refreshToken);
                 jwtService.sendAccessTokenAndRefreshToken(response, accessToken, refreshToken);
                 log.info(response.getHeader("Authorization"));
-
 
 
                 userRepository.findByEmail(oAuth2User.getEmail())
@@ -52,12 +52,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                             user.updateRefreshToken(refreshToken);
                             userRepository.saveAndFlush(user);
                         });
-                //FIXME: 리다이렉트
-                response.sendRedirect(redirectUrl);
-                //TODO: 회원가입 추가 폼 입력 시 업데이트하는 컨트롤러, 서비스를 만들면 그 시점에 Role Update를 진행해야함
-//                User findUser = userRepository.findByEmail(oAuth2User.getEmail())
-//                               .orElseThrow(() -> new IllegalArgumentException("이메일에 해당하는 유저가 없습니다."));
-//                findUser.authorizeUser();
+
+
 
             } else {
                 log.info("login before");
@@ -73,7 +69,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     }
 
-    private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) {
+    private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         String refreshToken = jwtService.createRefreshToken();
 //        response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
