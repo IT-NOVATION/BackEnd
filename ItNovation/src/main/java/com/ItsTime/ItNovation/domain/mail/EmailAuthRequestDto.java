@@ -1,9 +1,7 @@
-package com.ItsTime.ItNovation.domain.email;
+package com.ItsTime.ItNovation.domain.mail;
 
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class EmailAuthRequestDto {

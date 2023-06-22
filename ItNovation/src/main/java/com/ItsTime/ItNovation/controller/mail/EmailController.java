@@ -1,11 +1,10 @@
-package com.ItsTime.ItNovation.controller.findpw;
+package com.ItsTime.ItNovation.controller.mail;
 
-import com.ItsTime.ItNovation.domain.email.EmailAuthRequestDto;
-import com.ItsTime.ItNovation.service.findpw.EmailService;
+import com.ItsTime.ItNovation.domain.mail.EmailAuthRequestDto;
+import com.ItsTime.ItNovation.service.mail.EmailService;
 import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.service.findpw;
+package com.ItsTime.ItNovation.service.mail;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
