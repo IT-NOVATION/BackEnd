@@ -47,6 +47,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info(response.getHeader("Authorization"));
 
 
+                String redirectUrl="http://localhost:3000/success"+accessToken+"/"+refreshToken;
+                response.sendRedirect(redirectUrl);
+
                 userRepository.findByEmail(oAuth2User.getEmail())
                         .ifPresent(user->{
                             user.updateRefreshToken(refreshToken);
