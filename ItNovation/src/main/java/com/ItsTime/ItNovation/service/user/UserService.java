@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.service.user;
 
+import com.ItsTime.ItNovation.common.dto.ApiResult;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
@@ -8,6 +9,8 @@ import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +30,14 @@ public class UserService {
 
 
     @Transactional
-    public SignUpResponseDto join(SignUpRequestDto signUpRequestDto) {
+    public ResponseEntity<SignUpResponseDto> join(SignUpRequestDto signUpRequestDto) {
         String result = validateDuplicateUser(signUpRequestDto);
+        SignUpResponseDto signUpResponseDto=SignUpResponseDto.builder().userId(null).build();
         log.info(result);
         if (StringUtils.hasText(result)) {
-            return new SignUpResponseDto(false, result, null); //wrapper 타입만 null 이 들어갈 수 있음
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(signUpResponseDto); //wrapper 타입만 null 이 들어갈 수 있음
         } else {
             User user = User.builder()
                     .email(signUpRequestDto.getEmail())
@@ -43,7 +49,7 @@ public class UserService {
 
             userRepository.save(user);
             log.info(user.getEmail() + " 회원가입 성공");
-            return new SignUpResponseDto(true, "회원가입 성공", user.getId());
+            return ResponseEntity.ok(SignUpResponseDto.builder().userId(user.getId()).build());
         }
 
     }
