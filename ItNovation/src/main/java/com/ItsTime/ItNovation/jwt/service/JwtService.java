@@ -7,10 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -87,10 +89,15 @@ public class JwtService {
     /**
      * AccessToken + RefreshToken 헤더에 실어서 보내기
      */
-    public void sendAccessTokenAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
+    public void sendAccessTokenAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(accessHeader, accessToken);
         response.setHeader(refreshHeader, refreshToken);
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("accessToken", accessToken);
+        jsonResponse.put("refreshToken", refreshToken);
+        response.setHeader("Content-Type", "application/json");
+        response.getWriter().write(jsonResponse.toString());
         log.info("Access Token, Refresh Token 헤더 설정 완료");
     }
     /**
