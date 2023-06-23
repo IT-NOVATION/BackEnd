@@ -30,13 +30,14 @@ public class UserService {
 
 
     @Transactional
-    public ResponseEntity<ApiResult<String>> join(SignUpRequestDto signUpRequestDto) {
+    public ResponseEntity<SignUpResponseDto> join(SignUpRequestDto signUpRequestDto) {
         String result = validateDuplicateUser(signUpRequestDto);
+        SignUpResponseDto signUpResponseDto=SignUpResponseDto.builder().userId(null).build();
         log.info(result);
         if (StringUtils.hasText(result)) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResult<>(false, result, "")); //wrapper 타입만 null 이 들어갈 수 있음
+                    .body(signUpResponseDto); //wrapper 타입만 null 이 들어갈 수 있음
         } else {
             User user = User.builder()
                     .email(signUpRequestDto.getEmail())
@@ -48,7 +49,7 @@ public class UserService {
 
             userRepository.save(user);
             log.info(user.getEmail() + " 회원가입 성공");
-            return ResponseEntity.ok(new ApiResult<>(true,user.getId().toString(), "회원가입 성공"));
+            return ResponseEntity.ok(SignUpResponseDto.builder().userId(user.getId()).build());
         }
 
     }
