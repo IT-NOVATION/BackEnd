@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +61,13 @@ public class EmailService {
 
         javaMailSender.send(emailForm);
         return authNum;
+    }
+
+
+
+    public Boolean isCodeSame(String sendCode, String email, Map<String, String> authCodeMap){
+        String rightCode = authCodeMap.get(email);
+        return sendCode.equals(rightCode);
     }
 
 
