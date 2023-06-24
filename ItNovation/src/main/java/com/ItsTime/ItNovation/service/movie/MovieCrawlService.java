@@ -66,8 +66,8 @@ public class MovieCrawlService {
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
         for (int i = 1; i < 10; i++) {
-            String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
-                + "&page=" + i + "&language=ko-KR";
+            String url = "https://api.themoviedb.org/3/movie/now_playing" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
+                + "&page=" + i + "&language=ko-KR" + "&region=KR";
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
 //여기에서도 끌고 올 수 있음. backdropPath 끌고 올 수 있음.
             String json = responseEntity.getBody();
