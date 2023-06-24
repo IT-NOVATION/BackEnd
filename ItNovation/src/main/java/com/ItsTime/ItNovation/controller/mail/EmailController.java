@@ -1,10 +1,17 @@
 package com.ItsTime.ItNovation.controller.mail;
 
-import com.ItsTime.ItNovation.domain.mail.EmailAuthRequestDto;
+import com.ItsTime.ItNovation.domain.mail.dto.CodeCheckRequestDto;
+import com.ItsTime.ItNovation.domain.mail.dto.PasswordFindRequestDto;
 import com.ItsTime.ItNovation.service.mail.EmailService;
 import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,34 +21,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmailController {
 
     private final EmailService emailService;
+    private Map<String, String> authCodeMap = new ConcurrentHashMap<>();
 
-
-    @PostMapping("/test/mailConfirm")
-    public String mailConfirm(@RequestBody EmailAuthRequestDto emailDto) throws MessagingException, UnsupportedEncodingException
-    {
-        String authCode = emailService.sendMail(emailDto.getEmail());
-        return authCode;
+    @PostMapping("/passwordfind/emailSend")
+    public HttpStatus mailConfirm(@RequestBody PasswordFindRequestDto emailDto){
+        try {
+            String authCode = emailService.sendMail(emailDto.getEmail());
+            String email = emailDto.getEmail();
+            authCodeMap.put(email, authCode);
+        }catch (Exception e){
+           return HttpStatus.BAD_REQUEST;
+        }
+        return HttpStatus.OK;
     }
 
+    @PostMapping("/passwordfind/finalCheck")
+    public HttpStatus checkCode(@RequestBody CodeCheckRequestDto checkRequestDto){
+        String sendedCode = checkRequestDto.getCode();
+        String email = checkRequestDto.getEmail();
 
-    //Invalid server address
-    //받는사람의 도메인이 존재하지 않거나, 상대방 메일서버의 DNS 설정상의 문제가 있어 메일을 보낼 수 없는 상황입니다.
-    //주로 사용자들이 받는사람의 도메인을 잘못 적어서 발생한 경우가 많습니다.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if(emailService.isCodeSame(sendedCode, email, authCodeMap)){
+            return HttpStatus.OK;
+        }
+        return HttpStatus.BAD_REQUEST;
+    }
 
 }
