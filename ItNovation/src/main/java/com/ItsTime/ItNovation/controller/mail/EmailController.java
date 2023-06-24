@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmailController {
 
     private final EmailService emailService;
-    private Map<String, String> authCodeMap = new ConcurrentHashMap<>();
+    private Map<String, String> authCodeMap = new ConcurrentHashMap<>(); // 동시성 문제가 있을거 같아 ConcurrentHashMap 사용해서 멀티 스레드에서 무사히 돌아갈 수 있도록 진행..
 
     @PostMapping("/passwordfind/emailSend")
     public HttpStatus mailConfirm(@RequestBody PasswordFindRequestDto emailDto){
