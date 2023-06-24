@@ -40,3 +40,4 @@ application-oauth.yml
 application-prod.yml
 application-ttkey.yml
 application-jwt.yml
+application-mail.yml
