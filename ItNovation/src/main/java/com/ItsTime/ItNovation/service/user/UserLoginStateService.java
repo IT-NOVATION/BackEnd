@@ -31,7 +31,7 @@ public class UserLoginStateService {
             return ResponseEntity.status(HttpStatus.OK).body(loginStateDto);
         } catch (IllegalArgumentException e) {
             LoginStateDto loginStateDto = LoginStateDto.builder().loginState(false).userId(null).nickname(null).profileImg(null).build();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(loginStateDto);
+            return ResponseEntity.status(HttpStatus.OK).body(loginStateDto);
         }
     }
 }
