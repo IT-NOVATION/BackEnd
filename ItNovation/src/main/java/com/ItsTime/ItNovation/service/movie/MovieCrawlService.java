@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,22 +35,13 @@ public class MovieCrawlService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        total_Pages(restTemplate);
-        Map<String, Movie> titleAndMovie = getTitleAndMovie(restTemplate);
+        Map<String, Movie> titleAndMovie = getTitleAndMovies(restTemplate);
 
         return titleAndMovie;
     }
 
-    public String findBgImg() {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        String bgImgUrl = getBgImgUrl(restTemplate);
-        return bgImgUrl;
-    }
 
-
-    private Map<String, Movie> getTitleAndMovie(
+    private Map<String, Movie> getTitleAndMovies(
         RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
         Map<String, Movie> titleAndMovie = new HashMap<>();
         crawlMovieInfo(restTemplate, titleAndMovie);
@@ -66,8 +56,8 @@ public class MovieCrawlService {
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
         for (int i = 1; i < 10; i++) {
-            String url = "https://api.themoviedb.org/3/movie/now_playing" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
-                + "&page=" + i + "&language=ko-KR" + "&region=KR";
+            String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
+                + "&page=" + i + "&language=ko-KR" + "&region=KR" + "&sort_by=popularity.desc&include_adult=true&include_video=false"; // api 버전 변경에 다른
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
 //여기에서도 끌고 올 수 있음. backdropPath 끌고 올 수 있음.
             String json = responseEntity.getBody();
@@ -181,22 +171,6 @@ public class MovieCrawlService {
         movieInfo.put("genre", real_genre);
     }
 
-    private String getBgImgUrl(RestTemplate restTemplate) {
-        String url = "https://api.themoviedb.org/3/movie/109445/images?api_key=" + API_KEY;
-        Map<String, List<Map<String, String>>> forObject = restTemplate.getForObject(url,
-            Map.class);
-        String fileUrl = forObject.get("backdrops").get(0).get("file_path");
-        System.out.println("map " + forObject.get("backdrops").get(3).get("file_path"));
-        return "https://www.themoviedb.org/t/p/original/" + fileUrl;
-    }
-
-    private void total_Pages(RestTemplate restTemplate) {
-        Map<String, List<Map<String, Object>>> res = restTemplate.getForObject(
-            BASE_URL + API_KEY,
-            Map.class);
-        Object totalPages = res.get("total_pages");
-        log.info("totalpages= " + totalPages);
-    }
 
 }
 
