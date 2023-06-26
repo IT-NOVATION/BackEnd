@@ -54,7 +54,7 @@ public class SecurityConfig {
                 //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
                 .requestMatchers("/","/oauth2/**","/css/**", "/images/**", "/js/**").permitAll()
-                .requestMatchers("/test/**","api/v1/signup","/api/v1/profile","/api/v1/movies").permitAll() // 회원가입 접근 가능, 리다이렉용
+                .requestMatchers("/test/**","/signup","/userProfileInfo","/movies").permitAll() // 회원가입 접근 가능, 리다이렉용
                 .anyRequest().authenticated()// 인증필터를 거치지 않고 인가 처리를 해준다(이미 인증된 사용자로 처리했기에 인가 처리 해주는 것임)
                 .and()
                 //== 소셜 로그인 설정 ==//
