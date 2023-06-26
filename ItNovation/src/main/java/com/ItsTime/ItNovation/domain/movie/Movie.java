@@ -35,7 +35,6 @@ public class Movie {
 
 // 장르 러닝타임 감독 배우 줄거리 - 한국어(요청 url 변경)
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,17 +46,14 @@ public class Movie {
     private String movieDate;
     private String movieGenre;
     private String movieCountry;
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String movieDetail;
     private Integer movieRunningTime;
     private Long real_movieId;
-    private String language;
-
-
-
 
     @Builder
-    public Movie(Long real_movieId, String title, String movieImg, String movieBgImg, String movieActor,
+    public Movie(Long real_movieId, String title, String movieImg, String movieBgImg,
+        String movieActor,
         String movieDirector, String movieDate, String movieGenre, String movieCountry,
         String movieDetail, Integer movieRunningTime) {
         this.real_movieId = real_movieId;
@@ -72,7 +68,6 @@ public class Movie {
         this.movieDetail = movieDetail;
         this.movieRunningTime = movieRunningTime;
     }
-
 
 
 }

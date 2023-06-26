@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.json:json:20210307'
 	implementation 'mysql:mysql-connector-java:8.0.27'
 	implementation 'com.auth0:java-jwt:4.2.1'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
