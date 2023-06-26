@@ -1,10 +1,12 @@
 package com.ItsTime.ItNovation.controller.user;
 
 import com.ItsTime.ItNovation.common.dto.ApiResult;
+import com.ItsTime.ItNovation.domain.user.dto.LoginStateDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.service.user.UserLoginStateService;
 import com.ItsTime.ItNovation.service.user.UserProfileService;
 import com.ItsTime.ItNovation.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +26,7 @@ public class UserController {
     private final UserService userService;
     private final UserProfileService userProfileService;
     private final JwtService jwtService;
+    private final UserLoginStateService userLoginStateService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
@@ -40,6 +43,18 @@ public class UserController {
         }else{
             return userProfileService.userProfile(userProfileDto, accessToken.get());
         }
+    }
+
+    @GetMapping("/loginState")
+    public ResponseEntity<LoginStateDto> userLoginState(HttpServletRequest request) {
+        Optional<String> accessToken = jwtService.extractAccessToken(request);
+
+        if (accessToken.isEmpty()) {
+             return userLoginStateService.loginState(null);
+        }else{
+            return userLoginStateService.loginState(accessToken.get());
+        }
+
     }
     @GetMapping("/profile")
     public String secondSignup() {
