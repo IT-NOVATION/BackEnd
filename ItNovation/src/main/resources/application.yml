@@ -7,8 +7,6 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.MySQL5Dialect
-
-
   profiles:
     include:
       - oauth
@@ -16,3 +14,4 @@ spring:
       - jwt
       - mail
     active: prod
+
