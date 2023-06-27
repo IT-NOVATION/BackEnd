@@ -42,4 +42,4 @@ application-ttkey.yml
 application-jwt.yml
 application-mail.yml
 
-com/ItsTime/ItNovation/experiment/**
+/src/test/java/experiment/**
