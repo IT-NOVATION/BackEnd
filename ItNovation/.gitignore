@@ -41,5 +41,3 @@ application-prod.yml
 application-ttkey.yml
 application-jwt.yml
 application-mail.yml
-
-/src/test/java/experiment/**
