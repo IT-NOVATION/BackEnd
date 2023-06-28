@@ -6,7 +6,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    database-platform: org.hibernate.dialect.MySQL5Dialect
+    database-platform: org.hibernate.dialect.MySQL57Dialect # MyIsam은 @Transaction 발동이 안됨.  그래서 InnoDB 스토리지 엔진을 사용한 것으로 변경
   profiles:
     include:
       - oauth

@@ -1,22 +1,20 @@
 package com.ItsTime.ItNovation.service.user;
 
-import com.ItsTime.ItNovation.common.dto.ApiResult;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
-import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.Optional;
 
 @RequiredArgsConstructor //final 붙은 필드에 대해 생성자 생성
@@ -65,5 +63,24 @@ public class UserService {
 
     }
 
+
+    @Transactional
+    public ResponseEntity<String> updatePassword(String email, String updatedPassword){
+
+        Optional<User> findByEmail = userRepository.findByEmail(email);
+
+        if(findByEmail.isEmpty()){
+            return new ResponseEntity<>(HttpStatusCode.valueOf(401));
+        }
+        updatePassword(updatedPassword, findByEmail);
+
+        return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+    }
+
+    private void updatePassword(String updatedPassword, Optional<User> findByEmail) {
+        User user = findByEmail.get();
+        user.update(updatedPassword).passwordEncode(passwordEncoder);
+        userRepository.save(user);
+    }
 
 }

@@ -32,6 +32,7 @@ public class UserController {
     }
 
     @PostMapping("/userProfileInfo")
+
     public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto, HttpServletRequest request) {
         Optional<String> accessToken = jwtService.extractAccessToken(request);
 
