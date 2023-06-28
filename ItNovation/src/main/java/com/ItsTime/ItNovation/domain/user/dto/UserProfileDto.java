@@ -10,10 +10,12 @@ import lombok.ToString;
 @ToString
 public class UserProfileDto {
     private final String nickname;
+    private final String email;
     private final String introduction;
 
     @Builder
-    public UserProfileDto(String nickname, String introduction) {
+    public UserProfileDto(String email,String nickname, String introduction) {
+        this.email=email;
         this.nickname = nickname;
         this.introduction = introduction;
     }
