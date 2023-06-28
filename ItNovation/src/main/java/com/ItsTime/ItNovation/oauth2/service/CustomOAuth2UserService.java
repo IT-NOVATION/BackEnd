@@ -49,7 +49,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // socialType에 따라 유저 정보를 통해 OAuthAttributes 객체 생성
         OAuthAttributes extractAttributes=OAuthAttributes.of(socialType,userNameAttributeName,attributes);
 
-        User createdUser = getUser(extractAttributes, socialType);
+        User createdUser = getUser(extractAttributes);
         log.info(createdUser.getEmail());
         log.info(extractAttributes.getOAuth2UserInfo().getNickname());
         return new CustomOAuth2User(
@@ -61,17 +61,17 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         );
     }
 
-    private User getUser(OAuthAttributes attributes, SocialType socialType) {
+    private User getUser(OAuthAttributes attributes) {
         User findUser = userRepository.findByEmail(attributes.getOAuth2UserInfo().getEmail())
                 .orElse(null);
         if (findUser == null) {
-            return saveUser(attributes, socialType);
+            return saveUser(attributes);
         }
         return findUser;
     }
 
-    private User saveUser(OAuthAttributes attributes, SocialType socialType) {
-        User createdUser = attributes.toEntity(socialType, attributes.getOAuth2UserInfo());
+    private User saveUser(OAuthAttributes attributes) {
+        User createdUser = attributes.toEntity(attributes.getOAuth2UserInfo());
         return userRepository.save(createdUser);
     }
 

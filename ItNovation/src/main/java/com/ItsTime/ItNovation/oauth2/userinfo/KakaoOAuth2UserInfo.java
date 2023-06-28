@@ -1,5 +1,7 @@
 package com.ItsTime.ItNovation.oauth2.userinfo;
 
+import com.ItsTime.ItNovation.domain.user.Grade;
+
 import java.util.Map;
 
 public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
@@ -25,7 +27,7 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
     }
 
     @Override
-    public String getImageUrl() {
+    public String getProfileImg() {
         Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) account.get("profile");
 
@@ -37,6 +39,11 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
     }
 
     @Override
+    public String getBgImg() {
+        return "default";
+    }
+
+    @Override
     public String getEmail() {
         Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
         if (account == null) {
@@ -44,4 +51,7 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
         }
         return (String) account.get("email");
     }
+    @Override
+    public String getGrade(){
+        return Grade.getDefault().getValue();}
 }

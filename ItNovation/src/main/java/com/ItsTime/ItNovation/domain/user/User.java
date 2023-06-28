@@ -25,13 +25,14 @@ public class User extends BaseTimeEntity {
     private Role role;
     private String nickname;
     private String introduction;
-    private SocialType socialType;
-    private String imgUrl;
-    private String socialId;
-    private String refreshToken;
 
+    private String bgImg;
+    private String profileImg;
+    private String refreshToken;
+    private String grade;
 
     // 유저 권한 설정 메소드
+    //TODO: role admin으로 해도되나
     public void authorizeUser() {
         this.role = Role.USER;
     }
@@ -47,21 +48,29 @@ public class User extends BaseTimeEntity {
 
 
     @Builder
-    public User(String email, String password, Role role, String nickname, String introduction, SocialType socialType, String socialId, String refreshToken,String imgUrl) {
+    public User(String email, String password, Role role, String nickname, String introduction,   String refreshToken,String bgImg,String profileImg,String grade) {
         this.email = email;
         this.password = password;
         this.role = role;
         this.nickname = nickname;
         this.introduction = introduction;
-        this.socialType = socialType;
-        this.socialId = socialId;
         this.refreshToken = refreshToken;
-        this.imgUrl = imgUrl;
+        this.bgImg = bgImg;
+        this.profileImg=profileImg;
+        this.grade=grade;
     }
 
     public User update(String nickname,String introduction) {
         this.nickname = nickname;
         this.introduction = introduction;
+        return this;
+    }
+
+    public User update(String nickname, String introduction,String profileImg,String bgImg){
+        this.nickname = nickname;
+        this.introduction = introduction;
+        this.profileImg=profileImg;
+        this.bgImg=bgImg;
         return this;
     }
 
