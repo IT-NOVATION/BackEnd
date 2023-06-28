@@ -10,6 +10,7 @@ import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -65,5 +66,21 @@ public class UserService {
 
     }
 
+
+    @Transactional
+    public ResponseEntity<String> reWritePassword(String email, String updatedPassword){
+
+        Optional<User> findByEmail = userRepository.findByEmail(email);
+
+        if(findByEmail.isEmpty()){
+            return new ResponseEntity<>(HttpStatusCode.valueOf(401));
+        }
+        User user = findByEmail.get();
+
+        user.update(updatedPassword);
+        user.passwordEncode(passwordEncoder);
+        userRepository.save(user);
+        return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+    }
 
 }
