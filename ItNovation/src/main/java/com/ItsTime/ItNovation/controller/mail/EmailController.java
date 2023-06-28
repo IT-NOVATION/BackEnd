@@ -3,20 +3,11 @@ package com.ItsTime.ItNovation.controller.mail;
 import com.ItsTime.ItNovation.domain.mail.dto.CodeCheckRequestDto;
 import com.ItsTime.ItNovation.domain.mail.dto.PasswordFindRequestDto;
 import com.ItsTime.ItNovation.domain.mail.dto.RewritePasswordRequestDto;
-import com.ItsTime.ItNovation.domain.user.User;
-import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.mail.EmailService;
 import com.ItsTime.ItNovation.service.user.UserService;
-import jakarta.mail.MessagingException;
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,7 +52,7 @@ public class EmailController {
         String email = rewritePasswordRequestDto.getEmail();
         String updatePassword = rewritePasswordRequestDto.getPassword();
 
-        return userService.reWritePassword(email, updatePassword);
+        return userService.updatePassword(email, updatePassword);
     }
 
 }
