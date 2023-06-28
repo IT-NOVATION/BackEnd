@@ -29,7 +29,6 @@ public class EmailController {
 
     private final EmailService emailService;
     private final UserService userService;
-    private final UserRepository userRepository;
     private Map<String, String> authCodeMap = new ConcurrentHashMap<>(); // 동시성 문제가 있을거 같아 ConcurrentHashMap 사용해서 멀티 스레드에서 무사히 돌아갈 수 있도록 진행..
 
     @PostMapping("/passwordfind/emailSend")
@@ -57,13 +56,12 @@ public class EmailController {
 
 
 
-//    @PostMapping("/passwordfind/rewritePw")
-//    public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
-//        String email = rewritePasswordRequestDto.getEmail();
-//        String password = rewritePasswordRequestDto.getPassword();
-//        User findUser = userRepository.findByEmail(email).get(); // -> 이 과정까지 온 것 자체가 무조건 이메일이 있어서 올 수 있는 과정
-//        // 이후 작업 -> User entity의 update를 활용하여 password를 업데이트 하는 과정이 필요함. 생각할 부분 암호화 하는 것이 필요함.
-//        //findUser.
-//    }
+    @PostMapping("/passwordfind/rewritePw")
+    public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
+        String email = rewritePasswordRequestDto.getEmail();
+        String updatePassword = rewritePasswordRequestDto.getPassword();
+
+        return userService.reWritePassword(email, updatePassword);
+    }
 
 }
