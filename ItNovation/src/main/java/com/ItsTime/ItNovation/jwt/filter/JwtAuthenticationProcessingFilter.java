@@ -127,23 +127,20 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 }else{
                     //이메일 추출 실패
                     log.info("이메일 추출 실패");
-                    //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
-                    //return;
+
                 }
             }else{
                 //유효하지 않은 토큰
                 log.info("유효하지 않은 토큰");
-               // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
-               // return;
+
 
             }
         }else{
             //토큰 존재하지 않는 경우
             log.info("토큰 없음");
-           // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰이 없습니다.");
-           // return;
+
         }
-       // response.setStatus(HttpServletResponse.SC_OK);
+
         filterChain.doFilter(request, response);
     }
 
