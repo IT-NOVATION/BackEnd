@@ -53,9 +53,9 @@ public class SecurityConfig {
                 .and()
                 //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
-                .requestMatchers("/","/oauth2/**","/css/**", "/images/**", "/js/**").permitAll()
+                .requestMatchers("/oauth2/**","/css/**", "/images/**", "/js/**").permitAll()
                 //TODO: 사용자 토큰 확인이 필요한 엔드포인트는 .authenticated() 아닌 경우 permitAll에 등록해주세요
-                .requestMatchers("/test/**","/signup","/userProfile","/movies","/login").permitAll() // 회원가입 접근 가능, 리다이렉용
+                .requestMatchers("/test/**","/signup","/userProfile","/movies").permitAll() // 회원가입 접근 가능, 리다이렉용
                 .requestMatchers("/userProfile/me").authenticated()
                 .anyRequest().authenticated()// 인증필터를 거치지 않고 인가 처리를 해준다(이미 인증된 사용자로 처리했기에 인가 처리 해주는 것임)
                 .and()
