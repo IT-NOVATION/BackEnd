@@ -1,12 +1,16 @@
 package com.ItsTime.ItNovation.domain.movie;
 
 
+import com.ItsTime.ItNovation.domain.review.Review;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -50,6 +54,10 @@ public class Movie {
     private String movieDetail;
     private Integer movieRunningTime;
     private Long real_movieId;
+
+
+    @OneToMany(mappedBy = "reviewId")
+    private List<Review> reviews = new ArrayList<Review>();
 
     @Builder
     public Movie(Long real_movieId, String title, String movieImg, String movieBgImg,

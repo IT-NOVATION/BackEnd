@@ -9,11 +9,13 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import javax.swing.text.html.Option;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class MovieRepoService {
 
     private final MovieRepository movieRepository;
@@ -23,7 +25,11 @@ public class MovieRepoService {
     @Transactional
     public void saveMovie(Map<String, Movie> titleAndMovie){
         for (Entry<String, Movie> stringMovieEntry : titleAndMovie.entrySet()) {
-            movieRepository.save(stringMovieEntry.getValue());
+
+            if(movieRepository.findByTitle(stringMovieEntry.getKey()).isEmpty()){
+                movieRepository.save(stringMovieEntry.getValue());
+            }
+            log.info("DB에 이미 존재하고 있는 영화입니다.");
         }
     }
 
