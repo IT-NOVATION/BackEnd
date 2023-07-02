@@ -35,7 +35,8 @@ public class UserController {
 
 
     @PostMapping("/userProfile/me")
-    public ResponseEntity userProfileMe(@RequestBody UserProfileDtoMe userProfileDtoMe, HttpServletRequest request, Authentication authentication) {
+    public ResponseEntity userProfileMe(@RequestBody UserProfileDtoMe userProfileDtoMe, Authentication authentication) {
+        log.info("userProfileMe");
         String email = authentication.getName(); // 현재 사용자의 이메일 추출
 
         // 사용자 정보 업데이트 및 서비스 호출
@@ -44,8 +45,9 @@ public class UserController {
         // 성공적으로 처리되었음을 나타내는 200 상태 코드 반환
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/userProfile")
+    @PutMapping("/userProfile")
     public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto) {
+        log.info("userProfile");
         return userProfileService.userProfile(userProfileDto);
     }
 }
