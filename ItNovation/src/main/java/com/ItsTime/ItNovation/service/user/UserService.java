@@ -1,6 +1,6 @@
 package com.ItsTime.ItNovation.service.user;
 
-import com.ItsTime.ItNovation.common.dto.ApiResult;
+
 import com.ItsTime.ItNovation.domain.user.Grade;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.User;
@@ -8,6 +8,8 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
+import com.ItsTime.ItNovation.jwt.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+private final JwtService jwtService;
 
     @Transactional
     public ResponseEntity<?> join(SignUpRequestDto signUpRequestDto) {
@@ -68,5 +70,16 @@ public class UserService {
 
     }
 
+    @Transactional
+    public ResponseEntity logout(String accessToken) {
 
+            log.info("엑세스 토큰: {}" ,accessToken);
+
+            jwtService.logout(accessToken);
+            return ResponseEntity.ok("로그아웃 완료");
+
+
+
+
+    }
 }
