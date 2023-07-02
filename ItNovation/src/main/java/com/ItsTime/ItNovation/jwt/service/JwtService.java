@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Getter
@@ -48,6 +50,23 @@ public class JwtService {
 
     private final UserRepository userRepository;
 
+    private final Set<String> logoutTokens = new HashSet<>(); // 로그아웃된 토큰 목록
+    public void logout(String token) {
+        logoutTokens.add(token); // 로그아웃된 토큰을 블랙리스트나 로그아웃 목록에 추가
+    }
+    /**
+     * HttpServletResponse 객체를 이용해 에러 응답을 전송하는 메서드
+     */
+    private void sendErrorResponse(HttpServletResponse response, String message, int statusCode) {
+        try {
+            
+            response.setStatus(statusCode);
+            response.getWriter().write(message);
+        } catch (IOException e) {
+            // IOException 처리
+            log.error("IOException occurred while sending error response: {}", e.getMessage());
+        }
+    }
     /**
      * AccessToken 생성 메소드
      */
@@ -121,9 +140,11 @@ public class JwtService {
      */
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         log.info("accessToken 추출");
+
         return Optional.ofNullable(request.getHeader(accessHeader))
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
+
     }
 
     /**
@@ -160,11 +181,17 @@ public class JwtService {
     /**
      * 토큰의 유효성을 검사
      */
-    public boolean isTokenValid(String token) {
+    public boolean isTokenValid(String token,HttpServletResponse response) {
+        if (logoutTokens.contains(token)) {
+            sendErrorResponse(response,"로그아웃된 토큰입니다.", HttpServletResponse.SC_UNAUTHORIZED);
+            log.error("로그아웃된 토큰입니다.");
+            return false;
+        }
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
             return true;
         } catch (Exception e) {
+            sendErrorResponse(response,"로그아웃된 토큰입니다.", HttpServletResponse.SC_UNAUTHORIZED);
             log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
             return false;
         }

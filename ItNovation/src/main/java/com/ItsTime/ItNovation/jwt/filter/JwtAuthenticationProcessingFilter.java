@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.jwt.filter;
 
+import com.ItsTime.ItNovation.config.CustomAuthenticationEntryPoint;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +34,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private static final String NO_CHECK_URL = "/login";
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     /**
      * Spring Security에서 인증된 사용자의 권한 정보(GrantedAuthority)를 매핑할 때 사용하는 인터페이스
      * 이 인터페이스는 UserDetailsService를 통해 가져온 사용자 정보를 기반으로 UserDetails 객체를 생성할 때 사용되며, 이 과정에서 사용자의 권한 정보를 매핑하는 역할을 수행
@@ -50,22 +53,24 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         // -> RefreshToken이 없거나 유효하지 않다면(DB에 저장된 RefreshToken과 다르다면) null을 반환
         // 사용자의 요청 헤더에 RefreshToken이 있는 경우는, AccessToken이 만료되어 요청한 경우밖에 없다.
         // 따라서, 위의 경우를 제외하면 추출한 refreshToken은 모두 null
-        log.info("토큰 생성");
+        log.info("JwtAuthenticationProcessingFilter 진입");
         String refreshToken = jwtService.extractRefreshToken(request)
-                .filter(jwtService::isTokenValid)
+                .filter(token -> jwtService.isTokenValid(token, response))
                 .orElse(null);
 
         // 리프레시 토큰이 요청 헤더에 존재했다면, 사용자가 AccessToken이 만료되어서
         // RefreshToken까지 보낸 것이므로 리프레시 토큰이 DB의 리프레시 토큰과 일치하는지 판단 후,
         // 일치한다면 AccessToken을 재발급해준다.
         if (refreshToken != null) {
-            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+            log.info("리프레시 토큰 헤더에 존재 -> 리프레시 토큰 DB의 리프레시 토큰과 일치 여부 판단 후 일치 시 accessToken 도 재발급");
+            checkRefreshTokenAndReIssueAccessToken(request, response, refreshToken);
             return; // RefreshToken을 보낸 경우에는 AccessToken을 재발급 하고 인증 처리는 하지 않게 하기위해 바로 return으로 필터 진행 막기
         }
         // RefreshToken이 없거나 유효하지 않다면, AccessToken을 검사하고 인증을 처리하는 로직 수행
         // AccessToken이 없거나 유효하지 않다면, 인증 객체가 담기지 않은 상태로 다음 필터로 넘어가기 때문에 401 에러 발생
         // AccessToken이 유효하다면, 인증 객체가 담긴 상태로 다음 필터로 넘어가기 때문에 인증 성공
         if (refreshToken == null) {
+            log.info("리프레시 토큰 헤더에 존재 안함 -> 엑세스 토큰 검사");
             checkAccessTokenAndAuthentication(request, response, filterChain);
         }
         
@@ -78,19 +83,22 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     // 일치 시 AccessToken을 재발급해준다
     // 추가적으로 RTR방식으로 인해 reIssueRefreshToken()로 리프레시 토큰 재발급 & DB에 리프레시 토큰 업데이트 메소드 호출
     // 그 후 JwtService.sendAccessTokenAndRefreshToken()으로 응답 헤더에 보내기
-    private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
+    private void checkRefreshTokenAndReIssueAccessToken(HttpServletRequest request, HttpServletResponse response, String refreshToken) {
         userRepository.findByRefreshToken(refreshToken)
                 .ifPresent(user -> {
                     String reIssuedRefreshToken = reIssueRefreshToken(user);
                     try {
                         jwtService.sendAccessTokenAndRefreshToken(response, jwtService.createAccessToken(user.getEmail()), reIssuedRefreshToken);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+//                      sendErrorResponse(response, "Internal Server Error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//                      request.setAttribute("exception", Code.UNCOMPLETE_TOKEN.getCode());
                     }
                 });
     }
 
-
+    private void sendErrorResponse(HttpServletRequest request,HttpServletResponse response, String message, int statusCode) throws IOException, ServletException {
+        customAuthenticationEntryPoint.commence(request, response, new AuthenticationException(message) {});
+    }
 
     //리프레시 토큰 재발급 & DB에 리프레시 토큰 업데이트 메소드
     private String reIssueRefreshToken(User user) {
@@ -118,26 +126,28 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         Optional<String> accessTokenOptional = jwtService.extractAccessToken(request);
         if (accessTokenOptional.isPresent()) {
             String accesstoken = accessTokenOptional.get();
-            log.info("토큰 있음");
-            if (jwtService.isTokenValid(accesstoken)) {
+            log.info("엑세스 토큰 헤더에 있음");
+            if (jwtService.isTokenValid(accesstoken,response)) {
+                log.info("~~");
                 Optional<String> emailOptional = jwtService.extractEmail(accesstoken);
                 if (emailOptional.isPresent()) {
+                    log.info("유효한 엑세스 토큰임(해당 사용자 존재)");
                     String email = emailOptional.get();
                     userRepository.findByEmail(email).ifPresent(this::saveAuthentication);
                 }else{
                     //이메일 추출 실패
-                    log.info("이메일 추출 실패");
+                    log.info("유효하지 않은 엑세스 토큰임(Failed to extract email)");
+                    sendErrorResponse(request,response, "Failed to extract email", HttpServletResponse.SC_BAD_REQUEST);
 
                 }
             }else{
-                //유효하지 않은 토큰
-                log.info("유효하지 않은 토큰");
-
-
+                //유효하지 않은 토큰 - jwtService.isTokenValid에서 오류 처리
+                sendErrorResponse(request,response, "Invalid token - 클라이언트가 리프레시 토큰 전송 필요함", HttpServletResponse.SC_BAD_REQUEST);
             }
         }else{
             //토큰 존재하지 않는 경우
-            log.info("토큰 없음");
+            log.info("엑세스 토큰 헤더에 없음");
+            sendErrorResponse(request,response, "Token not found", HttpServletResponse.SC_BAD_REQUEST);
 
         }
 
