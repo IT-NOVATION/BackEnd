@@ -52,7 +52,8 @@ public class ReviewService {
             reviewRepository.save(review);
             return ResponseEntity.status(201).body("성공적으로 생성되었습니다");
         }catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            //TODO: 에러 메시지  -> 관심영화 API에서 이 경우 에러 처리하면됨
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
     }
