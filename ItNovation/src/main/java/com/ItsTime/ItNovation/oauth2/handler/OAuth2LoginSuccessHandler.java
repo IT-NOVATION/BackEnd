@@ -40,7 +40,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info(accessToken);
                 log.info(refreshToken);
 
-                //TODO: session으로도 토큰관리할 수 있는법 공부하기
+
                 HttpSession session=request.getSession();
                 session.setAttribute("accessToken",accessToken);
                 session.setAttribute("refreshToken",refreshToken);
@@ -48,7 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info(response.getHeader("Authorization"));
 
 
-                String redirectUrl="http://localhost:3000/success"+accessToken+"/"+refreshToken;
+                String redirectUrl="http://localhost:3000/success?accessToken="+accessToken+"&refreshToken="+refreshToken;
                 response.sendRedirect(redirectUrl);
 
                 userRepository.findByEmail(oAuth2User.getEmail())

@@ -1,9 +1,10 @@
 package com.ItsTime.ItNovation.controller.user;
 
-import com.ItsTime.ItNovation.common.dto.ApiResult;
+
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
+import com.ItsTime.ItNovation.domain.user.dto.UserProfileDtoMe;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.user.UserProfileService;
 import com.ItsTime.ItNovation.service.user.UserService;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -31,18 +33,21 @@ public class UserController {
         return userService.join(signUpRequestDto);
     }
 
-    @PostMapping("/userProfileInfo")
-    public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto, HttpServletRequest request) {
-        Optional<String> accessToken = jwtService.extractAccessToken(request);
 
-        if(accessToken.isEmpty()){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
-        }else{
-            return userProfileService.userProfile(userProfileDto, accessToken.get());
-        }
+    @PostMapping("/userProfile/me")
+    public ResponseEntity userProfileMe(@RequestBody UserProfileDtoMe userProfileDtoMe, Authentication authentication) {
+        log.info("userProfileMe");
+        String email = authentication.getName(); // 현재 사용자의 이메일 추출
+
+        // 사용자 정보 업데이트 및 서비스 호출
+        userProfileService.userProfileMe(userProfileDtoMe, email);
+
+        // 성공적으로 처리되었음을 나타내는 200 상태 코드 반환
+        return ResponseEntity.ok().build();
     }
-    @GetMapping("/profile")
-    public String secondSignup() {
-        return "리다이렉트";
+    @PutMapping("/userProfile")
+    public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto) {
+        log.info("userProfile");
+        return userProfileService.userProfile(userProfileDto);
     }
 }

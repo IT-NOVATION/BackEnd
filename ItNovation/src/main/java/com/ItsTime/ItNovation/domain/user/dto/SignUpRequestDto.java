@@ -1,13 +1,11 @@
 package com.ItsTime.ItNovation.domain.user.dto;
 
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @ToString
 @Getter
+
 public class SignUpRequestDto {
 
     private final String email;
