@@ -2,43 +2,34 @@ package com.ItsTime.ItNovation.service.movie;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
-import com.ItsTime.ItNovation.domain.movie.dto.MovieResponse;
-import com.ItsTime.ItNovation.domain.movie.dto.SearchDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieResponseDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchDto;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class MovieSearchService {
     private final MovieRepository movieRepository;
     private final StarRepository starRepository;
 
-    @Autowired
-    public MovieSearchService(MovieRepository movieRepository, StarRepository starRepository) {
-        this.movieRepository = movieRepository;
-        this.starRepository = starRepository;
-    }
-
-    public List<MovieResponse> searchMoviesByTitle(SearchDto searchDto) {
+    public List<MovieResponseDto> searchMoviesByTitle(MovieSearchDto searchDto) {
         String search = searchDto.getSearch();
         List<Movie> movies = movieRepository.findByTitleContaining(searchDto.getSearch());
-        List<MovieResponse> movieResponses = new ArrayList<>();
+        List<MovieResponseDto> movieResponseDtos = new ArrayList<>();
         for (Movie movie : movies) {
-            Float starScore = starRepository.findAverageScoreByMovieId(movie.getId());
-            movieResponses.add(convertToMovieResponse(movie, starScore));
+            Float starScore = starRepository.findAvgScoreByMovieId(movie.getId());
+            movieResponseDtos.add(convertToMovieResponse(movie, starScore));
         }
-        return movieResponses;
+        return movieResponseDtos;
     }
 
-    private MovieResponse convertToMovieResponse(Movie movie, Float starScore) {
-        return new MovieResponse(
+    private MovieResponseDto convertToMovieResponse(Movie movie, Float starScore) {//starScore와 Movie Entity를 한곳에서 관리
+        return new MovieResponseDto(
                 movie.getId(),
                 movie.getTitle(),
                 movie.getMovieImg(),

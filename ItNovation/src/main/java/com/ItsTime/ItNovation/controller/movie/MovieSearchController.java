@@ -1,26 +1,22 @@
 package com.ItsTime.ItNovation.controller.movie;
 
-import com.ItsTime.ItNovation.domain.movie.dto.MovieResponse;
-import com.ItsTime.ItNovation.domain.movie.dto.SearchDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieResponseDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchDto;
 import com.ItsTime.ItNovation.service.movie.MovieSearchService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 public class MovieSearchController {
     private final MovieSearchService movieSearchService;
 
-    @Autowired
-    public MovieSearchController(MovieSearchService movieSearchService) {
-        this.movieSearchService = movieSearchService;
-    }
-
     @PostMapping("/search/movie")
-    public List<MovieResponse> searchMoviesByTitle(@RequestBody SearchDto searchDto) {
+    public List<MovieResponseDto> searchMoviesByTitle(@RequestBody MovieSearchDto searchDto) {
         return movieSearchService.searchMoviesByTitle(searchDto);
     }
 }

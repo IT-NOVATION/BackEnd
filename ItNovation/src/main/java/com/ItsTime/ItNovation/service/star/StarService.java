@@ -1,16 +1,11 @@
 package com.ItsTime.ItNovation.service.star;
 
 import com.ItsTime.ItNovation.domain.star.StarRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class StarService {
     private final StarRepository starRepository;
-
-    @Autowired
-    public StarService(StarRepository starRepository) {
-        this.starRepository = starRepository;
-    }
-
 }
