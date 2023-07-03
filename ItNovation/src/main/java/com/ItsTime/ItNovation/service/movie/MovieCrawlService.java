@@ -3,9 +3,9 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -170,6 +170,33 @@ public class MovieCrawlService {
         movieInfo.put("movieRunningTime", runtime.toString());
         movieInfo.put("genre", real_genre);
     }
+
+    public List<Map<String, Object>> getPopularMovies() {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular" + "?api_key=" + API_KEY+"&language=ko-KR", String.class);
+        String json = responseEntity.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, Object>> movies = new ArrayList<>();
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            JsonNode results = jsonNode.get("results");
+            for (JsonNode movieNode : results) {
+                Map<String, Object> movieInfo = new HashMap<>();
+                movieInfo.put("id", movieNode.get("id").asLong());
+                movieInfo.put("title", movieNode.get("title").asText());
+                movieInfo.put("movieImg", movieNode.get("poster_path").asText());
+                movieInfo.put("popularity", movieNode.get("popularity").asDouble());
+                movies.add(movieInfo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return movies;
+    }
+
 
 
 }
