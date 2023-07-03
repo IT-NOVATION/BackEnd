@@ -75,11 +75,16 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
+
     public User update(String nickname, String introduction,String profileImg,String bgImg){
         this.nickname = nickname;
         this.introduction = introduction;
         this.profileImg=profileImg;
         this.bgImg=bgImg;
+
+    public User update(String password){
+        this.password = password;
+
         return this;
     }
 
