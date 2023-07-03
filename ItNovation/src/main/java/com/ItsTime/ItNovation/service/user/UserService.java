@@ -1,5 +1,9 @@
 package com.ItsTime.ItNovation.service.user;
 
+
+import com.ItsTime.ItNovation.common.dto.ApiResult;
+import com.ItsTime.ItNovation.domain.user.Grade;
+
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
@@ -40,13 +44,15 @@ public class UserService {
                     .email(signUpRequestDto.getEmail())
                     .password(signUpRequestDto.getPassword())
                     .role(Role.GUEST)
+                    .grade(Grade.getDefault().getValue())
                     .build();
+
 
             user.passwordEncode(passwordEncoder);
 
             userRepository.save(user);
             log.info(user.getEmail() + " 회원가입 성공");
-            return ResponseEntity.ok(null);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         }
 
     }

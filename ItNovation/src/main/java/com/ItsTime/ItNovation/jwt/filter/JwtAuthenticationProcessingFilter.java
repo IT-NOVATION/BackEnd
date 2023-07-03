@@ -43,7 +43,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getRequestURI().equals(NO_CHECK_URL)) {
-            filterChain.doFilter(request, response); // "/login" 요청이 들어오면, 다음 필터 호출
+            filterChain.doFilter(request, response); // "/login" 요청이 들어오면, 다음 필터(CustomJsonUsernamePasswordAuthenticationFilter)호출
             return; // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
         }
         // 사용자 요청 헤더에서 RefreshToken 추출
@@ -63,7 +63,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             return; // RefreshToken을 보낸 경우에는 AccessToken을 재발급 하고 인증 처리는 하지 않게 하기위해 바로 return으로 필터 진행 막기
         }
         // RefreshToken이 없거나 유효하지 않다면, AccessToken을 검사하고 인증을 처리하는 로직 수행
-        // AccessToken이 없거나 유효하지 않다면, 인증 객체가 담기지 않은 상태로 다음 필터로 넘어가기 때문에 403 에러 발생
+        // AccessToken이 없거나 유효하지 않다면, 인증 객체가 담기지 않은 상태로 다음 필터로 넘어가기 때문에 401 에러 발생
         // AccessToken이 유효하다면, 인증 객체가 담긴 상태로 다음 필터로 넘어가기 때문에 인증 성공
         if (refreshToken == null) {
             checkAccessTokenAndAuthentication(request, response, filterChain);
@@ -118,6 +118,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         Optional<String> accessTokenOptional = jwtService.extractAccessToken(request);
         if (accessTokenOptional.isPresent()) {
             String accesstoken = accessTokenOptional.get();
+            log.info("토큰 있음");
             if (jwtService.isTokenValid(accesstoken)) {
                 Optional<String> emailOptional = jwtService.extractEmail(accesstoken);
                 if (emailOptional.isPresent()) {
@@ -126,14 +127,18 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 }else{
                     //이메일 추출 실패
                     log.info("이메일 추출 실패");
+
                 }
             }else{
                 //유효하지 않은 토큰
                 log.info("유효하지 않은 토큰");
+
+
             }
         }else{
             //토큰 존재하지 않는 경우
             log.info("토큰 없음");
+
         }
 
         filterChain.doFilter(request, response);

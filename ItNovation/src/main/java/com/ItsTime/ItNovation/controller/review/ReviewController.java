@@ -1,43 +1,30 @@
 package com.ItsTime.ItNovation.controller.review;
 
-import com.ItsTime.ItNovation.domain.review.dto.ReviewDTO;
+import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
+import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@Controller
-@RequestMapping("/reviews")
 @RequiredArgsConstructor
+@Slf4j
+@RestController
+@RequestMapping("review")
 public class ReviewController {
 
-    /*
-    @Autowired//현재 사용 불가능 reviewService 제대로 완성 X
     private final ReviewService reviewService;
+    @PostMapping
+    public ResponseEntity reviewWrite(@RequestBody ReviewPostRequestDto reviewPostRequestDto, Authentication authentication) {
 
-    @GetMapping("/movieId/all")//영화의 모든 리뷰
-    public ResponseEntity<List<ReviewDTO>> getList(@PathVariable("movieId") Long movieId){
-        List<ReviewDTO> reviewDTOList = reviewService.getListOfMovie(movieId);
+            String nowUserEmail=authentication.getName();
+            log.info("현재 로그인한 유저: {}", nowUserEmail);
 
-        return new ResponseEntity<>(reviewDTOList, HttpStatus.OK);
+            return reviewService.reviewWrite(reviewPostRequestDto, nowUserEmail);
+
+
     }
 
-    @PutMapping("/{movieId}/reviewId")//리뷰 수정, 성공 여부
-    public ResponseEntity<Long> modifyReview(@PathVariable Long reviewId, @RequestBody ReviewDTO movieReivewDTO){
-        reviewService.modify(movieReivewDTO);
-        return new ResponseEntity<>(reviewId, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{movieId}/{reviewId}")//삭제
-    public ResponseEntity<Long> deleteReview(@PathVariable Long reviewId){
-        reviewService.remove(reviewId);
-        return new ResponseEntity<>(reviewId, HttpStatus.OK);
-    }
-
-*/
 }

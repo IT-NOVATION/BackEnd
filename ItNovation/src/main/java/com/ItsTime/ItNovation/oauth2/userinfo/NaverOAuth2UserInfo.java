@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.oauth2.userinfo;
 
+import com.ItsTime.ItNovation.domain.user.Grade;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -32,7 +33,7 @@ public class NaverOAuth2UserInfo extends OAuth2UserInfo {
     }
 
     @Override
-    public String getImageUrl() {
+    public String getProfileImg() {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
 
         if (response == null) {
@@ -40,6 +41,11 @@ public class NaverOAuth2UserInfo extends OAuth2UserInfo {
         }
 
         return (String) response.get("profile_image");
+    }
+
+    @Override
+    public String getBgImg() {
+        return "default";
     }
 
     @Override
@@ -52,5 +58,9 @@ public class NaverOAuth2UserInfo extends OAuth2UserInfo {
 
         return (String) response.get("email");
     }
+
+    @Override
+    public String getGrade(){
+        return Grade.getDefault().getValue();}
 
 }
