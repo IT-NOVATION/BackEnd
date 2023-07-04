@@ -28,7 +28,7 @@ public class ReviewController {
 
     }
 
-    @GetMapping("/Info")
+    @PostMapping("/Info")
     public ResponseEntity reviewRead(@RequestBody ReviewReadRequestDto reviewReadRequestDto){
 
         Long reviewId = reviewReadRequestDto.getReviewId();
