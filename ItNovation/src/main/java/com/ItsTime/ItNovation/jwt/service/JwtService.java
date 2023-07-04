@@ -186,6 +186,10 @@ public class JwtService {
      * 토큰의 유효성을 검사
      */
     public boolean isTokenValid(String token,HttpServletResponse response,HttpServletRequest request) {
+        if (logoutTokens.contains(token)) {
+            throw new JwtException(JwtErrorCode.EXPIRED_TOKEN.getMessage());
+
+        }
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
             return true;
