@@ -1,6 +1,5 @@
 package com.ItsTime.ItNovation.controller.user;
 
-import com.ItsTime.ItNovation.common.dto.ApiResult;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
