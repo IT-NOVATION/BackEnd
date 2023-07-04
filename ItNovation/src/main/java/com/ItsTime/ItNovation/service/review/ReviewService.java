@@ -88,9 +88,9 @@ public class ReviewService {
         ReviewUserInfoDto reviewUserInfoDto) {
 
         ReviewReadResponseDto reviewReadResponseDto = ReviewReadResponseDto.builder()
-            .reviewInfoDto(reviewInfoDto)
-            .reviewMovieInfoDto(reviewMovieInfoDto)
-            .reviewUserInfoDto(reviewUserInfoDto)
+            .review(reviewInfoDto)
+            .movie(reviewMovieInfoDto)
+            .user(reviewUserInfoDto)
             .build();
         
         return reviewReadResponseDto;

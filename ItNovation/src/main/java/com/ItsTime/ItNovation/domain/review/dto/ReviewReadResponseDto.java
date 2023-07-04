@@ -13,16 +13,16 @@ import lombok.NoArgsConstructor;
 public class ReviewReadResponseDto {
 
 
-    private ReviewInfoDto reviewInfoDto;
-    private ReviewMovieInfoDto reviewMovieInfoDto;
-    private ReviewUserInfoDto reviewUserInfoDto;
+    private ReviewInfoDto review;
+    private ReviewMovieInfoDto movie;
+    private ReviewUserInfoDto user;
 
 
     @Builder
-    public ReviewReadResponseDto(ReviewInfoDto reviewInfoDto, ReviewMovieInfoDto reviewMovieInfoDto,
-        ReviewUserInfoDto reviewUserInfoDto) {
-        this.reviewInfoDto = reviewInfoDto;
-        this.reviewMovieInfoDto = reviewMovieInfoDto;
-        this.reviewUserInfoDto = reviewUserInfoDto;
+    public ReviewReadResponseDto(ReviewInfoDto review, ReviewMovieInfoDto movie,
+        ReviewUserInfoDto user) {
+        this.review = review;
+        this.movie = movie;
+        this.user = user;
     }
 }
