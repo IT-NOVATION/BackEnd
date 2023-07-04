@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.controller.user;
 
 import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.dto.UserSearchRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchResponseDto;
 import com.ItsTime.ItNovation.service.user.UserSearchService;
 import java.util.ArrayList;
@@ -24,10 +25,10 @@ public class UserSearchController {
 
 
     @PostMapping("/test/search/user")
-    public ResponseEntity<List<UserSearchResponseDto>> searchUser(@RequestBody String searchNickName){
+    public ResponseEntity<List<UserSearchResponseDto>> searchUser(@RequestBody UserSearchRequestDto searchNickName){
         List<UserSearchResponseDto> response = new ArrayList<>();
         try {
-            response = userSearchService.getResponse(searchNickName);
+            response = userSearchService.getResponse(searchNickName.getSearchNickName());
             return ResponseEntity.status(200).body(response);
 
         }catch (Exception e){
