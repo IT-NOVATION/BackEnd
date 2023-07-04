@@ -1,7 +1,6 @@
 package com.ItsTime.ItNovation.service.user;
 
 
-import com.ItsTime.ItNovation.common.dto.ApiResult;
 import com.ItsTime.ItNovation.domain.user.Grade;
 
 import com.ItsTime.ItNovation.domain.user.Role;
