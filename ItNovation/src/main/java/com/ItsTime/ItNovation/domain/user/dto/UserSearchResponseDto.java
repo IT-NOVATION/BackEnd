@@ -4,13 +4,9 @@ package com.ItsTime.ItNovation.domain.user.dto;
 import com.ItsTime.ItNovation.domain.review.dto.SearchUserReviewDto;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Builder.ObtainVia;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class UserSearchResponseDto {
 
