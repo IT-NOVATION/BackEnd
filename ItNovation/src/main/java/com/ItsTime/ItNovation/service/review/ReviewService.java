@@ -1,33 +1,60 @@
 package com.ItsTime.ItNovation.service.review;
 
-import com.ItsTime.ItNovation.domain.review.dto.ReviewDTO;
-import java.util.List;
+import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.review.Review;
+import com.ItsTime.ItNovation.domain.review.ReviewRepository;
+import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
+import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-public interface ReviewService {
+@RequiredArgsConstructor
+@Slf4j
+@Service
+public class ReviewService {
+    private final UserRepository userRepository;
+    private final MovieRepository movieRepository;
+    private final ReviewRepository reviewRepository;
+    public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String nowUserEmail) {
+        try{
+            User nowUser = userRepository.findByEmail(nowUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
+            Movie nowMovie = movieRepository.findById(reviewPostRequestDto.getMovieId()).orElseThrow(() -> new IllegalArgumentException("일치하는 영화가 없습니다."));
 
-    List<ReviewDTO> getListOfMovie(Long movieId);
 
-    Long register(ReviewDTO movieReviewDTO);
+            log.info(reviewPostRequestDto.getReviewTitle());
+            log.info(reviewPostRequestDto.getReviewMainText());
+            Review review=Review.builder().star(reviewPostRequestDto.getStar())
+                    .movie(nowMovie)
+                    .user(nowUser)
+                    .reviewTitle(reviewPostRequestDto.getReviewTitle())
+                    .reviewMainText(reviewPostRequestDto.getReviewMainText())
+                    .hasGoodStory(reviewPostRequestDto.getHasGoodStory())
+                    .hasGoodProduction(reviewPostRequestDto.getHasGoodProduction())
+                    .hasGoodScenario(reviewPostRequestDto.getHasGoodScenario())
+                    .hasGoodDirecting(reviewPostRequestDto.getHasGoodDirecting())
+                    .hasGoodOst(reviewPostRequestDto.getHasGoodOst())
+                    .hasGoodVisual(reviewPostRequestDto.getHasGoodVisual())
+                    .hasGoodActing(reviewPostRequestDto.getHasGoodActing())
+                    .hasGoodCharterCharming(reviewPostRequestDto.getHasGoodCharterCharming())
+                    .hasGoodDiction(reviewPostRequestDto.getHasGoodDiction())
+                    .hasCheckDate(reviewPostRequestDto.getHasCheckDate())
+                    .hasSpoiler(reviewPostRequestDto.getHasSpoiler())
+                    .watchDate(reviewPostRequestDto.getWatchDate())
+                    .reviewLikes(null)
+                    .build();
 
-    void modify(ReviewDTO movieReviewDTO);
+            reviewRepository.save(review);
+            return ResponseEntity.status(201).body("성공적으로 생성되었습니다");
+        }catch (IllegalArgumentException e) {
+            //TODO: 에러 메시지  -> 관심영화 API에서 이 경우 에러 처리하면됨
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
 
-    void remove(Long reviewId);
-
-    //ReviewDTO 객체를 Review Entity 객체로 변환
-    //필요한것
-    /* 무비 빌더로 무비 아이디, 유저 아이디 갖고 오고싶은데 존재여부
-    default Review dtoToEntity(ReviewDTO movieDTO){
-        Review movieReview = Review.builder()
-                .movie(Movie.builder().movieId(ReviewDTO.getMovieId.getMovieId().build))
-
-                .build();
-        return movieReview;
     }
-    */
-    //해당 리뷰에 대한 정보 갖고있는 DTO
-    /*
-    default ReviewDTO entityToDto(Review movieReview){
-
-    }
-     */
 }

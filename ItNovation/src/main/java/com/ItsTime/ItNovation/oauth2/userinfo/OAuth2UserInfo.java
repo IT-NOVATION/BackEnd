@@ -1,5 +1,7 @@
 package com.ItsTime.ItNovation.oauth2.userinfo;
 
+import com.ItsTime.ItNovation.domain.user.Grade;
+
 import java.util.Map;
 
 public abstract class OAuth2UserInfo {
@@ -13,7 +15,9 @@ public abstract class OAuth2UserInfo {
 
     public abstract String getNickname();
 
-    public abstract String getImageUrl();
+    public abstract String getProfileImg();
+    public abstract String getBgImg();
 
     public abstract String getEmail();
+    public abstract String  getGrade();
 }

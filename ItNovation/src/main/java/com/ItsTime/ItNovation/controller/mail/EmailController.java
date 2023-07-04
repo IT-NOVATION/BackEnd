@@ -47,12 +47,12 @@ public class EmailController {
 
 
 
-    @PostMapping("/passwordfind/rewritePw")
-    public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
-        String email = rewritePasswordRequestDto.getEmail();
-        String updatePassword = rewritePasswordRequestDto.getPassword();
-
-        return userService.updatePassword(email, updatePassword);
-    }
+//    @PostMapping("/passwordfind/rewritePw")
+//    public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
+//        String email = rewritePasswordRequestDto.getEmail();
+//        String updatePassword = rewritePasswordRequestDto.getPassword();
+//
+//        return userService.updatePassword(email, updatePassword);
+//    }
 
 }

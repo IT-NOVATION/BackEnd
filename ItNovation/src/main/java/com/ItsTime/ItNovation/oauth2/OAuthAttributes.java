@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.oauth2;
 
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
+import com.ItsTime.ItNovation.domain.user.Grade;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.SocialType;
 import com.ItsTime.ItNovation.domain.user.User;
@@ -65,14 +66,14 @@ public class OAuthAttributes extends BaseTimeEntity {
      * email에는 UUID로 중복 없는 랜덤 값 생성
      * role은 GUEST로 설정
      */
-    public User toEntity(SocialType socialType,OAuth2UserInfo oAuth2UserInfo) {
+    public User toEntity(OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()
-                .socialType(socialType)
-                .socialId(oAuth2UserInfo.getId())
                 .email(oAuth2UserInfo.getEmail())
                 .nickname(oAuth2UserInfo.getNickname())
-                .imgUrl(oAuth2UserInfo.getImageUrl())
+                .bgImg(oAuth2UserInfo.getBgImg())
+                .profileImg(oAuth2UserInfo.getProfileImg())
                 .role(Role.GUEST)
+                .grade(Grade.getDefault().getValue())
                 .build();
     }
 }
