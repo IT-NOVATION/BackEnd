@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSearchRequestDto {
 
-    private String search;
+    private String searchNickName;
 
 
     @Builder
-    public UserSearchRequestDto(String search){
-        this.search=search;
+    public UserSearchRequestDto(String searchNickName){
+        this.searchNickName =searchNickName;
     }
 
 
