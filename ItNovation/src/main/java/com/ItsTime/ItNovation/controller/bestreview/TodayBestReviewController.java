@@ -19,7 +19,6 @@ public class TodayBestReviewController {
 
     @GetMapping("/today/bestReview")
     public ResponseEntity todayBestReview(){
-
         return todayBestReviewService.getBestReviewAndUser();
     }
 

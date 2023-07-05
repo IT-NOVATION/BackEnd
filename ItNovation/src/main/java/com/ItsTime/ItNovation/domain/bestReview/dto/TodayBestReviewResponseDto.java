@@ -14,7 +14,6 @@ public class TodayBestReviewResponseDto {
     private String profileImg;
     private String nickName;
     private String introduction;
-
     private List<TodayBestReviewDto> reviews = new ArrayList<>();
 
 
