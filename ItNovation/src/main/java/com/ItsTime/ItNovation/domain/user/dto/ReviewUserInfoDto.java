@@ -1,14 +1,9 @@
 package com.ItsTime.ItNovation.domain.user.dto;
 
 
-import com.ItsTime.ItNovation.domain.user.Grade;
-import com.google.protobuf.Enum;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ReviewUserInfoDto {
 

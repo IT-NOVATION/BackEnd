@@ -1,11 +1,8 @@
 package com.ItsTime.ItNovation.domain.movie.dto;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ReviewMovieInfoDto {
 

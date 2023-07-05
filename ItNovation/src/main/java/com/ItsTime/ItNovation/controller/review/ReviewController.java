@@ -29,7 +29,7 @@ public class ReviewController {
     }
 
     @PostMapping("/Info")
-    public ResponseEntity reviewRead( @RequestBody ReviewReadRequestDto reviewReadRequestDto){
+    public ResponseEntity reviewRead(@RequestBody ReviewReadRequestDto reviewReadRequestDto){
 
         Long reviewId = reviewReadRequestDto.getReviewId();
         return reviewService.reviewRead(reviewId);
