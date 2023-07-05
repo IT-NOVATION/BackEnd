@@ -2,16 +2,19 @@ package com.ItsTime.ItNovation.service.review;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
+import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
+import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
+import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -56,5 +59,87 @@ public class ReviewService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
+    }
+
+    public ResponseEntity reviewRead(Long reviewId) {
+
+        try {
+            Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없습니다."));
+            Movie movie = review.getMovie();
+            User user = review.getUser();
+
+            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user);
+            return ResponseEntity.status(200).body(reviewReadResponseDto);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user) {
+        ReviewInfoDto reviewInfoDto = madeReviewInfoDto(review);
+        ReviewMovieInfoDto reviewMovieInfoDto = madeMovieInfoDto(movie);
+        ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user);
+
+        return mergeInfoDto(reviewInfoDto, reviewMovieInfoDto, reviewUserInfoDto);
+    }
+
+    private ReviewReadResponseDto mergeInfoDto(ReviewInfoDto reviewInfoDto, ReviewMovieInfoDto reviewMovieInfoDto,
+        ReviewUserInfoDto reviewUserInfoDto) {
+
+        ReviewReadResponseDto reviewReadResponseDto = ReviewReadResponseDto.builder()
+            .review(reviewInfoDto)
+            .movie(reviewMovieInfoDto)
+            .user(reviewUserInfoDto)
+            .build();
+        
+        return reviewReadResponseDto;
+
+    }
+
+    private ReviewUserInfoDto madeUserInfoDto(User user) {
+        ReviewUserInfoDto reviewUserInfoDto = ReviewUserInfoDto.builder()
+            .userId(user.getId())
+            .bgImg(user.getBgImg())
+            .nickname(user.getNickname())
+            .grade(user.getGrade())
+            .introduction(user.getIntroduction())
+            .profileImg(user.getProfileImg())
+            .build();
+        return reviewUserInfoDto;
+    }
+
+    private ReviewMovieInfoDto madeMovieInfoDto(Movie movie) {
+        ReviewMovieInfoDto reviewMovieInfoDto = ReviewMovieInfoDto.builder()
+            .movieId(movie.getId())
+            .movieCountry(movie.getMovieCountry())
+            .movieImg(movie.getMovieImg())
+            .movieGenre(movie.getMovieGenre())
+            .movieReleaseDate(movie.getMovieDate())
+            .title(movie.getTitle())
+            .build();
+
+        return reviewMovieInfoDto;
+    }
+
+    private ReviewInfoDto madeReviewInfoDto(Review review) {
+        ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
+            .reviewId(review.getReviewId())
+            .hasCheckDate(review.getHasCheckDate())
+            .hasGoodActing(review.getHasGoodActing())
+            .hasGoodDiction(review.getHasGoodDiction())
+            .hasSpoiler(review.getHasSpoiler())
+            .hasGoodDirecting(review.getHasGoodDirecting())
+            .hasGoodOst(review.getHasGoodOst())
+            .hasGoodScenario(review.getHasGoodScenario())
+            .hasGoodProduction(review.getHasGoodProduction())
+            .hasGoodVisual(review.getHasGoodVisual())
+            .hasGoodCharterCharming(review.getHasGoodCharterCharming())
+            .reviewTitle(review.getReviewTitle())
+            .reviewMainText(review.getReviewMainText())
+            .watchDate(review.getWatchDate())
+            .build();
+
+        return reviewInfoDto;
     }
 }

@@ -23,6 +23,7 @@ public class UserSearchService {
         List<User> findByNickName = userRepository.findByNickname(searchNickName);
         if(findByNickName.isEmpty()){
             log.error("유저가 없습니다.");
+            throw new RuntimeException("유저가 없음 ㅠㅠ");
         }
         try {
             List<UserSearchResponseDto> userSearchResponseDtos = madeResponseDto(findByNickName);

@@ -13,6 +13,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Optional<User> findById(Long id);
     Optional<User> findByRefreshToken(String refreshToken);
 
-    @Query("SELECT u FROM User u WHERE u.nickname = :nickname OR u.nickname LIKE %:nickname%")
-    List<User> findByNickname(@Param("nickname")String nickname);
+    @Query("SELECT u FROM User u WHERE LOWER(u.nickname) LIKE CONCAT('%', :nickname, '%') ORDER BY CASE WHEN u.nickname = :nickname THEN 1 ELSE 0 END DESC")
+    List<User> findByNickname(@Param("nickname") String nickname);
 }
