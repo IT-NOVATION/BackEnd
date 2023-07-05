@@ -149,7 +149,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         } else {
             //토큰 존재하지 않는 경우
             log.info("엑세스 토큰 헤더에 없음");
-            throw new JwtException(JwtErrorCode.UNKNOWN_TOKEN.getMessage());
+            String requestURI = request.getRequestURI();
+            if (!requestURI.contains("/oauth2")) {
+                throw new JwtException(JwtErrorCode.UNKNOWN_TOKEN.getMessage());
+            }
 
         }
 
