@@ -3,6 +3,7 @@ package com.ItsTime.ItNovation.jwt.filter;
 import com.ItsTime.ItNovation.common.JwtErrorCode;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
+
 import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.jwt.util.PasswordUtil;
 import jakarta.servlet.FilterChain;
@@ -22,6 +23,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import static org.springframework.security.core.userdetails.User.*;
 
 /**
  * 실제 필터링 로직 수행, request header에서 Authorization 값 꺼내 토큰 검사하고
@@ -175,7 +178,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             password = PasswordUtil.generateRandomPassword();
         }
 
-        UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
+        UserDetails userDetailsUser = builder()
                 .username(myUser.getEmail())
                 .password(password)
                 .roles(myUser.getRole().name())
