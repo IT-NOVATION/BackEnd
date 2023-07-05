@@ -17,11 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 각 소셜별로 받아오는 데이터가 다르므로
+ * 소셜별로 데이터를 받는 데이터를 분기 처리하는 DTO
+ */
 @Getter
 @Slf4j
 public class OAuthAttributes extends BaseTimeEntity {
 
-    private String nameAttributeKey;
+    private String nameAttributeKey; //OAuth2 로그인 진행 시 키가 되는 값, PK와 유사
     private OAuth2UserInfo oAuth2UserInfo;
     @Builder
     public OAuthAttributes(String nameAttributeKey, OAuth2UserInfo oAuth2UserInfo) {
@@ -62,8 +66,7 @@ public class OAuthAttributes extends BaseTimeEntity {
 
     /**
      * of메소드로 OAuthAttributes 객체가 생성되어, 유저 정보들이 담긴 OAuth2UserInfo가 소셜 타입별로 주입된 상태
-     * OAuth2UserInfo에서 socialId(식별값), nickname, imageUrl을 가져와서 build
-     * email에는 UUID로 중복 없는 랜덤 값 생성
+     * OAuth2UserInfo에서 nickname, imageUrl을 가져와서 build
      * role은 GUEST로 설정
      */
     public User toEntity(OAuth2UserInfo oAuth2UserInfo) {

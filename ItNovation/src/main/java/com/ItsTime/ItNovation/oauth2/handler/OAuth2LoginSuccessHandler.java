@@ -33,7 +33,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         try {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-            if (oAuth2User.getRole() == Role.GUEST) {
+            if (oAuth2User.getRole() == Role.GUEST) { //처음 로그인 시 모두 GUEST
                 log.info("guest");
 
                 String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
