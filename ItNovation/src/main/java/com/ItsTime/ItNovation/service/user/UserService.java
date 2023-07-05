@@ -8,6 +8,11 @@ import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
+
+import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
+import com.ItsTime.ItNovation.jwt.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +32,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final JwtService jwtService;
 
     @Transactional
     public ResponseEntity<?> join(SignUpRequestDto signUpRequestDto) {
@@ -37,7 +42,7 @@ public class UserService {
         if (StringUtils.hasText(result)) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                     //wrapper 타입만 null 이 들어갈 수 있음
+            //wrapper 타입만 null 이 들어갈 수 있음
         } else {
             User user = User.builder()
                     .email(signUpRequestDto.getEmail())
@@ -68,10 +73,15 @@ public class UserService {
 
     }
 
-
     @Transactional
-    public ResponseEntity<String> updatePassword(String email, String updatedPassword){
+    public ResponseEntity logout(String accessToken) {
 
+        log.info("엑세스 토큰: {}", accessToken);
+        jwtService.logout(accessToken);
+        return ResponseEntity.ok("로그아웃 완료");
+
+    }
+    public ResponseEntity<String> updatePassword(String email, String updatedPassword){
         Optional<User> findByEmail = userRepository.findByEmail(email);
 
         if(findByEmail.isEmpty()){
@@ -87,5 +97,6 @@ public class UserService {
         user.update(updatedPassword).passwordEncode(passwordEncoder);
         userRepository.save(user);
     }
+
 
 }

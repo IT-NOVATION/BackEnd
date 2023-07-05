@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.controller.user;
 
+
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
@@ -8,6 +9,7 @@ import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.user.UserProfileService;
 import com.ItsTime.ItNovation.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
@@ -30,6 +32,19 @@ public class UserController {
     public ResponseEntity<?> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
         log.info("회원가입");
         return userService.join(signUpRequestDto);
+    }
+    @GetMapping("/custom-logout")
+    public ResponseEntity logout(HttpServletRequest request) {
+        log.info("로그아웃");
+        Optional<String> accessToken = jwtService.extractAccessToken(request);
+        if(accessToken.isEmpty()){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+        }else{
+            log.info("엑세스 토큰: {}" ,accessToken.get());
+
+            return userService.logout(accessToken.get());
+        }
+
     }
 
 
