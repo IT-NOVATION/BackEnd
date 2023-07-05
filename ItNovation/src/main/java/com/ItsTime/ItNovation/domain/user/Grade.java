@@ -17,7 +17,5 @@ public enum Grade {
     public static Grade getDefault() {
         return WELCOME;
     }
-    public String getValue() {
-        return value;
-    }
+
 }
