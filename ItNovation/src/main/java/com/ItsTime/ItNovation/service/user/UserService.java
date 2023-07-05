@@ -42,7 +42,7 @@ public class UserService {
         if (StringUtils.hasText(result)) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                     //wrapper 타입만 null 이 들어갈 수 있음
+            //wrapper 타입만 null 이 들어갈 수 있음
         } else {
             User user = User.builder()
                     .email(signUpRequestDto.getEmail())
@@ -76,15 +76,12 @@ public class UserService {
     @Transactional
     public ResponseEntity logout(String accessToken) {
 
-            log.info("엑세스 토큰: {}" ,accessToken);
+        log.info("엑세스 토큰: {}", accessToken);
+        jwtService.logout(accessToken);
+        return ResponseEntity.ok("로그아웃 완료");
 
-            jwtService.logout(accessToken);
-            return ResponseEntity.ok("로그아웃 완료");
-
-
-    @Transactional
+    }
     public ResponseEntity<String> updatePassword(String email, String updatedPassword){
-
         Optional<User> findByEmail = userRepository.findByEmail(email);
 
         if(findByEmail.isEmpty()){
