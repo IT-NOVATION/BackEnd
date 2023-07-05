@@ -38,3 +38,7 @@ out/
 
 application-oauth.yml
 application-prod.yml
+application-jwt.yml
+application-mail.yml
+application-ttkey.yml
+
