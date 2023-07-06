@@ -17,7 +17,7 @@ public class PushReviewLikeController {
     private final PushService pushService;
 
 
-    @GetMapping("/test/push/reviewlike")
+    @GetMapping("/push/reviewlike")
     public ResponseEntity pushReviewLike(@RequestParam(name="reviewId") Long reviewId, @RequestParam(name="userId") Long userId){
         log.info(reviewId.toString());
         log.info(userId.toString());
