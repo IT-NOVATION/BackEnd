@@ -85,9 +85,8 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
-    public User update(String password){
+    public User update (String password){
         this.password = password;
-
         return this;
     }
 
