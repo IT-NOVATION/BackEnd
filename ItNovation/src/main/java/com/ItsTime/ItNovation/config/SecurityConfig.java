@@ -2,8 +2,10 @@ package com.ItsTime.ItNovation.config;
 
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.ItsTime.ItNovation.jwt.filter.JwtExceptionFilter;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.login.filter.CustomJsonUsernamePasswordAuthenticationFilter;
+import com.ItsTime.ItNovation.login.handler.CustomLogoutSuccessHandler;
 import com.ItsTime.ItNovation.login.handler.LoginSuccessHandler;
 import com.ItsTime.ItNovation.login.handler.LoginFailureHandler;
 import com.ItsTime.ItNovation.login.service.LoginService;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -25,7 +28,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 @RequiredArgsConstructor
 @Configuration
@@ -53,30 +58,44 @@ public class SecurityConfig {
                 .and()
                 //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
+
                 .requestMatchers("/oauth2/**","/css/**", "/images/**", "/js/**").permitAll() //인가를 허용한다-> 인가는 인증후에 진행되므로 인증도 필요없다는 말
                 //TODO: 사용자 토큰 확인이 필요한 엔드포인트는 .authenticated() 아닌 경우 permitAll에 등록해주세요
-                .requestMatchers("/test/**","/signup","/userProfile","/movies","/review","/review/Info").permitAll()
+                .requestMatchers("/test/**","/signup","/userProfile","/movies","/review", "/review/Info","/today/**").permitAll()
+
                 .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
                 .and()
+
                 //== 소셜 로그인 설정 ==//
                 .oauth2Login()
                 .successHandler(oAuth2LoginSuccessHandler)
                 .failureHandler(oAuth2LoginFailureHandler)
                 .userInfoEndpoint().userService(customOAuth2UserService);
 
+
         //TODO: 필터 순서
         http.addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class);
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtExceptionFilter(), jwtAuthenticationProcessingFilter().getClass());
 
 
         return http.build();
     }
 
     @Bean
+    public JwtExceptionFilter jwtExceptionFilter() {
+        JwtExceptionFilter jwtExceptionFilter = new JwtExceptionFilter();
+        return jwtExceptionFilter;
+    }
+
+
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
         JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
@@ -92,6 +111,7 @@ public class SecurityConfig {
         customJsonUsernamePasswordLoginFilter.setAuthenticationFailureHandler(loginFailureHandler());
         return customJsonUsernamePasswordLoginFilter;
     }
+
     /**
      * UserDetailsService는 커스텀 LoginService로 등록
      * 또한, FormLogin과 동일하게 AuthenticationManager로는 ProviderManager 사용하고 구현체로는 DaoAuthenticationProvider
@@ -119,10 +139,6 @@ public class SecurityConfig {
     public LoginFailureHandler loginFailureHandler() {
         return new LoginFailureHandler();
     }
-
-
-
-
 
 
 }

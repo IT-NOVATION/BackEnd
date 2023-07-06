@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.domain.user;
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
 import com.ItsTime.ItNovation.domain.review.Review;
+import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -37,6 +38,9 @@ public class User extends BaseTimeEntity {
     //ReviewLike 엔티티 클래스가 Review 엔티티 클래스의 reviewId 필드를 참조하여 연관관계를 맺고 있다는 것
     @OneToMany(mappedBy = "user")
     private List<Review> reviews;
+
+    @OneToMany(mappedBy= "user")
+    private List<ReviewLike> reviewLikes;
 
     // 유저 권한 설정 메소드
     //TODO: role admin으로 해도되나
