@@ -33,34 +33,48 @@ public class PushService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없어요!"));
             User user = userRepository.findById(pushUserId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없어요!"));
-
             Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByReviewIdAndUserId(
                 pushUserId, reviewId);
-            if(reviewLike.isEmpty()){
-                ReviewLike build = ReviewLike.builder()
-                    .user(user)
-                    .review(review)
-                    .reviewLike(true)
-                    .build();
-                reviewLikeRepository.save(build);
-                PushReviewLikeResponseDto reviewLikeDto = PushReviewLikeResponseDto.builder()
-                    .isReviewLike(build.getReviewLike())
-                    .build();
-                return ResponseEntity.status(200).body(reviewLikeDto);
-
-            }
-            else{
-                ReviewLike presentReviewLike = reviewLike.get();
-                presentReviewLike.updateReviewLike();
-                //reviewLikeRepository.save(presentReviewLike);
-                PushReviewLikeResponseDto reviewLikeDto = PushReviewLikeResponseDto.builder()
-                    .isReviewLike(presentReviewLike.getReviewLike())
-                    .build();
-                System.out.println("reviewLikeDto = " + reviewLikeDto);
-                return ResponseEntity.status(200).body(reviewLikeDto);
-            }
+            return getPushReviewLikeResponseDtoResponseEntity(review, user, reviewLike);
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(400).body(e.getMessage());
         }
+    }
+
+
+
+    private ResponseEntity<PushReviewLikeResponseDto> getPushReviewLikeResponseDtoResponseEntity(
+        Review review, User user, Optional<ReviewLike> reviewLike) {
+        if(reviewLike.isEmpty()){
+            ReviewLike build = buildReviewLike(review, user);
+            reviewLikeRepository.save(build);
+            PushReviewLikeResponseDto reviewLikeDto = buildPushReviewLikeResponseDto(
+                build);
+            return ResponseEntity.status(200).body(reviewLikeDto);
+        }
+        else{
+            ReviewLike presentReviewLike = reviewLike.get();
+            presentReviewLike.updateReviewLike();
+            //reviewLikeRepository.save(presentReviewLike); //transactional 작성 꼭 해야함 안 하면 더티 체킹 안함.
+            PushReviewLikeResponseDto reviewLikeDto = buildPushReviewLikeResponseDto(
+                presentReviewLike);
+            return ResponseEntity.status(200).body(reviewLikeDto);
+        }
+    }
+
+    private static PushReviewLikeResponseDto buildPushReviewLikeResponseDto(ReviewLike build) {
+        PushReviewLikeResponseDto reviewLikeDto = PushReviewLikeResponseDto.builder()
+            .isReviewLike(build.getReviewLike())
+            .build();
+        return reviewLikeDto;
+    }
+
+    private static ReviewLike buildReviewLike(Review review, User user) {
+        ReviewLike build = ReviewLike.builder()
+            .user(user)
+            .review(review)
+            .reviewLike(true)
+            .build();
+        return build;
     }
 }
