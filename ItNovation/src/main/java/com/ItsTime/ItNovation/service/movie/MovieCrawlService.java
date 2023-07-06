@@ -1,13 +1,24 @@
 package com.ItsTime.ItNovation.service.movie;
 import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularRecommendResponseDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
+import com.ItsTime.ItNovation.domain.popularMovie.PopularMovie;
+import com.ItsTime.ItNovation.domain.popularMovie.PopularMovieRepository;
+import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +27,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MovieCrawlService {
 
+    private final PopularMovieRepository popularMovieRepository;
+    private final StarRepository starRepository;
+    private final MovieRepository movieRepository;
     @Value("${ttkey}")
     public String API_KEY;
 
@@ -170,6 +185,76 @@ public class MovieCrawlService {
         movieInfo.put("movieRunningTime", runtime.toString());
         movieInfo.put("genre", real_genre);
     }
+
+    public List<MoviePopularDto> getPopularMovies(){
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular" + "?api_key=" + API_KEY+"&language=ko-KR", String.class);
+        String json = responseEntity.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, Object>> movies = new ArrayList<>();
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            JsonNode results = jsonNode.get("results");
+            for (JsonNode movieNode : results) {
+                Map<String, Object> movieInfo = new HashMap<>();
+                movieInfo.put("id", movieNode.get("id").asLong());
+                movieInfo.put("title", movieNode.get("title").asText());
+                movieInfo.put("movieImg", movieNode.get("poster_path").asText());
+                movieInfo.put("popularity", movieNode.get("popularity").asDouble());
+                movies.add(movieInfo);
+            }
+        } catch (JsonProcessingException e) {//Json파싱 오류
+            e.printStackTrace();//오류날 시에 Httpstatus 오류를 던져주기
+        }
+
+        // PopularMovie 테이블에 저장
+        List<Map<String, Object>> selectedMovies = movies.subList(0, Math.min(10, movies.size()));
+        List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
+        for (Map<String, Object> movieInfo : selectedMovies) {
+            String title = (String) movieInfo.get("title");
+            String movieImg = (String) movieInfo.get("movieImg");
+            Double popularity = (Double) movieInfo.get("popularity");
+
+            MoviePopularDto moviePopularDto = MoviePopularDto.builder()
+                    .movieTitle(title)
+                    .movieImg(movieImg)
+                    .popularity(popularity.intValue())
+                    .build();
+
+            PopularMovie moviePopular = PopularMovie.builder()
+                    .title(title)
+                    .movieImg(movieImg)
+                    .popularity(popularity)
+                    .build();
+            popularMovieRepository.save(moviePopular);
+            moviePopularDtos.add(moviePopularDto);
+        }
+
+        return moviePopularDtos;
+    }
+
+    public List<MovieRecommendDto> getTopReviewedMovies() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Movie> movies = movieRepository.findTopReviewedMoviesWithLimit(pageable);
+
+        return movies.stream()
+                .map(this::mapMovieToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    private MovieRecommendDto mapMovieToResponseDto(Movie movie) {
+        Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId());
+        return MovieRecommendDto.builder()
+                .movieId(movie.getId())
+                .movieTitle(movie.getTitle())
+                .movieImg(movie.getMovieImg())
+                .starScore(averageStarScore != null ? averageStarScore : 0)
+                .build();
+    }
+
+
 
 
 }

@@ -85,6 +85,7 @@ public class User extends BaseTimeEntity {
         this.introduction = introduction;
         this.profileImg = profileImg;
         this.bgImg = bgImg;
+
         return this;
     }
 
@@ -97,5 +98,5 @@ public class User extends BaseTimeEntity {
         return this.role.getKey();
     }
 
-
 }
+

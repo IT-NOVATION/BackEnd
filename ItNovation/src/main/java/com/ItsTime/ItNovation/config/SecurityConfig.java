@@ -59,12 +59,14 @@ public class SecurityConfig {
                 //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
 
+
                 .requestMatchers("/oauth2/**","/css/**", "/images/**", "/js/**").permitAll() //인가를 허용한다-> 인가는 인증후에 진행되므로 인증도 필요없다는 말
                 //TODO: 사용자 토큰 확인이 필요한 엔드포인트는 .authenticated() 아닌 경우 permitAll에 등록해주세요
                 .requestMatchers("/test/**","/signup","/userProfile","/movies","/review", "/review/Info","/today/**").permitAll()
 
                 .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
+
                 .and()
 
                 //== 소셜 로그인 설정 ==//

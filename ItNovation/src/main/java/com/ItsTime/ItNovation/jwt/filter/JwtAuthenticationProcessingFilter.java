@@ -155,7 +155,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             }
 
         }
-
+        response.setStatus(HttpServletResponse.SC_OK);
         filterChain.doFilter(request, response);
     }
 
