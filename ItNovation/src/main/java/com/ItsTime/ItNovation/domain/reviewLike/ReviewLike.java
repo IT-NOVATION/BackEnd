@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 @Entity
 public class ReviewLike extends BaseTimeEntity {
     @Id
@@ -28,10 +27,15 @@ public class ReviewLike extends BaseTimeEntity {
     private Review review;
     private Boolean reviewLike;
 
-    public ReviewLike(Long reviewLikeId, User user, Review review, Boolean reviewLike) {
-        this.reviewLikeId = reviewLikeId;
+    @Builder
+    public ReviewLike(User user, Review review, Boolean reviewLike) {
         this.user = user;
         this.review = review;
         this.reviewLike = reviewLike;
+    }
+
+
+    public void updateReviewLike(){
+        this.reviewLike = !this.reviewLike;
     }
 }
