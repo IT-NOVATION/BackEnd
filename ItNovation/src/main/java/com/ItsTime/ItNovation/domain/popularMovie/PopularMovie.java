@@ -18,6 +18,8 @@ public class PopularMovie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long movieId;
+
     private String title;
 
     private String movieImg;
@@ -25,8 +27,8 @@ public class PopularMovie {
     private Double popularity;
 
     @Builder
-    PopularMovie(Long id, String title, String movieImg, Double popularity){
-        this.id = id;
+    PopularMovie(Long movieId,String title, String movieImg, Double popularity){
+        this.movieId = movieId;
         this.title = title;
         this.movieImg = movieImg;
         this.popularity = popularity;
