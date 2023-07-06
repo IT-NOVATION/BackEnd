@@ -26,9 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class MovieController {
 
-    @Autowired
     private final MovieCrawlService movieCrawlService;
-    @Autowired
     private final MovieRepoService movieRepoService;
 
     @GetMapping("/crawl") // 테스트 하실때는 SecurityConfig에 /movies url 추가후 진행하세요!
