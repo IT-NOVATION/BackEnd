@@ -19,9 +19,11 @@ import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.security.core.userdetails.User.*;
@@ -37,6 +39,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private static final String NO_CHECK_URL = "/login";
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final List<RequestMatcher> specialUrlMatchers; // 특정 URL에 대한 매처
 
     /**
      * Spring Security에서 인증된 사용자의 권한 정보(GrantedAuthority)를 매핑할 때 사용하는 인터페이스
@@ -48,9 +51,11 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().equals(NO_CHECK_URL)) {
-            filterChain.doFilter(request, response); // "/login" 요청이 들어오면, 다음 필터(CustomJsonUsernamePasswordAuthenticationFilter)호출
-            return; // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
+        for (RequestMatcher requestMatcher : specialUrlMatchers) {
+            if (requestMatcher.matches(request)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
         // 사용자 요청 헤더에서 RefreshToken 추출
         // -> RefreshToken이 없거나 유효하지 않다면(DB에 저장된 RefreshToken과 다르다면) null을 반환

@@ -31,6 +31,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.Arrays;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
@@ -45,6 +50,10 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
 
 
+    List<RequestMatcher> specialUrlMatchers = Arrays.asList(
+            new AntPathRequestMatcher("/userProfile"),
+            new AntPathRequestMatcher("/login")
+    );
 
 
     //HttpSecurity 객체를 사용하여 Spring Security의 인증 및 권한 부여 규칙을 정의
@@ -75,6 +84,7 @@ public class SecurityConfig {
 
         //TODO: 필터 순서
         http.addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class);
+        http.addFilterBefore(new SecurityFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtExceptionFilter(), jwtAuthenticationProcessingFilter().getClass());
 
@@ -97,7 +107,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository,specialUrlMatchers);
         return jwtAuthenticationFilter;
     }
 
