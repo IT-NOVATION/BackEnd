@@ -2,8 +2,8 @@ package com.ItsTime.ItNovation.service.movie;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
-import com.ItsTime.ItNovation.domain.movie.dto.MovieResponseDto;
-import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchRequestDto;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,24 +17,27 @@ public class MovieSearchService {
     private final MovieRepository movieRepository;
     private final StarRepository starRepository;
 
-    public List<MovieResponseDto> searchMoviesByTitle(MovieSearchDto searchDto) {
+    public List<MoviePopularDto> searchMoviesByTitle(MovieSearchRequestDto searchDto) {
         String search = searchDto.getSearch();
         List<Movie> movies = movieRepository.findByTitleContaining(searchDto.getSearch());
-        List<MovieResponseDto> movieResponseDtos = new ArrayList<>();
+        List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
         for (Movie movie : movies) {
             Float starScore = starRepository.findAvgScoreByMovieId(movie.getId());
-            movieResponseDtos.add(convertToMovieResponse(movie, starScore));
+            if(starScore == null){
+                starScore = 0.0f;
+            }
+            moviePopularDtos.add(convertToMovieResponse(movie, starScore));
         }
-        return movieResponseDtos;
+        return moviePopularDtos;
     }
 
-    private MovieResponseDto convertToMovieResponse(Movie movie, Float starScore) {//starScore와 Movie Entity를 한곳에서 관리
-        return new MovieResponseDto(
-                movie.getId(),
-                movie.getTitle(),
-                movie.getMovieImg(),
-                starScore
-        );
+    private MoviePopularDto convertToMovieResponse(Movie movie, Float starScore) {//starScore와 Movie Entity를 한곳에서 관리
+        return MoviePopularDto.builder()
+                .movieId(movie.getId())
+                .movieTitle(movie.getTitle())
+                .movieImg(movie.getMovieImg())
+                .starScore(starScore)
+                .build();
     }
 }
 
