@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.domain.user;
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
+import com.ItsTime.ItNovation.domain.follow.Follower;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import jakarta.persistence.*;
@@ -41,6 +42,10 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy= "user")
     private List<ReviewLike> reviewLikes;
+
+    @OneToMany(mappedBy = "pushUser")
+    private List<Follower> followers;
+
 
     // 유저 권한 설정 메소드
     //TODO: role admin으로 해도되나

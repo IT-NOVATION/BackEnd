@@ -20,6 +20,9 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             "ORDER BY COUNT(r) DESC")
     List<Movie> findTopReviewedMoviesWithLimit(Pageable pageable);
 
+    @Query("SELECT m FROM Movie m WHERE m.real_movieId = :id")
+    Optional<Movie> findByRealMovieId(Long id);
+
 
 
 

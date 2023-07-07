@@ -70,7 +70,7 @@ public class MovieCrawlService {
      */
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
-        for (int i = 1; i < 10; i++) {
+        for (int i = 1; i < 150; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
                 + "&page=" + i + "&language=ko-KR" + "&region=KR" + "&sort_by=popularity.desc&include_adult=true&include_video=false"; // api 버전 변경에 다른
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
@@ -201,7 +201,7 @@ public class MovieCrawlService {
                 Map<String, Object> movieInfo = new HashMap<>();
                 movieInfo.put("id", movieNode.get("id").asLong());
                 movieInfo.put("title", movieNode.get("title").asText());
-                movieInfo.put("movieImg", movieNode.get("poster_path").asText());
+                movieInfo.put("movieImg", "https://www.themoviedb.org/t/p/original"+ movieNode.get("poster_path").asText());
                 movieInfo.put("popularity", movieNode.get("popularity").asDouble());
                 movies.add(movieInfo);
             }
@@ -213,17 +213,21 @@ public class MovieCrawlService {
         List<Map<String, Object>> selectedMovies = movies.subList(0, Math.min(10, movies.size()));
         List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
         for (Map<String, Object> movieInfo : selectedMovies) {
+            Movie id = movieRepository.findByRealMovieId((Long) movieInfo.get("id"))
+                    .orElseThrow(() -> new IllegalArgumentException("해당 영화가 DB에 저장되어있지 않습니다."));
             String title = (String) movieInfo.get("title");
             String movieImg = (String) movieInfo.get("movieImg");
             Double popularity = (Double) movieInfo.get("popularity");
 
             MoviePopularDto moviePopularDto = MoviePopularDto.builder()
+                    .movieId(id.getId())
                     .movieTitle(title)
                     .movieImg(movieImg)
                     .popularity(popularity.intValue())
                     .build();
 
             PopularMovie moviePopular = PopularMovie.builder()
+                    .movieId(id.getId())
                     .title(title)
                     .movieImg(movieImg)
                     .popularity(popularity)

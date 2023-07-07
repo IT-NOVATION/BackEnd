@@ -30,4 +30,9 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
         "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = CURRENT_DATE) DESC")
     List<Review> findTop2ReviewsByUserId(@Param("userId") Long userId, Pageable pageable);
 
+
+
+    @Query("select rl from ReviewLike rl where rl.user.id = :userId AND rl.review.reviewId= :reviewId")
+    Optional<ReviewLike> findReviewLikeByReviewIdAndUserId(@Param("userId") Long userId, @Param("reviewId") Long reviewId);
+
 }
