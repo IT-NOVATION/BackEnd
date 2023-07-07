@@ -1,0 +1,119 @@
+package com.ItsTime.ItNovation.service.best;
+
+import com.ItsTime.ItNovation.domain.bestReview.dto.TodayBestReviewResponseDto;
+import com.ItsTime.ItNovation.domain.bestUser.TopUserResponseDto;
+import com.ItsTime.ItNovation.domain.follow.FollowRepository;
+import com.ItsTime.ItNovation.domain.follow.Follower;
+import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.dto.TopUserMovieDto;
+import com.ItsTime.ItNovation.domain.review.Review;
+import com.ItsTime.ItNovation.domain.review.ReviewRepository;
+import com.ItsTime.ItNovation.domain.review.dto.TopUserReviewDto;
+import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
+import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class TodayBestUserService {
+
+
+    private final ReviewLikeRepository reviewLikeRepository;
+    private final ReviewRepository reviewRepository;
+    private final FollowRepository followRepository;
+
+
+    public ResponseEntity getBestUserInfo() {
+        Pageable pageable = PageRequest.of(0, 5);
+        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(
+            pageable);
+
+        List<TopUserResponseDto> top5UserResponseDtos = new ArrayList<>();
+        for (int index = 0; index < top5UsersWithTodayDate.size(); index++) {
+            List<TopUserReviewDto> topUserReviewDtos = new ArrayList<>();
+            User user = top5UsersWithTodayDate.get(index);
+            madeInternalResponseDto(topUserReviewDtos, top5UserResponseDtos, user);
+        }
+        return ResponseEntity.status(200).body(top5UserResponseDtos);
+    }
+
+    private void madeInternalResponseDto(List<TopUserReviewDto> topUserReviewDtos,
+        List<TopUserResponseDto> top5UserResponseDtos, User user) {
+        int followers = user.getFollowers().size();
+        Long following = followRepository.countByFollowedUserId(user.getId());
+        List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(user.getId());
+        addBestReview(topUserReviewDtos, reviews);
+        Pageable remainPageable = PageRequest.of(0, 2);
+        addNewestReview(topUserReviewDtos, user, remainPageable);
+        TopUserResponseDto topUserResponseDto = buildTopUserResponseDto(
+            topUserReviewDtos, user, followers, following);
+        top5UserResponseDtos.add(topUserResponseDto);
+    }
+
+    private void addNewestReview(List<TopUserReviewDto> topUserReviewDtos, User user,
+        Pageable remainPageable) {
+        List<Review> newestReviewByUserId = reviewRepository.findNewestReviewByUserId(
+            user.getId(), remainPageable);
+        addTopUserReviewDto(topUserReviewDtos, newestReviewByUserId);
+    }
+
+    private void addBestReview(List<TopUserReviewDto> topUserReviewDtos, List<Review> reviews) {
+        TopUserReviewDto topReviewDto = getTopUserReviewDto(reviews.get(0));
+        topUserReviewDtos.add(topReviewDto);
+    }
+
+    private void addTopUserReviewDto(List<TopUserReviewDto> topUserReviewDtos,
+        List<Review> newestReviewByUserId) {
+        for (Review review : newestReviewByUserId) {
+            TopUserReviewDto remainDto = getTopUserReviewDto(review);
+            topUserReviewDtos.add(remainDto);
+        }
+    }
+
+    private static TopUserResponseDto buildTopUserResponseDto(
+        List<TopUserReviewDto> topUserReviewDtos, User user, int followers, Long following) {
+        TopUserResponseDto topUserResponseDto = TopUserResponseDto.builder()
+            .userId(user.getId())
+            .profileImg(user.getProfileImg())
+            .nickName(user.getNickname())
+            .introduction(user.getIntroduction())
+            .grade(user.getGrade())
+            .followers(followers)
+            .followings(following)
+            .reviews(topUserReviewDtos)
+            .build();
+        return topUserResponseDto;
+    }
+
+    private TopUserReviewDto getTopUserReviewDto(Review topReview) {
+        int reviewLikeCount = reviewLikeRepository.countReviewLikeByReviewId(
+            topReview.getReviewId());
+        TopUserReviewDto topReviewDto = TopUserReviewDto.builder()
+            .star(topReview.getStar())
+            .reviewTitle(topReview.getReviewTitle())
+            .createdDate(topReview.getCreatedDate().toString())
+            .reviewId(topReview.getReviewId())
+            .reviewLikeCount(reviewLikeCount)
+            .reviewMainText(topReview.getReviewMainText())
+            .movie(getMovieDto(topReview.getMovie()))
+            .build();
+        return topReviewDto;
+    }
+
+    private TopUserMovieDto getMovieDto(Movie movie) {
+        return TopUserMovieDto.builder()
+            .movieId(movie.getId())
+            .movieImg(movie.getMovieImg())
+            .build();
+    }
+}
