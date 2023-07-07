@@ -31,9 +31,6 @@ public class PushController {
     /**
      * 1. follow 눌렀을때 상대방과 follow가 안돼있는 case
      * 2. follow 테이블이 존재하는데 해제하고 싶은 case
-     *
-     * @param targetId
-     * @param pushUserId
      * @return response
      */
     @GetMapping("/follow")
