@@ -19,5 +19,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findNewestReviewByUserId(@Param("userId") Long userId, Pageable pageable);
 
 
-
+    @Query("SELECT AVG(r.star) FROM Review r WHERE r.movie.id = :movieId")
+    Float findAvgScoreByMovieId(@Param("movieId") Long movieId);
 }
