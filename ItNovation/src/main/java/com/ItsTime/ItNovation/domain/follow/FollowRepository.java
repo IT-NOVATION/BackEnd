@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.domain.follow;
 
 import com.ItsTime.ItNovation.domain.user.User;
+import java.util.List;
 import java.util.Optional;
 import javax.swing.text.html.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +23,9 @@ public interface FollowRepository extends JpaRepository<Follower, Long> {
 
 
     Optional<Follower> findById(Long id);
+
+    @Query("select count(*) from Follower f where f.follower.id=:userId")
+    Long countByFollowedUserId(@Param("userId") Long userId);
 
 
 
