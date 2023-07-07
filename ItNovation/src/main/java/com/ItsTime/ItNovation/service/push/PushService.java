@@ -59,7 +59,6 @@ public class PushService {
         else{
             ReviewLike presentReviewLike = reviewLike.get();
             presentReviewLike.updateReviewLike();
-            //reviewLikeRepository.save(presentReviewLike); //transactional 작성 꼭 해야함 안 하면 더티 체킹 안함.
             PushReviewLikeResponseDto reviewLikeDto = buildPushReviewLikeResponseDto(
                 presentReviewLike);
             return ResponseEntity.status(200).body(reviewLikeDto);
@@ -87,33 +86,11 @@ public class PushService {
             User pushUser = userRepository.findById(pushUserId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없어요!"));
             User targetUser = userRepository.findById(targetId).orElseThrow(() -> new IllegalArgumentException("해당 팔로우 유저가 없어요!"));
-            //Optional<Follower> findByPushUser = followRepository.findByPushUser(pushUser);
             Optional<Follower> findByPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
                 pushUser.getId(), targetUser.getId());
-            if(pushUser.getId().equals(targetUser.getId())){
-                throw new IllegalArgumentException("자기가 자기 자신을 팔로우 할 순 없습니다!");
-            }
-            if(findByPushUserAndFollowUser.isEmpty()){
-                Follower build = Follower.builder()
-                    .pushUser(pushUser)
-                    .follower(targetUser)
-                    .build();
-                followRepository.save(build);
-                FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
-                    .isFollow(true).build();
-                return ResponseEntity.status(200).body(followStateResponseDto);
-            }
-            else{
-                Follower find = findByPushUserAndFollowUser.get();
-
-                // 단순히 지울 작업이 아니라 follow id pushUser id 두개 다 비교해서 일치하면 지우고 아니면
-                // 만들고 해야함.
-
-                followRepository.delete(find);
-                FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
-                    .isFollow(false).build();
-                return ResponseEntity.status(200).body(followStateResponseDto);
-            }
+            isSelfFollow(pushUser, targetUser);
+            return getFollowStateResponseDtoResponseEntity(pushUser, targetUser,
+                findByPushUserAndFollowUser);
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(400).body(e.getMessage());
         }
@@ -121,5 +98,37 @@ public class PushService {
 
 
 
+    }
+
+    private ResponseEntity<FollowStateResponseDto> getFollowStateResponseDtoResponseEntity(
+        User pushUser, User targetUser, Optional<Follower> findByPushUserAndFollowUser) {
+        if(findByPushUserAndFollowUser.isEmpty()){
+            Follower build = getFollower(pushUser, targetUser);
+            followRepository.save(build);
+            FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
+                .isFollow(true).build();
+            return ResponseEntity.status(200).body(followStateResponseDto);
+        }
+        else{
+            Follower find = findByPushUserAndFollowUser.get();
+            followRepository.delete(find);
+            FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
+                .isFollow(false).build();
+            return ResponseEntity.status(200).body(followStateResponseDto);
+        }
+    }
+
+    private static Follower getFollower(User pushUser, User targetUser) {
+        Follower build = Follower.builder()
+            .pushUser(pushUser)
+            .follower(targetUser)
+            .build();
+        return build;
+    }
+
+    private static void isSelfFollow(User pushUser, User targetUser) {
+        if(pushUser.getId().equals(targetUser.getId())){
+            throw new IllegalArgumentException("자기가 자기 자신을 팔로우 할 순 없습니다!");
+        }
     }
 }
