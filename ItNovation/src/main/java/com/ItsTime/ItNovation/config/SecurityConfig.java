@@ -31,6 +31,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.Arrays;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
@@ -45,6 +50,10 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
 
 
+    List<RequestMatcher> specialUrlMatchers = Arrays.asList(
+            new AntPathRequestMatcher("/userProfile"),
+            new AntPathRequestMatcher("/login")
+    );
 
 
     //HttpSecurity 객체를 사용하여 Spring Security의 인증 및 권한 부여 규칙을 정의
@@ -59,11 +68,13 @@ public class SecurityConfig {
                 //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
 
+
                 .requestMatchers("/oauth2/**","/css/**", "/images/**", "/js/**").permitAll() //인가를 허용한다-> 인가는 인증후에 진행되므로 인증도 필요없다는 말
                 //TODO: 사용자 토큰 확인이 필요한 엔드포인트는 .authenticated() 아닌 경우 permitAll에 등록해주세요
                 .requestMatchers("/test/**","/signup","/userProfile","/movies","/review", "/review/Info", "today/**").permitAll()
                 .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
+
                 .and()
 
                 //== 소셜 로그인 설정 ==//
@@ -75,6 +86,7 @@ public class SecurityConfig {
 
         //TODO: 필터 순서
         http.addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class);
+        http.addFilterBefore(new SecurityFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtExceptionFilter(), jwtAuthenticationProcessingFilter().getClass());
 
@@ -97,7 +109,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository,specialUrlMatchers);
         return jwtAuthenticationFilter;
     }
 

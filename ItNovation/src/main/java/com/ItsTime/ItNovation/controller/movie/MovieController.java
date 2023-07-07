@@ -1,6 +1,9 @@
 package com.ItsTime.ItNovation.controller.movie;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularRecommendResponseDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import java.util.List;
@@ -9,26 +12,21 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/movies")
+@RequestMapping("/test/api/v1/movies")
 @Slf4j
 public class MovieController {
 
-    @Autowired
     private final MovieCrawlService movieCrawlService;
-    @Autowired
     private final MovieRepoService movieRepoService;
 
     @GetMapping("/crawl") // 테스트 하실때는 SecurityConfig에 /movies url 추가후 진행하세요!
@@ -55,6 +53,27 @@ public class MovieController {
         return movie;
     }
 
+    @GetMapping("/popular")
+    public List<MoviePopularDto> getPopularMovies() {
+        return movieCrawlService.getPopularMovies();
+    }
+
+    @GetMapping("/top-reviewed")
+    public ResponseEntity<List<MovieRecommendDto>> getTopReviewedMovies() {
+        List<MovieRecommendDto> movies = movieCrawlService.getTopReviewedMovies();
+        return new ResponseEntity<>(movies, HttpStatus.OK);
+    }
+
+    @GetMapping("/popularAndRecommend")
+    public ResponseEntity getPopularAndRecommend(){
+        List<MoviePopularDto> popularMovies = movieCrawlService.getPopularMovies();
+        List<MovieRecommendDto> topReviewedMovies = movieCrawlService.getTopReviewedMovies();
+        MoviePopularRecommendResponseDto moviePopularRecommendResponseDto = MoviePopularRecommendResponseDto.builder()
+                .popular(popularMovies)
+                .recommended(topReviewedMovies)
+                .build();
+        return ResponseEntity.status(200).body(moviePopularRecommendResponseDto);
+    }
 
 
 }
