@@ -55,6 +55,7 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/login"),
             new AntPathRequestMatcher("/today/**"),
             new AntPathRequestMatcher("/test/**")
+            new AntPathRequestMatcher("/oauth2")
     );
 
 
