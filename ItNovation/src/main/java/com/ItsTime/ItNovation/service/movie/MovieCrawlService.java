@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularRecommendResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.domain.popularMovie.PopularMovie;
 import com.ItsTime.ItNovation.domain.popularMovie.PopularMovieRepository;
+import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +33,7 @@ public class MovieCrawlService {
 
     private final PopularMovieRepository popularMovieRepository;
     private final StarRepository starRepository;
+    private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
     @Value("${ttkey}")
     public String API_KEY;
@@ -70,7 +72,7 @@ public class MovieCrawlService {
      */
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
-        for (int i = 1; i < 150; i++) {
+        for (int i = 1; i < 500; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
                 + "&page=" + i + "&language=ko-KR" + "&region=KR" + "&sort_by=popularity.desc&include_adult=true&include_video=false"; // api 버전 변경에 다른
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
@@ -87,6 +89,28 @@ public class MovieCrawlService {
         }
     }
 
+//
+//    Map<String, Movie> titleAndMovie = new HashMap<>();
+//    crawlMovieInfo(restTemplate, titleAndMovie);
+//        return titleAndMovie;
+
+//
+//    String json = responseEntity.getBody();
+//    ObjectMapper objectMapper = new ObjectMapper();
+//            try {
+//        JsonNode jsonNode = objectMapper.readTree(json);
+//        JsonNode results = jsonNode.get("results");
+//        nowPagesMovieCrawl(titleAndMovie, results);
+//    }catch (Exception e){
+//        e.printStackTrace();
+//    }
+
+    /**
+     * 여기부터 진짜 크롤링
+     *
+     * @param titleAndMovie
+     * @param results
+     */
     private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JsonNode results)
          {
         final String posterBasicPath= "https://www.themoviedb.org/t/p/original";
@@ -188,33 +212,35 @@ public class MovieCrawlService {
 
     public List<MoviePopularDto> getPopularMovies(){
         RestTemplate restTemplate = new RestTemplate();
+        popularMovieRepository.deleteAll();
         ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular" + "?api_key=" + API_KEY+"&language=ko-KR", String.class);
         String json = responseEntity.getBody();
-
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> movies = new ArrayList<>();
-
         try {
             JsonNode jsonNode = objectMapper.readTree(json);
             JsonNode results = jsonNode.get("results");
             for (JsonNode movieNode : results) {
                 Map<String, Object> movieInfo = new HashMap<>();
-                movieInfo.put("id", movieNode.get("id").asLong());
-                movieInfo.put("title", movieNode.get("title").asText());
-                movieInfo.put("movieImg", "https://www.themoviedb.org/t/p/original"+ movieNode.get("poster_path").asText());
-                movieInfo.put("popularity", movieNode.get("popularity").asDouble());
+                buildMovieInfo(movieNode, movieInfo);
                 movies.add(movieInfo);
             }
         } catch (JsonProcessingException e) {//Json파싱 오류
             e.printStackTrace();//오류날 시에 Httpstatus 오류를 던져주기
         }
+        log.info(movies.toString());
 
         // PopularMovie 테이블에 저장
         List<Map<String, Object>> selectedMovies = movies.subList(0, Math.min(10, movies.size()));
         List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
         for (Map<String, Object> movieInfo : selectedMovies) {
-            Movie id = movieRepository.findByRealMovieId((Long) movieInfo.get("id"))
-                    .orElseThrow(() -> new IllegalArgumentException("해당 영화가 DB에 저장되어있지 않습니다."));
+            String title2 = (String) movieInfo.get("title");
+            log.info(title2);
+            if(movieRepository.findByRealMovieId((Long) movieInfo.get("id")).isEmpty()) {
+                savePopularMovie(movieInfo);
+            }
+
+            Movie id = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
             String title = (String) movieInfo.get("title");
             String movieImg = (String) movieInfo.get("movieImg");
             Double popularity = (Double) movieInfo.get("popularity");
@@ -239,6 +265,46 @@ public class MovieCrawlService {
         return moviePopularDtos;
     }
 
+    private static void buildMovieInfo(JsonNode movieNode, Map<String, Object> movieInfo) {
+        movieInfo.put("id", movieNode.get("id").asLong());
+        movieInfo.put("title", movieNode.get("title").asText());
+        movieInfo.put("movieImg", "https://www.themoviedb.org/t/p/original"+ movieNode.get("poster_path").asText());
+        movieInfo.put("popularity", movieNode.get("popularity").asDouble());
+        movieInfo.put("movieBgImg", "https://www.themoviedb.org/t/p/original"+ movieNode.get("backdrop_path").asText());
+        movieInfo.put("originalLanguage", movieNode.get("original_language").asText());
+        movieInfo.put("movieDetail", movieNode.get("overview").asText());
+        movieInfo.put("movieDate", movieNode.get("release_date").asText());
+    }
+
+    private void savePopularMovie(Map<String, Object> movieInfo) {
+        Map<String, String> convertMovieInfo = new HashMap<>();
+        final String posterBasicPath= "https://www.themoviedb.org/t/p/original";
+        convertMovieInfo(movieInfo, convertMovieInfo);
+
+        Integer real_movieId = Integer.parseInt(convertMovieInfo.get("id"));
+        try {
+            movieCreditCrawl(real_movieId, convertMovieInfo);
+            movieDetails(real_movieId, convertMovieInfo);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        convertMovieInfo.put("country", movieInfo.get("originalLanguage").toString());
+        Movie movie = setMovie(real_movieId, convertMovieInfo);
+        movieRepository.save(movie);
+    }
+
+    private static void convertMovieInfo(Map<String, Object> movieInfo,
+        Map<String, String> convertMovieInfo) {
+        convertMovieInfo.put("id", movieInfo.get("id").toString());
+        convertMovieInfo.put("title", movieInfo.get("title").toString());
+        convertMovieInfo.put("movieImg", movieInfo.get("movieImg").toString());
+        convertMovieInfo.put("movieBgImg", movieInfo.get("movieBgImg").toString());
+        convertMovieInfo.put("originalLanguage", movieInfo.get("originalLanguage").toString());
+        convertMovieInfo.put("movieDetail", movieInfo.get("movieDetail").toString());
+        convertMovieInfo.put("movieDate", movieInfo.get("movieDate").toString());
+    }
+
+
     public List<MovieRecommendDto> getTopReviewedMovies() {
         Pageable pageable = PageRequest.of(0, 10);
         List<Movie> movies = movieRepository.findTopReviewedMoviesWithLimit(pageable);
@@ -249,7 +315,9 @@ public class MovieCrawlService {
     }
 
     private MovieRecommendDto mapMovieToResponseDto(Movie movie) {
-        Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId());
+        Float averageStarScore = reviewRepository.findAvgScoreByMovieId(movie.getId());
+        //Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId()); // ? 이거 왜 있는거지?
+
         return MovieRecommendDto.builder()
                 .movieId(movie.getId())
                 .movieTitle(movie.getTitle())

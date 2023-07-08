@@ -53,6 +53,8 @@ public class SecurityConfig {
     List<RequestMatcher> specialUrlMatchers = Arrays.asList(
             new AntPathRequestMatcher("/userProfile"),
             new AntPathRequestMatcher("/login"),
+            new AntPathRequestMatcher("/today/**"),
+            new AntPathRequestMatcher("/test/**")
             new AntPathRequestMatcher("/oauth2")
     );
 
