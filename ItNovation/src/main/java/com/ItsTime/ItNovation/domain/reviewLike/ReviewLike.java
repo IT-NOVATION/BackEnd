@@ -22,7 +22,13 @@ public class ReviewLike extends BaseTimeEntity {
     @JoinColumn(name="userId")
     private User user;
 
-    @ManyToOne
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="userId")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewId") // reviewId 필드를 외래키로 매핑
     private Review review;
     private Boolean reviewLike;
