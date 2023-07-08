@@ -59,6 +59,9 @@ public class PushService {
         else{
             ReviewLike presentReviewLike = reviewLike.get();
             presentReviewLike.updateReviewLike();
+
+            //reviewLikeRepository.save(presentReviewLike); //transactional 작성 꼭 해야함 안 하면 더티 체킹 안함.
+
             PushReviewLikeResponseDto reviewLikeDto = buildPushReviewLikeResponseDto(
                 presentReviewLike);
             return ResponseEntity.status(200).body(reviewLikeDto);
