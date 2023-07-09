@@ -33,12 +33,19 @@ public class TodayBestUserService {
     private final FollowRepository followRepository;
 
 
+
+    /**
+     * Todo -> 전날 기준 집계해서 top User 뽑는 방식으로 고려
+     * @return
+     */
     public ResponseEntity getBestUserInfo() {
         Pageable pageable = PageRequest.of(0, 5);
         List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(
-            pageable);
+            pageable); // -> 이거 전날 기준으로 고쳐야 함!
+        System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
 
         List<TopUserResponseDto> top5UserResponseDtos = new ArrayList<>();
+
         for (int index = 0; index < top5UsersWithTodayDate.size(); index++) {
             List<TopUserReviewDto> topUserReviewDtos = new ArrayList<>();
             User user = top5UsersWithTodayDate.get(index);
@@ -106,6 +113,7 @@ public class TodayBestUserService {
             .reviewLikeCount(reviewLikeCount)
             .reviewMainText(topReview.getReviewMainText())
             .movie(getMovieDto(topReview.getMovie()))
+            .hasSpoiler(topReview.getHasSpoiler())
             .build();
         return topReviewDto;
     }

@@ -17,11 +17,12 @@ public class TopUserReviewDto {
     private int reviewLikeCount;
 
     private TopUserMovieDto movie;
+    private Boolean hasSpoiler;
 
 
     @Builder
     public TopUserReviewDto(Long reviewId, String reviewTitle, Float star, String reviewMainText,
-        String createdDate, int reviewLikeCount, TopUserMovieDto movie) {
+        String createdDate, int reviewLikeCount, TopUserMovieDto movie, Boolean hasSpoiler) {
         this.reviewId = reviewId;
         this.reviewTitle = reviewTitle;
         this.star = star;
@@ -29,5 +30,6 @@ public class TopUserReviewDto {
         this.createdDate = createdDate;
         this.reviewLikeCount = reviewLikeCount;
         this.movie = movie;
+        this.hasSpoiler= hasSpoiler;
     }
 }
