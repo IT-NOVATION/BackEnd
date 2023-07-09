@@ -137,7 +137,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             String accesstoken = accessTokenOptional.get();
             log.info("엑세스 토큰 헤더에 있음");
             if (jwtService.isTokenValid(accesstoken, response, request)) {
-                Optional<String> emailOptional = jwtService.extractEmail(accesstoken, request);
+                Optional<String> emailOptional = jwtService.extractEmail(accesstoken);
                 if (emailOptional.isPresent()) {
                     log.info("유효한 엑세스 토큰임(해당 사용자 존재)");
                     String email = emailOptional.get();
