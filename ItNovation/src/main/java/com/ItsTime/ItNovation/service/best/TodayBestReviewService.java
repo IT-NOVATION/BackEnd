@@ -7,6 +7,8 @@ import com.ItsTime.ItNovation.domain.movie.dto.TodayBestReviewMovieDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +25,13 @@ public class TodayBestReviewService {
 
     private final ReviewLikeRepository reviewLikeRepository;
 
+    private final LocalDate yesterday = LocalDate.now().minusDays(1);
+
 
     public ResponseEntity getBestReviewAndUser() {
         Pageable pageable = PageRequest.of(0, 3);
-        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(yesterday,
             pageable);
         try {
             List<TodayBestReviewResponseDto> todayBestReviewResponseDtos = madeResponse(
@@ -65,7 +70,7 @@ public class TodayBestReviewService {
     private List<TodayBestReviewDto> findTodayTop2Review(User user) {
         Pageable pageable = PageRequest.of(0, 2);
         List<TodayBestReviewDto> reviewDtos = new ArrayList<>();
-        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(
+        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(yesterday,
             user.getId(), pageable);
 
         convertToTopBestReviewDtos(reviewDtos, top2ReviewsByUserId);

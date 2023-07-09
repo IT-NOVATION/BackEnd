@@ -13,6 +13,7 @@ import com.ItsTime.ItNovation.domain.review.dto.TopUserReviewDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class TodayBestUserService {
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
 
-
+    private final LocalDate yesterday = LocalDate.now().minusDays(1);
 
     /**
      * Todo -> 전날 기준 집계해서 top User 뽑는 방식으로 고려
@@ -40,7 +41,7 @@ public class TodayBestUserService {
      */
     public ResponseEntity getBestUserInfo() {
         Pageable pageable = PageRequest.of(0, 5);
-        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(
+        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(yesterday,
             pageable); // -> 이거 전날 기준으로 고쳐야 함!
         System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
 
@@ -57,8 +58,9 @@ public class TodayBestUserService {
     private void madeInternalResponseDto(List<TopUserReviewDto> topUserReviewDtos,
         List<TopUserResponseDto> top5UserResponseDtos, User user) {
         int followers = user.getFollowers().size();
+        log.info(yesterday.toString());
         Long following = followRepository.countByFollowedUserId(user.getId());
-        List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(user.getId());
+        List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(yesterday, user.getId());
         addBestReview(topUserReviewDtos, reviews);
         Pageable remainPageable = PageRequest.of(0, 2);
         addNewestReview(topUserReviewDtos, user, remainPageable);
@@ -75,6 +77,7 @@ public class TodayBestUserService {
     }
 
     private void addBestReview(List<TopUserReviewDto> topUserReviewDtos, List<Review> reviews) {
+        log.info(reviews.toString());
         TopUserReviewDto topReviewDto = getTopUserReviewDto(reviews.get(0));
         topUserReviewDtos.add(topReviewDto);
     }
