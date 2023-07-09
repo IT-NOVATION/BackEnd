@@ -123,6 +123,7 @@ public class ReviewService {
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
+
         ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
             .hasCheckDate(review.getHasCheckDate())
