@@ -17,6 +17,7 @@ public class TopUserReviewDto {
     private int reviewLikeCount;
 
     private TopUserMovieDto movie;
+
     private Boolean hasSpoiler;
 
 
