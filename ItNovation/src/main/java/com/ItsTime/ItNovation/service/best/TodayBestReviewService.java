@@ -26,7 +26,7 @@ public class TodayBestReviewService {
 
     public ResponseEntity getBestReviewAndUser() {
         Pageable pageable = PageRequest.of(0, 3);
-        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTop3UsersWithTodayDate(
+        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(
             pageable);
         try {
             List<TodayBestReviewResponseDto> todayBestReviewResponseDtos = madeResponse(
@@ -65,7 +65,7 @@ public class TodayBestReviewService {
     private List<TodayBestReviewDto> findTodayTop2Review(User user) {
         Pageable pageable = PageRequest.of(0, 2);
         List<TodayBestReviewDto> reviewDtos = new ArrayList<>();
-        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTop2ReviewsByUserId(
+        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(
             user.getId(), pageable);
 
         convertToTopBestReviewDtos(reviewDtos, top2ReviewsByUserId);
