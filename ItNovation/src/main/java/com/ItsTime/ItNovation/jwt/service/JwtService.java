@@ -155,7 +155,7 @@ public class JwtService {
      * 유효하다면 getClaim()으로 이메일 추출
      * 유효하지 않다면 빈 Optional 객체 반환
      */
-    public Optional<String> extractEmail(String accessToken,HttpServletRequest request) {
+    public Optional<String> extractEmail(String accessToken) {
         try {
             // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))

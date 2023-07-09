@@ -1,11 +1,9 @@
 package com.ItsTime.ItNovation.controller.user;
 
 
-import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
-import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
-import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
-import com.ItsTime.ItNovation.domain.user.dto.UserProfileDtoMe;
+import com.ItsTime.ItNovation.domain.user.dto.*;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.service.user.UserLoginStateService;
 import com.ItsTime.ItNovation.service.user.UserProfileService;
 import com.ItsTime.ItNovation.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +25,7 @@ public class UserController {
     private final UserService userService;
     private final UserProfileService userProfileService;
     private final JwtService jwtService;
-
+    private final UserLoginStateService userLoginStateService;
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
         log.info("회원가입");
@@ -63,5 +61,17 @@ public class UserController {
     public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto) {
         log.info("userProfile");
         return userProfileService.userProfile(userProfileDto);
+    }
+    @GetMapping("/loginState")
+    public ResponseEntity<LoginStateDto> userLoginState(HttpServletRequest request) {
+        log.info("loginstate");
+        Optional<String> accessToken = jwtService.extractAccessToken(request);
+
+        if (accessToken.isEmpty()) {
+            return userLoginStateService.loginState(null);
+        }else{
+            return userLoginStateService.loginState(accessToken.get());
+        }
+
     }
 }
