@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class SingleMovieAndReviewAndUserInfoDto {
+public class SingleMoviePageResponseDto {
 
 
     private List<SingleMoviePageReviewAndUserDto> reviewAndUserInfoList;
@@ -15,7 +15,7 @@ public class SingleMovieAndReviewAndUserInfoDto {
 
 
     @Builder
-    public SingleMovieAndReviewAndUserInfoDto(List<SingleMoviePageReviewAndUserDto> reviewAndUserInfoList, SingleMoviePageMovieInfoDto movie) {
+    public SingleMoviePageResponseDto(List<SingleMoviePageReviewAndUserDto> reviewAndUserInfoList, SingleMoviePageMovieInfoDto movie) {
         this.reviewAndUserInfoList = reviewAndUserInfoList;
         this.movie = movie;
 
