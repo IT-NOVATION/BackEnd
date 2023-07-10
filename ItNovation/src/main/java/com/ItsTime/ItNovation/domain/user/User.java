@@ -1,7 +1,7 @@
 package com.ItsTime.ItNovation.domain.user;
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
-import com.ItsTime.ItNovation.domain.follow.Follower;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import jakarta.persistence.*;
@@ -44,7 +44,7 @@ public class User extends BaseTimeEntity {
     private List<ReviewLike> reviewLikes;
 
     @OneToMany(mappedBy = "pushUser")
-    private List<Follower> followers;
+    private List<FollowState> followStates;
 
 
     // 유저 권한 설정 메소드
