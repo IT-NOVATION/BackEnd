@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.domain.reviewLike;
 
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.user.User;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
@@ -17,22 +18,22 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
 
     @Query("SELECT rl.user FROM ReviewLike rl " +
         "WHERE rl.reviewLike = true " +
-        "AND DATE(rl.createdDate) = CURRENT_DATE " +
+        "AND DATE(rl.createdDate) = :yesterday " +
         "GROUP BY rl.user " +
         "ORDER BY COUNT(rl.user) DESC")
-    List<User> findTopUsersWithTodayDate(Pageable pageable);
+    List<User> findTopUsersWithTodayDate(@Param("yesterday")LocalDate date,Pageable pageable);
 
 
     @Query("SELECT r FROM Review r " +
         "WHERE r.user.id = :userId " +
-        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = CURRENT_DATE) DESC")
-    List<Review> findTopReviewsByUserId(@Param("userId") Long userId, Pageable pageable);
+        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = :yesterday) DESC")
+    List<Review> findTopReviewsByUserId(@Param("yesterday") LocalDate date, @Param("userId") Long userId, Pageable pageable);
 
 
     @Query("SELECT r FROM Review r " +
         "WHERE r.user.id = :userId " +
-        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = CURRENT_DATE) DESC")
-    List<Review> bestReviewsByUserId(@Param("userId") Long userId);
+        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = :yesterday) DESC")
+    List<Review> bestReviewsByUserId(@Param("yesterday") LocalDate date, @Param("userId") Long userId);
 
 
 
