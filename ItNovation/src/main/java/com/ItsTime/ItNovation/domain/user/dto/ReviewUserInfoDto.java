@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.domain.user.dto;
 
 
+import com.ItsTime.ItNovation.domain.user.Grade;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,7 +11,7 @@ public class ReviewUserInfoDto {
     private Long userId;
     private String bgImg;
     private String nickname;
-    private String grade;
+    private Grade grade;
     private String introduction;
     private String profileImg;
 
@@ -19,7 +20,7 @@ public class ReviewUserInfoDto {
 
 
     @Builder
-    public ReviewUserInfoDto(Long userId, String bgImg, String nickname, String grade,
+    public ReviewUserInfoDto(Long userId, String bgImg, String nickname, Grade grade,
         String introduction, String profileImg) {
         this.userId = userId;
         this.bgImg = bgImg;
