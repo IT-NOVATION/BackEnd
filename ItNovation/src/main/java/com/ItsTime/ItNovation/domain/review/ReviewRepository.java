@@ -21,4 +21,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT AVG(r.star) FROM Review r WHERE r.movie.id = :movieId")
     Float findAvgScoreByMovieId(@Param("movieId") Long movieId);
+
+    Long countByMovieId(Long movieId);
 }
