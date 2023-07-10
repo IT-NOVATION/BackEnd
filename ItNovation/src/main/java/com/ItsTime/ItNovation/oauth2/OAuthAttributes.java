@@ -72,7 +72,7 @@ public class OAuthAttributes extends BaseTimeEntity {
     public User toEntity(OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()
                 .email(oAuth2UserInfo.getEmail())
-                .nickname(oAuth2UserInfo.getNickname())
+                .nickname("설정필요")
                 .bgImg(oAuth2UserInfo.getBgImg())
                 .profileImg(oAuth2UserInfo.getProfileImg())
                 .role(Role.GUEST)
