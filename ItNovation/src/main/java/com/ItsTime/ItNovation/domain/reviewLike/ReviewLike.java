@@ -18,9 +18,7 @@ public class ReviewLike extends BaseTimeEntity {
     private Long reviewLikeId;
 
 
-    @ManyToOne
-    @JoinColumn(name="userId")
-    private User user;
+
 
 
 
