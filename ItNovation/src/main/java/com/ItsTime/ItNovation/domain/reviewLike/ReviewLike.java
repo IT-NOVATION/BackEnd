@@ -17,7 +17,9 @@ public class ReviewLike extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewLikeId;
 
-    @ManyToOne
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="userId")
     private User user;
 
