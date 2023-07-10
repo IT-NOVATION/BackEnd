@@ -24,6 +24,11 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     Optional<Movie> findByRealMovieId(Long id);
 
 
+    @Query("SELECT m FROM Movie m WHERE m.id = :id")
+    Optional<Movie> findByMovieId(Long id);
+
+
+
 
 
 
