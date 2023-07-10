@@ -1,7 +1,7 @@
 package com.ItsTime.ItNovation.controller.singleMoviePage;
 
 
-import com.ItsTime.ItNovation.service.single.SingleMoviePageService;
+import com.ItsTime.ItNovation.service.singleMoviePage.SingleMoviePageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
