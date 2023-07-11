@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Follower {
+public class FollowState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,16 +27,16 @@ public class Follower {
     private User pushUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "follower_id")
+    @JoinColumn(name = "target_id")
     // @JoinColumn 을 하게 되었을때 name= -> 외래키를 현재 테이블에 어떻게 보이게 할 지 선정하는 이름
     // column property를 따로 지정을 하지 않으면 해당 엔티티의 Id값으로 매핑한다.
-    private User follower;
+    private User targetUser;
 
 
     @Builder
-    public Follower(User pushUser, User follower) {
+    public FollowState(User pushUser, User targetUser) {
         this.pushUser = pushUser;
-        this.follower = follower;
+        this.targetUser = targetUser;
     }
 
 
