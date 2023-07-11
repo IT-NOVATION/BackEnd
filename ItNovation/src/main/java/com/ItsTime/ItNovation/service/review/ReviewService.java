@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewPostMovieInfoResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
+import com.ItsTime.ItNovation.domain.review.dto.ReviewCountResponseDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +28,8 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
+  
+    @Transactional
     public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String nowUserEmail) {
         try{
             User nowUser = userRepository.findByEmail(nowUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
@@ -62,7 +66,7 @@ public class ReviewService {
         }
 
     }
-
+    @Transactional
     public ResponseEntity reviewRead(Long reviewId) {
 
         try {
@@ -145,7 +149,7 @@ public class ReviewService {
 
         return reviewInfoDto;
     }
-
+    @Transactional
     public ResponseEntity getMovieInfo(Long movieId) {
         try {
             Movie findMovie = movieRepository.findById(movieId)
@@ -166,5 +170,18 @@ public class ReviewService {
             .title(findMovie.getTitle())
             .build();
         return responseDto;
+    }
+    @Transactional
+    public ResponseEntity reviewCount(Long movieId){
+        try{
+            log.info(String.valueOf(movieId));
+            Long count = reviewRepository.countByMovieId(movieId);
+            ReviewCountResponseDto responseDto = ReviewCountResponseDto.builder()
+                    .reviewCount(count)
+                    .build();
+            return ResponseEntity.ok(responseDto);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

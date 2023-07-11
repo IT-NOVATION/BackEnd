@@ -2,21 +2,23 @@ package com.ItsTime.ItNovation.service.push;
 
 
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
-import com.ItsTime.ItNovation.domain.follow.Follower;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.follow.dto.FollowStateResponseDto;
+import com.ItsTime.ItNovation.domain.movie.Movie;
+import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movieLike.MovieLike;
+import com.ItsTime.ItNovation.domain.movieLike.MovieLikeRepository;
+import com.ItsTime.ItNovation.domain.movieLike.dto.MovieLikeStateResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.PushReviewLikeResponseDto;
-import com.ItsTime.ItNovation.domain.review.dto.PushReviewLikeResponseDto.PushReviewLikeResponseDtoBuilder;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ public class PushService {
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final FollowRepository followRepository;
+    private final MovieRepository movieRepository;
+    private final MovieLikeRepository movieLikeRepository;
 
     @Transactional
     public ResponseEntity pushReviewLike(Long reviewId, Long pushUserId) {
@@ -89,7 +93,7 @@ public class PushService {
             User pushUser = userRepository.findById(pushUserId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없어요!"));
             User targetUser = userRepository.findById(targetId).orElseThrow(() -> new IllegalArgumentException("해당 팔로우 유저가 없어요!"));
-            Optional<Follower> findByPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
+            Optional<FollowState> findByPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
                 pushUser.getId(), targetUser.getId());
             isSelfFollow(pushUser, targetUser);
             return getFollowStateResponseDtoResponseEntity(pushUser, targetUser,
@@ -104,16 +108,16 @@ public class PushService {
     }
 
     private ResponseEntity<FollowStateResponseDto> getFollowStateResponseDtoResponseEntity(
-        User pushUser, User targetUser, Optional<Follower> findByPushUserAndFollowUser) {
+        User pushUser, User targetUser, Optional<FollowState> findByPushUserAndFollowUser) {
         if(findByPushUserAndFollowUser.isEmpty()){
-            Follower build = getFollower(pushUser, targetUser);
+            FollowState build = getFollower(pushUser, targetUser);
             followRepository.save(build);
             FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
                 .isFollow(true).build();
             return ResponseEntity.status(200).body(followStateResponseDto);
         }
         else{
-            Follower find = findByPushUserAndFollowUser.get();
+            FollowState find = findByPushUserAndFollowUser.get();
             followRepository.delete(find);
             FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
                 .isFollow(false).build();
@@ -121,10 +125,10 @@ public class PushService {
         }
     }
 
-    private static Follower getFollower(User pushUser, User targetUser) {
-        Follower build = Follower.builder()
+    private static FollowState getFollower(User pushUser, User targetUser) {
+        FollowState build = FollowState.builder()
             .pushUser(pushUser)
-            .follower(targetUser)
+            .targetUser(targetUser)
             .build();
         return build;
     }
@@ -133,5 +137,45 @@ public class PushService {
         if(pushUser.getId().equals(targetUser.getId())){
             throw new IllegalArgumentException("자기가 자기 자신을 팔로우 할 순 없습니다!");
         }
+    }
+
+    @Transactional
+    public ResponseEntity pushMovieLike(Long userId, Long movieId){
+        try{
+            User movieLikeUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없어요!"));
+            Movie movie = movieRepository.findById(movieId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 영화가 없어요"));
+            Optional<MovieLike> findByUserAndMovie = movieLikeRepository.findByUserIdAndMovieId(
+                    movieLikeUser.getId(), movie.getId());
+            return getMovieLikeStateResponseDtoResponseEntity(movieLikeUser, movie,
+                    findByUserAndMovie);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    private ResponseEntity getMovieLikeStateResponseDtoResponseEntity(User movieLikeUser, Movie movie, Optional<MovieLike> findByUserAndMovie) {
+        if(findByUserAndMovie.isEmpty()){
+            MovieLike build = getMovieLike(movieLikeUser, movie);
+            movieLikeRepository.save(build);
+            MovieLikeStateResponseDto movieLikeStateResponseDto = MovieLikeStateResponseDto.builder()
+                    .isMovieLike(true).build();
+            return ResponseEntity.status(200).body(movieLikeStateResponseDto);
+        }else{
+            MovieLike movieLike = findByUserAndMovie.get();
+            movieLikeRepository.delete(movieLike);
+            MovieLikeStateResponseDto movieLikeStateResponseDto = MovieLikeStateResponseDto.builder()
+                    .isMovieLike(false).build();
+            return ResponseEntity.status(200).body(movieLikeStateResponseDto);
+        }
+
+    }
+    private static MovieLike getMovieLike(User userId, Movie movieId) {
+        MovieLike build = MovieLike.builder()
+                .user(userId)
+                .movie(movieId)
+                .build();
+        return build;
     }
 }

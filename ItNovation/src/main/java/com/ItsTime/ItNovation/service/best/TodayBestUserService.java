@@ -1,18 +1,14 @@
 package com.ItsTime.ItNovation.service.best;
 
-import com.ItsTime.ItNovation.domain.bestReview.dto.TodayBestReviewResponseDto;
 import com.ItsTime.ItNovation.domain.bestUser.TopUserResponseDto;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
-import com.ItsTime.ItNovation.domain.follow.Follower;
 import com.ItsTime.ItNovation.domain.movie.Movie;
-import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.TopUserMovieDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.TopUserReviewDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
-import com.ItsTime.ItNovation.domain.user.UserRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +53,7 @@ public class TodayBestUserService {
 
     private void madeInternalResponseDto(List<TopUserReviewDto> topUserReviewDtos,
         List<TopUserResponseDto> top5UserResponseDtos, User user) {
-        int followers = user.getFollowers().size();
+        int followers = user.getFollowStates().size();
         log.info(yesterday.toString());
         Long following = followRepository.countByFollowedUserId(user.getId());
         List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(yesterday, user.getId());

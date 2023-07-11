@@ -4,6 +4,7 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,9 +12,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MovieLike {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long movieLikeId;
+    private Long Id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -23,6 +25,12 @@ public class MovieLike {
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
-    private boolean movieLike;
+
+    @Builder
+    public MovieLike(User user, Movie movie) {
+        this.user = user;
+        this.movie = movie;
+    }
+
 
 }

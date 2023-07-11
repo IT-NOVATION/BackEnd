@@ -24,14 +24,22 @@ public class MovieRepoService {
 
     @Transactional
     public void saveMovie(Map<String, Movie> titleAndMovie){
-        for (Entry<String, Movie> stringMovieEntry : titleAndMovie.entrySet()) {
+        for (Entry<String, Movie> newMovie : titleAndMovie.entrySet()) {
+            Optional<Movie> byTitle = movieRepository.findByTitle(
+                newMovie.getValue().getTitle());
 
-            if(movieRepository.findByTitle(stringMovieEntry.getKey()).isEmpty()){
-                movieRepository.save(stringMovieEntry.getValue());
+            if (byTitle.isPresent()){
+                Movie movie = byTitle.get();
+                movie.updateMovie(newMovie.getValue());
             }
+            else{
+                movieRepository.save(newMovie.getValue());
+            }
+
             log.info("DB에 이미 존재하고 있는 영화입니다.");
         }
     }
+
 
 
     @Transactional

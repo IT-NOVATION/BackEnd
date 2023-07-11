@@ -72,7 +72,7 @@ public class MovieCrawlService {
      */
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
-        for (int i = 1; i < 500; i++) {
+        for (int i = 1; i < 5; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
                 + "&page=" + i + "&language=ko-KR" + "&region=KR" + "&sort_by=popularity.desc&include_adult=true&include_video=false"; // api 버전 변경에 다른
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
@@ -89,21 +89,6 @@ public class MovieCrawlService {
         }
     }
 
-//
-//    Map<String, Movie> titleAndMovie = new HashMap<>();
-//    crawlMovieInfo(restTemplate, titleAndMovie);
-//        return titleAndMovie;
-
-//
-//    String json = responseEntity.getBody();
-//    ObjectMapper objectMapper = new ObjectMapper();
-//            try {
-//        JsonNode jsonNode = objectMapper.readTree(json);
-//        JsonNode results = jsonNode.get("results");
-//        nowPagesMovieCrawl(titleAndMovie, results);
-//    }catch (Exception e){
-//        e.printStackTrace();
-//    }
 
     /**
      * 여기부터 진짜 크롤링
@@ -122,6 +107,7 @@ public class MovieCrawlService {
             // 이제 긁어올것 장르, 배우, 감독, 나라, 러닝타임,
             long real_movieId = movieId.longValue();
             try {
+                log.info(movie_Info.get("title") + "go to credit crawl");
                 movieCreditCrawl(movieId, movie_Info);
                 movieDetails(movieId, movie_Info);
             }catch (Exception e){
@@ -147,6 +133,8 @@ public class MovieCrawlService {
 
     private static Movie setMovie(long real_movieId, Map<String, String> movieInfo) {
         log.info("==========\n In setMovie =============");
+        log.info(movieInfo.get("title"));
+        log.info(movieInfo.get("movieActor"));
         Movie movie = Movie.builder().
             title(movieInfo.get("title")).
             movieImg(movieInfo.get("movieImg")).
@@ -169,24 +157,35 @@ public class MovieCrawlService {
         String movieUrl = String.format(
             "https://api.themoviedb.org/3/movie/%d/credits?api_key=%s&language=ko-KR",
             movieId, API_KEY);
-        log.info(movieUrl);
         RestTemplate restTemplate2 = new RestTemplate();
         ResponseEntity<String> creditEntity = restTemplate2.getForEntity(movieUrl, String.class);
         String json2 = creditEntity.getBody();
 
+        log.info("in credit");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
         //JSONObject credits = jsonObject.getJSONObject("credits");
+        log.info(jsonNode.toString());
+        JsonNode jsonNode1 = jsonNode.get("cast");
         JsonNode crew = jsonNode.get("crew");
+        for (JsonNode member : jsonNode1) {
+            log.info(member.toString());
+            if (member.get("known_for_department").asText().equals("Acting")) {
+                if(member.get("name").asText().toString().isEmpty()){
+                    log.info("배우가 비어있다고 합니다?");
+                    log.info(member.toString());
+                }
+                movieInfo.put("movieActor", member.get("name").asText());
+            }
+        }
         for (JsonNode member : crew) {
+            log.info(member.toString());
             if (member.get("job").asText().equals("Director")) {
                 movieInfo.put("movieDirector", member.get("name").asText());
             }
-            if (member.get("known_for_department").asText().equals("Acting")) {
-                movieInfo.put("movieActor", member.get("name").asText());
-            }
-
         }
+
+
     }
 
     private void movieDetails(Integer movieId, Map<String, String> movieInfo)
@@ -316,7 +315,6 @@ public class MovieCrawlService {
 
     private MovieRecommendDto mapMovieToResponseDto(Movie movie) {
         Float averageStarScore = reviewRepository.findAvgScoreByMovieId(movie.getId());
-        //Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId()); // ? 이거 왜 있는거지?
 
         return MovieRecommendDto.builder()
                 .movieId(movie.getId())

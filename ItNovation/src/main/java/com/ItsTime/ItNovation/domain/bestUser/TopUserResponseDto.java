@@ -3,6 +3,8 @@ package com.ItsTime.ItNovation.domain.bestUser;
 
 import com.ItsTime.ItNovation.domain.review.dto.TopUserReviewDto;
 import java.util.List;
+
+import com.ItsTime.ItNovation.domain.user.Grade;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,7 +16,7 @@ public class TopUserResponseDto {
     private String profileImg;
     private String nickName;
     private String introduction;
-    private String grade;
+    private Grade grade;
     private int followers;
     private Long followings;
 
@@ -24,7 +26,7 @@ public class TopUserResponseDto {
 
     @Builder
     public TopUserResponseDto(Long userId, String profileImg, String nickName, String introduction,
-        String grade, int followers, Long followings, List<TopUserReviewDto> reviews) {
+                              Grade grade, int followers, Long followings, List<TopUserReviewDto> reviews) {
         this.userId = userId;
         this.profileImg = profileImg;
         this.nickName = nickName;
