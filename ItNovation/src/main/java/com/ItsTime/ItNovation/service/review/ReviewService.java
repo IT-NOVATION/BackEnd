@@ -3,6 +3,7 @@ package com.ItsTime.ItNovation.service.review;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
+import com.ItsTime.ItNovation.domain.movie.dto.ReviewPostMovieInfoResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewCountResponseDto;
@@ -12,6 +13,7 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,8 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
+  
+    @Transactional
     public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String nowUserEmail) {
         try{
             User nowUser = userRepository.findByEmail(nowUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
@@ -62,7 +66,7 @@ public class ReviewService {
         }
 
     }
-
+    @Transactional
     public ResponseEntity reviewRead(Long reviewId) {
 
         try {
@@ -144,6 +148,28 @@ public class ReviewService {
             .build();
 
         return reviewInfoDto;
+    }
+    @Transactional
+    public ResponseEntity getMovieInfo(Long movieId) {
+        try {
+            Movie findMovie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
+            ReviewPostMovieInfoResponseDto responseDto = buildResponse(
+                movieId, findMovie);
+            return ResponseEntity.status(200).body(responseDto);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    private ReviewPostMovieInfoResponseDto buildResponse(Long movieId,
+        Movie findMovie) {
+        ReviewPostMovieInfoResponseDto responseDto = ReviewPostMovieInfoResponseDto.builder()
+            .movieId(movieId)
+            .movieImg(findMovie.getMovieImg())
+            .title(findMovie.getTitle())
+            .build();
+        return responseDto;
     }
     @Transactional
     public ResponseEntity reviewCount(Long movieId){
