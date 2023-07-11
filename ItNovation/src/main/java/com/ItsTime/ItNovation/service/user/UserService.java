@@ -48,7 +48,7 @@ public class UserService {
                     .email(signUpRequestDto.getEmail())
                     .password(signUpRequestDto.getPassword())
                     .role(Role.GUEST)
-                    .grade(Grade.getDefault().getValue())
+                    .grade(Grade.WELCOME)
                     .build();
 
 

@@ -34,7 +34,8 @@ public class User extends BaseTimeEntity {
     private String bgImg;
     private String profileImg;
     private String refreshToken;
-    private String grade;
+    @Enumerated(value = EnumType.STRING)
+    private Grade grade;
 
     //ReviewLike 엔티티 클래스가 Review 엔티티 클래스의 reviewId 필드를 참조하여 연관관계를 맺고 있다는 것
     @OneToMany(mappedBy = "user")
@@ -66,7 +67,7 @@ public class User extends BaseTimeEntity {
 
 
     @Builder
-    public User(String email, String password, Role role, String nickname, String introduction,   String refreshToken,String bgImg,String profileImg,String grade) {
+    public User(String email, String password, Role role, String nickname, String introduction,   String refreshToken,String bgImg,String profileImg,Grade grade) {
         this.email = email;
         this.password = password;
         this.role = role;
@@ -90,7 +91,6 @@ public class User extends BaseTimeEntity {
         this.introduction = introduction;
         this.profileImg = profileImg;
         this.bgImg = bgImg;
-
         return this;
     }
 
