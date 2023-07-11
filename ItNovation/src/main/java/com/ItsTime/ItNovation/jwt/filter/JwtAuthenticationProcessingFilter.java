@@ -36,7 +36,7 @@ import static org.springframework.security.core.userdetails.User.*;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
-    private static final String NO_CHECK_URL = "/login";
+
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final List<RequestMatcher> specialUrlMatchers; // 특정 URL에 대한 매처
@@ -53,6 +53,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         for (RequestMatcher requestMatcher : specialUrlMatchers) {
             if (requestMatcher.matches(request)) {
+                //TODO: 토큰 필요없는 url 일 경우 다음 필터로 넘어가야하는데 아래코드 실행안되고 return 되는 문제 해결 필요
                 filterChain.doFilter(request, response);
                 return;
             }

@@ -31,12 +31,8 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         jwtService.sendAccessTokenAndRefreshToken(response, accessToken, refreshToken);
 
-        HttpSession session=request.getSession();
-        session.setAttribute("accessToken",accessToken);
-        session.setAttribute("refreshToken",refreshToken);
 
-        String redirectUrl="http://localhost:3000/success"+accessToken+"/"+refreshToken;
-        response.sendRedirect(redirectUrl);
+
         userRepository.findByEmail(email)
                 .ifPresent(user->{
                     user.updateRefreshToken(refreshToken);
