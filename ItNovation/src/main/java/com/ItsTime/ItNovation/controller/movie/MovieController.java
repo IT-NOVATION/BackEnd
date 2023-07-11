@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/test/api/v1/movies")
+@RequestMapping("/movies")
 @Slf4j
 public class MovieController {
 
