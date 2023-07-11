@@ -10,10 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReviewReadRequestDto {
 
-
     private Long reviewId;
-
-
-
 
 }
