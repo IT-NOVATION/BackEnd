@@ -2,21 +2,18 @@ package com.ItsTime.ItNovation.service.push;
 
 
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
-import com.ItsTime.ItNovation.domain.follow.Follower;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.follow.dto.FollowStateResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.PushReviewLikeResponseDto;
-import com.ItsTime.ItNovation.domain.review.dto.PushReviewLikeResponseDto.PushReviewLikeResponseDtoBuilder;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,7 +86,7 @@ public class PushService {
             User pushUser = userRepository.findById(pushUserId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없어요!"));
             User targetUser = userRepository.findById(targetId).orElseThrow(() -> new IllegalArgumentException("해당 팔로우 유저가 없어요!"));
-            Optional<Follower> findByPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
+            Optional<FollowState> findByPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
                 pushUser.getId(), targetUser.getId());
             isSelfFollow(pushUser, targetUser);
             return getFollowStateResponseDtoResponseEntity(pushUser, targetUser,
@@ -104,16 +101,16 @@ public class PushService {
     }
 
     private ResponseEntity<FollowStateResponseDto> getFollowStateResponseDtoResponseEntity(
-        User pushUser, User targetUser, Optional<Follower> findByPushUserAndFollowUser) {
+        User pushUser, User targetUser, Optional<FollowState> findByPushUserAndFollowUser) {
         if(findByPushUserAndFollowUser.isEmpty()){
-            Follower build = getFollower(pushUser, targetUser);
+            FollowState build = getFollower(pushUser, targetUser);
             followRepository.save(build);
             FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
                 .isFollow(true).build();
             return ResponseEntity.status(200).body(followStateResponseDto);
         }
         else{
-            Follower find = findByPushUserAndFollowUser.get();
+            FollowState find = findByPushUserAndFollowUser.get();
             followRepository.delete(find);
             FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
                 .isFollow(false).build();
@@ -121,10 +118,10 @@ public class PushService {
         }
     }
 
-    private static Follower getFollower(User pushUser, User targetUser) {
-        Follower build = Follower.builder()
+    private static FollowState getFollower(User pushUser, User targetUser) {
+        FollowState build = FollowState.builder()
             .pushUser(pushUser)
-            .follower(targetUser)
+            .targetUser(targetUser)
             .build();
         return build;
     }
