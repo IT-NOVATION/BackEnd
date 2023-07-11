@@ -4,6 +4,7 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,4 +26,14 @@ public class Star {
 
     private Float score;
 
+    @Builder
+    public Star( Movie movie, User user, Float score) {
+        this.movie = movie;
+        this.user = user;
+        this.score = score;
+    }
+
+    public void updateScore(Float score) {
+        this.score = score;//이미 해당 영화에 대한 평가를 한 적이 있다면 수정합니다.
+    }
 }

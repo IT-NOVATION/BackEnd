@@ -53,7 +53,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("select count(r) from Review r where r.movie = :movie and r.hasGoodDiction = true")
     int countHasGoodDiction(@Param("movie") Movie movie);
 
-
-
-
+    Long countByMovieId(Long movieId);
 }
