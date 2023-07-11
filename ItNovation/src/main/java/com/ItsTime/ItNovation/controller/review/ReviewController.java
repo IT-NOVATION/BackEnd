@@ -29,9 +29,9 @@ public class ReviewController {
 
     }
 
-    @PostMapping("/Info")
+    @PostMapping("/Info") // getMapping 으로 변경 -> id값 넘겨주기
     public ResponseEntity reviewRead(@RequestBody ReviewReadRequestDto reviewReadRequestDto){
-
+        log.info(reviewReadRequestDto.toString());
         Long reviewId = reviewReadRequestDto.getReviewId();
         return reviewService.reviewRead(reviewId);
     }

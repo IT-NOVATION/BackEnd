@@ -17,7 +17,7 @@ public class PushController {
     private final PushService pushService;
 
 
-    @GetMapping("/reviewlike")
+    @GetMapping("/reviewlike") //userId 빼기
     public ResponseEntity pushReviewLike(@RequestParam(name="reviewId") Long reviewId, @RequestParam(name="userId") Long userId){
         log.info(reviewId.toString());
         log.info(userId.toString());
@@ -31,12 +31,13 @@ public class PushController {
      * 2. follow 테이블이 존재하는데 해제하고 싶은 case
      * @return response
      */
-    @GetMapping("/follow")
+    @GetMapping("/follow") //userId 빼기
     public ResponseEntity pushFollow(@RequestParam(name="pushUserId") Long pushUserId, @RequestParam(name="targetUserId") Long targetId){
         return pushService.pushFollow(pushUserId, targetId);
     }
 
-    @GetMapping("/movieLike")
+
+    @GetMapping("/movieLike") // usdrId 빼기
     public ResponseEntity pushMovieLike(@RequestBody MovieLikeRequestDto movieLikeRequestDto){
         Long userId = movieLikeRequestDto.getUserId();
         Long movieId = movieLikeRequestDto.getMovieId();

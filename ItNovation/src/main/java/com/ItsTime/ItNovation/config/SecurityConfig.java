@@ -69,8 +69,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
 
                 //TODO: 사용자 토큰 확인이 필요한 엔드포인트는 .authenticated() 아닌 경우 permitAll에 등록해주세요
+
                 .requestMatchers("/oauth2/**","/css/**", "/images/**", "/test/**","/js/**").permitAll()
-                .requestMatchers("/signup","/userProfile","/movies","/review", "/review/Info", "today/**").permitAll()
+                .requestMatchers("/signup","/userProfile","/movies","/review", "/review/Info", "today/**", "single/**").permitAll()
+
                 .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
 
