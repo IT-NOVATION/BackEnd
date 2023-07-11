@@ -14,7 +14,7 @@ import java.security.PublicKey;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/test/single")
+@RequestMapping("/single")
 public class SingleController {
 
     private final StarService starService;
