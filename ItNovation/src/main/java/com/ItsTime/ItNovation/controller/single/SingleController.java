@@ -11,14 +11,22 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.PublicKey;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+
 @RequestMapping("/single")
 public class SingleController {
 
     private final StarService starService;
     private final ReviewService reviewService;
+
+
 
     @PostMapping("/starEvaluate")
     public ResponseEntity singleStarEvaluate(@RequestBody SingleStarEvaluateRequestDto singleStarEvaluateRequestDto){
@@ -31,4 +39,5 @@ public class SingleController {
     public ResponseEntity reviewCount(@PathVariable Long movieId){
         return reviewService.reviewCount(movieId);
     }
+
 }
