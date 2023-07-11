@@ -23,14 +23,14 @@ public class PushController {
     private final UserRepository userRepository;
 
 
-    @GetMapping("/reviewlike") //userId 빼기
+    @GetMapping("/reviewlike")
     public ResponseEntity pushReviewLike(@RequestParam(name="reviewId") Long reviewId, Authentication authentication){
         try {
             User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new IllegalArgumentException("hi"));
+                .orElseThrow(() -> new IllegalArgumentException("no user"));
             return pushService.pushReviewLike(reviewId, user.getId());
         }catch (IllegalArgumentException e){
-            return ResponseEntity.status(400).body(null);
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
@@ -40,26 +40,26 @@ public class PushController {
      * 2. follow 테이블이 존재하는데 해제하고 싶은 case
      * @return response
      */
-    @GetMapping("/follow") //userId 빼기
+    @GetMapping("/follow")
     public ResponseEntity pushFollow(@RequestParam(name="targetUserId") Long targetId, Authentication authentication){
         try {
             User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new IllegalArgumentException("hi"));
+                .orElseThrow(() -> new IllegalArgumentException("no user"));
             return pushService.pushFollow(user.getId(), targetId);
         }catch (IllegalArgumentException e){
-            return ResponseEntity.status(400).body(null);
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
 
-    @GetMapping("/movieLike") // usdrId 빼기
+    @GetMapping("/movieLike")
     public ResponseEntity pushMovieLike(@RequestParam Long movieId, Authentication authentication) {
         try {
             User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new IllegalArgumentException("hi"));
+                .orElseThrow(() -> new IllegalArgumentException("no user"));
             return pushService.pushMovieLike(user.getId(), movieId);
         }catch (IllegalArgumentException e){
-            return ResponseEntity.status(400).body(null);
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 }
