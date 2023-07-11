@@ -51,6 +51,7 @@ public class SecurityConfig {
 
 
     List<RequestMatcher> specialUrlMatchers = Arrays.asList(
+
             new AntPathRequestMatcher("/login/**")
     );
 
