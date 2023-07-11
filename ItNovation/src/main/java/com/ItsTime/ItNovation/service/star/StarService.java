@@ -46,6 +46,6 @@ public class StarService {
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.OK).body(200);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }
