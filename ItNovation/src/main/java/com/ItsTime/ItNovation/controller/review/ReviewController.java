@@ -1,6 +1,5 @@
 package com.ItsTime.ItNovation.controller.review;
 
-import com.ItsTime.ItNovation.domain.review.dto.ReviewPostMovieInfoRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
