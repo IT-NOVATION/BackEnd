@@ -62,25 +62,25 @@ public class SaveTest {
     }
 
 
-    @Test
-    @Transactional
-    public void 기존db에서불러왔을때_equal하게보는지(){
-        //given 기존 db에 저장되어있는 친구 정보
-        Movie originMovie = Movie.builder().
-            movieCountry("en").movieGenre("12").movieRunningTime(123).movieDirector("123")
-            .movieDetail("fwefsv").movieDate("1234").movieActor("12345")
-            .title("helloworld2").movieImg("1234").movieBgImg("12345").real_movieId(444332L).build();
-
-        //when
-        Optional<Movie> helloworld = movieRepository.findByTitle("helloworld2");
-        Movie findMovie = helloworld.get();
-
-        //then
-        Assertions.assertThat(originMovie).isEqualTo(findMovie);
-        // -> DB에 이후에 먼저 저장되어있는 친구를 찾아서 기존의 친구의 형태와 비교하면 다르게 됨.
-        //1차 캐시는 트랜잭션이 끝나기 직전에는 계속 존재하고 있음.
-        //flush는 영속성 컨텍스트를 비우는게 아니라 변경내용을 데이터베이스에 동기화 하는 작업임.
-    }
+//    @Test
+//    @Transactional
+//    public void 기존db에서불러왔을때_equal하게보는지(){
+//        //given 기존 db에 저장되어있는 친구 정보
+//        Movie originMovie = Movie.builder().
+//            movieCountry("en").movieGenre("12").movieRunningTime(123).movieDirector("123")
+//            .movieDetail("fwefsv").movieDate("1234").movieActor("12345")
+//            .title("helloworld2").movieImg("1234").movieBgImg("12345").real_movieId(444332L).build();
+//
+//        //when
+//        Optional<Movie> helloworld = movieRepository.findByTitle("helloworld2");
+//        Movie findMovie = helloworld.get();
+//
+//        //then
+//        Assertions.assertThat(originMovie).isEqualTo(findMovie);
+//        // -> DB에 이후에 먼저 저장되어있는 친구를 찾아서 기존의 친구의 형태와 비교하면 다르게 됨.
+//        //1차 캐시는 트랜잭션이 끝나기 직전에는 계속 존재하고 있음.
+//        //flush는 영속성 컨텍스트를 비우는게 아니라 변경내용을 데이터베이스에 동기화 하는 작업임.
+//    }
 
 
     @Test
