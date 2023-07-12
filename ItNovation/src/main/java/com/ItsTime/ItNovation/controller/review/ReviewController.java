@@ -1,6 +1,5 @@
 package com.ItsTime.ItNovation.controller.review;
 
-import com.ItsTime.ItNovation.domain.review.dto.ReviewPostMovieInfoRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
@@ -29,10 +28,8 @@ public class ReviewController {
 
     }
 
-    @PostMapping("/Info")
-    public ResponseEntity reviewRead(@RequestBody ReviewReadRequestDto reviewReadRequestDto){
-
-        Long reviewId = reviewReadRequestDto.getReviewId();
+    @GetMapping("/Info/{reviewId}") // getMapping 으로 변경 -> id값 넘겨주기
+    public ResponseEntity reviewRead(@PathVariable Long reviewId){
         return reviewService.reviewRead(reviewId);
     }
 

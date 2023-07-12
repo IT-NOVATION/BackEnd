@@ -11,18 +11,22 @@ public interface FollowRepository extends JpaRepository<FollowState, Long> {
 
     Optional<FollowState> findByPushUser(User user);
 
-    @Query("Select f from FollowState  f where f.pushUser.id=:pushUser and f.follower.id=:targetUser")
+
+
+    @Query("Select f from FollowState  f where f.pushUser.id=:pushUser and f.targetUser.id=:targetUser")
     Optional<FollowState> findByPushUserAndFollowUser(@Param("pushUser") Long pushUserId, @Param("targetUser") Long targetUserId);
 
 
-    @Query("delete FollowState f where f.pushUser.id=:pushUser and f.follower.id=:targetUser")
+    @Query("delete FollowState f where f.pushUser.id=:pushUser and f.targetUser.id=:targetUser")
     void deleteByPushUserAndFollowUser(@Param("pushUser") Long pushUserId, @Param("targetUser") Long targetUserId);
 
 
 
     Optional<FollowState> findById(Long id);
 
-    @Query("select count(*) from FollowState f where f.follower.id=:userId")
+
+
+    @Query("select count(*) from FollowState f where f.targetUser.id=:userId")
     Long countByFollowedUserId(@Param("userId") Long userId);
 
 
