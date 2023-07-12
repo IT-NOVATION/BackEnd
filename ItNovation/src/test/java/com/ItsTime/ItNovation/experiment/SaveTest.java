@@ -97,7 +97,7 @@ public class SaveTest {
         Optional<Movie> helloworld = movieRepository.findByTitle("helloworld2");
         Movie findMovie = helloworld.get();
         Long findMovieId = findMovie.getId();
-        findMovie.setMovieCountry("china");
+        //findMovie.setMovieCountry("china");
         movieRepository.save(findMovie); // 이렇게 하면 변경이 진행됨.
         //then
         Optional<Movie> checkMovie = movieRepository.findById(findMovieId);
