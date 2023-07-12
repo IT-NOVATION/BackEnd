@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class StarService {
     private final MovieRepository movieRepository;
 
 
+    @Transactional
     public ResponseEntity singleStarEvaluate(@RequestBody SingleStarEvaluateRequestDto singleStarEvaluateRequestDto){
         try{
             User user = userRepository.findById(singleStarEvaluateRequestDto.getUserId())
@@ -48,4 +50,5 @@ public class StarService {
         }
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
 }
