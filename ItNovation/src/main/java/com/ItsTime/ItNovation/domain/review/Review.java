@@ -25,7 +25,10 @@ public class Review extends BaseTimeEntity {
 
     private String reviewTitle;
 
+
+    @Column(columnDefinition = "LONGTEXT")
     private String reviewMainText;
+
     private Boolean hasGoodStory;
 
     private Boolean hasGoodProduction;

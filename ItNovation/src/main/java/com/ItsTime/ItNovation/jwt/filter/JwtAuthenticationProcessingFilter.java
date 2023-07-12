@@ -36,7 +36,7 @@ import static org.springframework.security.core.userdetails.User.*;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
-    private static final String NO_CHECK_URL = "/login";
+
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final List<RequestMatcher> specialUrlMatchers; // 특정 URL에 대한 매처
@@ -53,6 +53,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         for (RequestMatcher requestMatcher : specialUrlMatchers) {
             if (requestMatcher.matches(request)) {
+                //TODO: 토큰 필요없는 url 일 경우 다음 필터로 넘어가야하는데 아래코드 실행안되고 return 되는 문제 해결 필요
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -154,10 +155,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         } else {
             //토큰 존재하지 않는 경우
             log.info("엑세스 토큰 헤더에 없음");
-            String requestURI = request.getRequestURI();
-            if (!requestURI.contains("/oauth2")) {
-                throw new JwtException(JwtErrorCode.UNKNOWN_TOKEN.getMessage());
-            }
+
 
         }
         response.setStatus(HttpServletResponse.SC_OK);

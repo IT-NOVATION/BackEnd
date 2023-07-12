@@ -11,7 +11,7 @@ public enum Grade {
     GOLD("GOLD"),
     VIP("VIP");
 
-    private final String value;
+    private final String key;
 
 
     public static Grade getDefault() {

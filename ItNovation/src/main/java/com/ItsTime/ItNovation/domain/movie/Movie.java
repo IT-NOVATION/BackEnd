@@ -11,6 +11,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -19,9 +20,8 @@ import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 public class Movie {
 //[adult, backdrop_path, id, original_language, overview, popularity, release_date, title,  vote_average, vote_count]
 
@@ -75,6 +75,20 @@ public class Movie {
         this.movieCountry = movieCountry;
         this.movieDetail = movieDetail;
         this.movieRunningTime = movieRunningTime;
+    }
+
+    public void updateMovie(Movie newInfoMovie){
+        this.real_movieId = newInfoMovie.real_movieId;
+        this.title = newInfoMovie.title;
+        this.movieImg = newInfoMovie.movieImg;
+        this.movieBgImg = newInfoMovie.movieBgImg;
+        this.movieActor = newInfoMovie.movieActor;
+        this.movieDirector = newInfoMovie.movieDirector;
+        this.movieDate = newInfoMovie.movieDate;
+        this.movieGenre = newInfoMovie.movieGenre;
+        this.movieCountry = newInfoMovie.movieCountry;
+        this.movieDetail = newInfoMovie.movieDetail;
+        this.movieRunningTime = newInfoMovie.movieRunningTime;
     }
 
 
