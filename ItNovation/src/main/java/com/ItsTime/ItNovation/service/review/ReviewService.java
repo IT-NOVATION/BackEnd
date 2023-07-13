@@ -6,13 +6,13 @@ import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewPostMovieInfoResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewCountResponseDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
+import com.ItsTime.ItNovation.domain.review.dto.*;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -183,5 +183,29 @@ public class ReviewService {
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+    }
+
+    public ResponseEntity<List<LatestReviewResponseDto>> getLatestReviews() {
+        List<Review> latestReviews = reviewRepository.findTop3ByOrderByCreatedDateDesc();
+        List<LatestReviewResponseDto> responseDtoList = new ArrayList<>();
+        for (Review review : latestReviews) {
+            User user = review.getUser();
+            Movie movie = review.getMovie();
+
+            LatestReviewResponseDto responseDto = LatestReviewResponseDto.builder()
+                    .userId(user.getId())
+                    .profileImg(user.getProfileImg())
+                    .nickname(user.getNickname())
+                    .introduction(user.getIntroduction())
+                    .reviewId(review.getReviewId())
+                    .reviewTitle(review.getReviewTitle())
+                    .movieId(movie.getId())
+                    .movieImg(movie.getMovieImg())
+                    .build();
+
+            responseDtoList.add(responseDto);
+        }
+
+        return ResponseEntity.ok(responseDtoList);
     }
 }
