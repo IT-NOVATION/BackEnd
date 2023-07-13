@@ -54,4 +54,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     int countHasGoodDiction(@Param("movie") Movie movie);
 
     Long countByMovieId(Long movieId);
+
+    List<Review> findTop3ByOrderByCreatedDateDesc();
 }
