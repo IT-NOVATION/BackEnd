@@ -206,6 +206,11 @@ public class ReviewService {
             responseDtoList.add(responseDto);
         }
 
-        return ResponseEntity.ok(responseDtoList);
+        if (responseDtoList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(responseDtoList);
+        } else {
+            return ResponseEntity.ok(responseDtoList);
+        }
     }
+
 }
