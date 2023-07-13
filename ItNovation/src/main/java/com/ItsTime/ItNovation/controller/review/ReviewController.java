@@ -1,9 +1,7 @@
 package com.ItsTime.ItNovation.controller.review;
 
-import com.ItsTime.ItNovation.domain.review.dto.ReviewPostMovieInfoRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadRequestDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
