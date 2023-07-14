@@ -3,6 +3,8 @@ package com.ItsTime.ItNovation.domain.review.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class LatestReviewResponseDto {
 
@@ -10,20 +12,14 @@ public class LatestReviewResponseDto {
     private String profileImg;
     private String nickname;
     private String introduction;
-    private Long reviewId;
-    private String reviewTitle;
-    private Long movieId;
-    private String movieImg;
+    private List<LatestReviewDto> reviews;
 
     @Builder
-    public LatestReviewResponseDto(Long userId, String profileImg, String nickname, String introduction, Long reviewId, String reviewTitle, Long movieId, String movieImg) {
+    public LatestReviewResponseDto(Long userId, String profileImg, String nickname, String introduction, List<LatestReviewDto> reviews) {
         this.userId = userId;
         this.profileImg = profileImg;
         this.nickname = nickname;
         this.introduction = introduction;
-        this.reviewId = reviewId;
-        this.reviewTitle = reviewTitle;
-        this.movieId = movieId;
-        this.movieImg = movieImg;
+        this.reviews = reviews;
     }
 }
