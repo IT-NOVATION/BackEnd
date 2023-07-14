@@ -17,7 +17,7 @@ import java.util.List;
 public class MovieSearchController {
     private final MovieSearchService movieSearchService;
 
-    @PostMapping("/test/search/movie")
+    @PostMapping("/search/movie")
     public List<MoviePopularDto> searchMoviesByTitle(@RequestBody MovieSearchRequestDto searchDto) {
         System.out.println("searchDto.toString() = " + searchDto.toString());;
         return movieSearchService.searchMoviesByTitle(searchDto);
