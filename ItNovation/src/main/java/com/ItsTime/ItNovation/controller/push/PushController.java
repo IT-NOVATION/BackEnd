@@ -2,10 +2,15 @@ package com.ItsTime.ItNovation.controller.push;
 
 
 import com.ItsTime.ItNovation.domain.movieLike.dto.MovieLikeRequestDto;
+import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.push.PushService;
+import com.ItsTime.ItNovation.service.user.UserService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,14 +20,18 @@ import org.springframework.web.bind.annotation.*;
 public class PushController {
 
     private final PushService pushService;
+    private final UserRepository userRepository;
 
 
     @GetMapping("/reviewlike")
-    public ResponseEntity pushReviewLike(@RequestParam(name="reviewId") Long reviewId, @RequestParam(name="userId") Long userId){
-        log.info(reviewId.toString());
-        log.info(userId.toString());
-
-        return pushService.pushReviewLike(reviewId, userId);
+    public ResponseEntity pushReviewLike(@RequestParam(name="reviewId") Long reviewId, Authentication authentication){
+        try {
+            User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("no user"));
+            return pushService.pushReviewLike(reviewId, user.getId());
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
 
 
@@ -32,14 +41,25 @@ public class PushController {
      * @return response
      */
     @GetMapping("/follow")
-    public ResponseEntity pushFollow(@RequestParam(name="pushUserId") Long pushUserId, @RequestParam(name="targetUserId") Long targetId){
-        return pushService.pushFollow(pushUserId, targetId);
+    public ResponseEntity pushFollow(@RequestParam(name="targetUserId") Long targetId, Authentication authentication){
+        try {
+            User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("no user"));
+            return pushService.pushFollow(user.getId(), targetId);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
 
+
     @GetMapping("/movieLike")
-    public ResponseEntity pushMovieLike(@RequestBody MovieLikeRequestDto movieLikeRequestDto){
-        Long userId = movieLikeRequestDto.getUserId();
-        Long movieId = movieLikeRequestDto.getMovieId();
-        return pushService.pushMovieLike(userId, movieId);
+    public ResponseEntity pushMovieLike(@RequestParam Long movieId, Authentication authentication) {
+        try {
+            User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("no user"));
+            return pushService.pushMovieLike(user.getId(), movieId);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
-    Optional<Movie> findByTitle(String title);
+    Optional<Movie> findByTitle(String title); // 문제 발견 고치기
 
     List<Movie> findByTitleContaining(String keyword);//검색된 영화 배열 방식으로 끌어오기 위해 추가
 

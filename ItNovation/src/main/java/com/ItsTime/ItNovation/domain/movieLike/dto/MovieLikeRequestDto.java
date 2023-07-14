@@ -4,6 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class MovieLikeRequestDto {
-    private Long userId;
     private Long movieId;
 }

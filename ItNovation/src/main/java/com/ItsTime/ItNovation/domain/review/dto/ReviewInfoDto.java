@@ -22,6 +22,7 @@ public class ReviewInfoDto {
     private Boolean hasCheckDate;
     private Boolean hasSpoiler;
     private String watchDate;
+    // reviewLikeNum 추가해야함.
 
 
     @Builder
