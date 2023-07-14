@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.service.review;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.dto.LatestReviewMovieResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewPostMovieInfoResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
@@ -14,8 +15,11 @@ import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -185,32 +189,29 @@ public class ReviewService {
         }
     }
 
-    public ResponseEntity<List<LatestReviewResponseDto>> getLatestReviews() {
-        List<Review> latestReviews = reviewRepository.findTop3ByOrderByCreatedDateDesc();
-        List<LatestReviewResponseDto> responseDtoList = new ArrayList<>();
-        for (Review review : latestReviews) {
-            User user = review.getUser();
-            Movie movie = review.getMovie();
+    public List<LatestReviewResponseDto> getLatestReviews() {
+        List<User> recentReviewers = reviewRepository.findNewestReview(PageRequest.of(0, 3));
+        return recentReviewers.stream().map(recentReviewer -> {
+            List<LatestReviewDto> reviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 3))
+                    .stream()
+                    .map(review -> LatestReviewDto.builder()
+                            .reviewId(review.getReviewId())
+                            .reviewTitle(review.getReviewTitle())
+                            .movie(LatestReviewMovieResponseDto.builder()
+                                    .movieId(review.getMovie().getId())
+                                    .movieImg(review.getMovie().getMovieImg())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList());
 
-            LatestReviewResponseDto responseDto = LatestReviewResponseDto.builder()
-                    .userId(user.getId())
-                    .profileImg(user.getProfileImg())
-                    .nickname(user.getNickname())
-                    .introduction(user.getIntroduction())
-                    .reviewId(review.getReviewId())
-                    .reviewTitle(review.getReviewTitle())
-                    .movieId(movie.getId())
-                    .movieImg(movie.getMovieImg())
+            return LatestReviewResponseDto.builder()
+                    .userId(recentReviewer.getId())
+                    .profileImg(recentReviewer.getProfileImg())
+                    .nickname(recentReviewer.getNickname())
+                    .introduction(recentReviewer.getIntroduction())
+                    .reviews(reviews)
                     .build();
-
-            responseDtoList.add(responseDto);
-        }
-
-        if (responseDtoList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(responseDtoList);
-        } else {
-            return ResponseEntity.ok(responseDtoList);
-        }
+        }).collect(Collectors.toList());
     }
 
 }
