@@ -2,6 +2,8 @@ package com.ItsTime.ItNovation.domain.review;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import java.util.List;
+
+import com.ItsTime.ItNovation.domain.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -55,5 +57,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Long countByMovieId(Long movieId);
 
-    List<Review> findTop3ByOrderByCreatedDateDesc();
+    @Query("SELECT r.user FROM Review r ORDER BY r.createdDate DESC")
+    List<User> findNewestReview(Pageable pageable);
 }
