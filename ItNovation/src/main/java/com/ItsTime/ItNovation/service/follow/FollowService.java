@@ -38,4 +38,19 @@ public class FollowService {
         return null;
     }
 
+    @Transactional
+    public List<User> getFollowingsByUserId(Long userId) {
+        Optional<User> findUser = userRepository.findById(userId);
+        try {
+            if (findUser.isEmpty()) {
+                throw new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage());
+            } else {
+                List<User> FollowingList = followRepository.findFollowingsByUserId(findUser.get().getId());
+                return FollowingList;
+            }
+        } catch (IllegalArgumentException e) {
+            log.info(e.getMessage());
+        }
+        return null;
+    }
 }
