@@ -32,6 +32,7 @@ public class TodayBestReviewService {
     @Transactional
     public ResponseEntity getBestReviewAndUser() {
         Pageable pageable = PageRequest.of(0, 3);
+
         List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable);
         try {

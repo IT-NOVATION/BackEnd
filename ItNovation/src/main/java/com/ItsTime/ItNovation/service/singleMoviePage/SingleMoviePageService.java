@@ -38,6 +38,7 @@ public class SingleMoviePageService {
     private final MovieLikeRepository movieLikeRepository;
 
 
+
     @Transactional
     public ResponseEntity getReviewInformationAboutMovie(Long movieId) {
 
@@ -45,11 +46,9 @@ public class SingleMoviePageService {
             Movie findMovie = movieRepository.findByMovieId(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
 
-
             List<Review> reviewList =
                 reviewRepository.findAllByMovie(findMovie);
             List<SingleMoviePageReviewAndUserDto> singleMoviePageReviewAndUserDtos = new LinkedList<>();
-
 
             for (Review review : reviewList) {
                 SingleMoviePageReviewAndUserDto reviewAndUserInfoDto = SingleMoviePageReviewAndUserDto.builder()
@@ -89,12 +88,12 @@ public class SingleMoviePageService {
             .movieLikeCount(movieLikeRepository.countMovieLike(movie))
             .movieRunningTime(movie.getMovieRunningTime())
             .movieReleasedDate(movie.getMovieDate())
-            .top3HasFeature(fineTop3Feature(movie))
+            .top3HasFeature(findTop3Feature(movie))
             .build();
         return singleMoviePageMovieInfoDto;
     }
 
-    private MovieFeatureDto fineTop3Feature(Movie movie) {  // 여기 코드 너무 고정적임 유동적이질 않음. ㅠㅠ 유동성있도록 기획에게 물어보고 변경해야 할 부분
+    private MovieFeatureDto findTop3Feature(Movie movie) {  // 여기 코드 너무 고정적임 유동적이질 않음. ㅠㅠ 유동성있도록 기획에게 물어보고 변경해야 할 부분
         Map<String, Integer> featureCountMap = new HashMap<>();
         MovieFeatureDto featureCount = getFeatureCount(featureCountMap, movie);
 
@@ -112,6 +111,7 @@ public class SingleMoviePageService {
         featureCountMap.put("hasGoodCharacterCharming", reviewRepository.countHasGoodCharacterCharming(movie));
         featureCountMap.put("hasGoodDiction", reviewRepository.countHasGoodDiction(movie));
         featureCountMap.put("hasGoodStory", reviewRepository.countHasGoodStory(movie));
+
         List<Map.Entry<String, Integer>> entryList = new ArrayList<>(featureCountMap.entrySet());
         Collections.sort(entryList, (entry1, entry2) -> {
             return entry2.getValue().compareTo(entry1.getValue()); // 내림차순 정렬
@@ -123,6 +123,9 @@ public class SingleMoviePageService {
             String key = entry.getKey();
             Integer value = entry.getValue();
             System.out.println("Key: " + key + ", Value: " + value);
+            if(value==0){
+                continue;
+            }
             topFeatureList.add(key);
         }
 

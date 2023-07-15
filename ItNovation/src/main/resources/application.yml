@@ -12,7 +12,8 @@ spring:
   profiles:
     include:
       - oauth
-      - ttkey
+      - key
       - jwt
       - mail
+      - key
     active: prod

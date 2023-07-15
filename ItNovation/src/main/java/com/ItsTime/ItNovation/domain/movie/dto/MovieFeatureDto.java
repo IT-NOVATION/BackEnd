@@ -1,5 +1,7 @@
 package com.ItsTime.ItNovation.domain.movie.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -31,7 +31,9 @@ public class TopKeywordService {
 
         try {
             Movie movie = movieRepository.findById(movieId)
+
                     .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
+
 
             MovieFeatureDto featureCount = getFeatureCount(featureCountMap, movie);
             return ResponseEntity.status(200).body(featureCount);
@@ -41,7 +43,9 @@ public class TopKeywordService {
     }
 
     private MovieFeatureDto getFeatureCount(Map<String, Integer> featureCountMap,
-                                            Movie movie) {
+
+        Movie movie) {
+
         featureCountMap.put("hasGoodActing", reviewRepository.countHasGoodActing(movie));
         featureCountMap.put("hasGoodScenario", reviewRepository.countHasGoodScenario(movie));
         featureCountMap.put("hasGoodDirecting", reviewRepository.countHasGoodDirecting(movie));
@@ -71,10 +75,14 @@ public class TopKeywordService {
         }
 
         MovieFeatureDto top3Feature = MovieFeatureDto.builder()
+
                 .topKeywordList(topFeatureList)
                 .build();
+
 
         return top3Feature;
     }
 
+
 }
+

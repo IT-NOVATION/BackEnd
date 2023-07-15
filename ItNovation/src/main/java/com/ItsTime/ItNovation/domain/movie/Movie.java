@@ -50,6 +50,7 @@ public class Movie {
     private String movieDate;
     private String movieGenre;
     private String movieCountry;
+    private String movieAudit;
     @Column(columnDefinition = "LONGTEXT")
     private String movieDetail;
     private Integer movieRunningTime;
@@ -63,7 +64,7 @@ public class Movie {
     public Movie(Long real_movieId, String title, String movieImg, String movieBgImg,
         String movieActor,
         String movieDirector, String movieDate, String movieGenre, String movieCountry,
-        String movieDetail, Integer movieRunningTime) {
+        String movieDetail, Integer movieRunningTime, String movieAudit) {
         this.real_movieId = real_movieId;
         this.title = title;
         this.movieImg = movieImg;
@@ -75,6 +76,7 @@ public class Movie {
         this.movieCountry = movieCountry;
         this.movieDetail = movieDetail;
         this.movieRunningTime = movieRunningTime;
+        this.movieAudit = movieAudit;
     }
 
     public void updateMovie(Movie newInfoMovie){
@@ -89,6 +91,7 @@ public class Movie {
         this.movieCountry = newInfoMovie.movieCountry;
         this.movieDetail = newInfoMovie.movieDetail;
         this.movieRunningTime = newInfoMovie.movieRunningTime;
+        this.movieAudit = newInfoMovie.movieAudit;
     }
 
 
