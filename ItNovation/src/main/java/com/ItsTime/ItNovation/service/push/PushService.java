@@ -14,6 +14,7 @@ import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.PushReviewLikeResponseDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
+import com.ItsTime.ItNovation.domain.reviewLike.dto.ReviewLikeRequestDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import java.util.Optional;
@@ -35,15 +36,14 @@ public class PushService {
     private final MovieLikeRepository movieLikeRepository;
 
     @Transactional
-    public ResponseEntity pushReviewLike(Long reviewId, Long pushUserId) {
+    public ResponseEntity pushReviewLike(ReviewLikeRequestDto reviewLikeRequestDto, User findUser) {
         try {
-            Review review = reviewRepository.findById(reviewId)
+            log.info(reviewLikeRequestDto.getReviewId().toString());
+            Review review = reviewRepository.findById(reviewLikeRequestDto.getReviewId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없어요!"));
-            User user = userRepository.findById(pushUserId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없어요!"));
             Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByReviewIdAndUserId(
-                pushUserId, reviewId);
-            return getPushReviewLikeResponseDtoResponseEntity(review, user, reviewLike);
+                    findUser.getId(), reviewLikeRequestDto.getReviewId());
+            return getPushReviewLikeResponseDtoResponseEntity(review, findUser, reviewLike);
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(400).body(e.getMessage());
         }
@@ -88,6 +88,7 @@ public class PushService {
         return build;
     }
 
+    @Transactional
     public ResponseEntity pushFollow(Long pushUserId, Long targetId) {
         try {
             User pushUser = userRepository.findById(pushUserId)

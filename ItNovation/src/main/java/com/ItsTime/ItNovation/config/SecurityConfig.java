@@ -52,8 +52,25 @@ public class SecurityConfig {
 
     List<RequestMatcher> specialUrlMatchers = Arrays.asList(
 
-            new AntPathRequestMatcher("/login/**")
-    );
+            // CustomJsonUsernamePasswordAuthenticationFilter 가 토큰 검증 이후의 필터이기에 여기에 등록
+            new AntPathRequestMatcher("/login/**"),
+            new AntPathRequestMatcher("/signup"),
+            new AntPathRequestMatcher("/userProfile"),
+            new AntPathRequestMatcher("/test/**"),
+            new AntPathRequestMatcher("/oauth2/**"),
+            new AntPathRequestMatcher("/loginState/**"),
+            new AntPathRequestMatcher("/movies/**"),
+            new AntPathRequestMatcher("/search/**"),
+            new AntPathRequestMatcher("/today/**"),
+            new AntPathRequestMatcher("/single/moviePage/**"),
+            new AntPathRequestMatcher("/review/Info/**"),
+            new AntPathRequestMatcher("/top/**"),
+            new AntPathRequestMatcher("/single/movie/reviewCount/**")
+
+
+
+
+            );
 
 
     //HttpSecurity 객체를 사용하여 Spring Security의 인증 및 권한 부여 규칙을 정의
@@ -68,10 +85,10 @@ public class SecurityConfig {
                 //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
 
-                //TODO: 사용자 토큰 확인이 필요한 엔드포인트는 .authenticated() 아닌 경우 permitAll에 등록해주세요
-
                 .requestMatchers("/oauth2/**","/css/**", "/images/**", "/test/**","/js/**").permitAll()
-                .requestMatchers("/signup","/userProfile","/movies/**","/review", "/review/Info", "today/**", "single/**", "/search/**" ).permitAll()
+                //TODO: 토큰 검증 필요없는 것은 위의 specialUrlMatchers 랑 아래 permitAll 에 등록 필수
+//                .requestMatchers("/signup","/userProfile","/movies","/review", "/review/Info", "today/**","/loginState").permitAll()
+                .requestMatchers(specialUrlMatchers.toArray(new RequestMatcher[0])).permitAll()
 
                 .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
