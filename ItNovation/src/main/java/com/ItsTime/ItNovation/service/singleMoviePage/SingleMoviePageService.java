@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -37,6 +38,7 @@ public class SingleMoviePageService {
     private final MovieLikeRepository movieLikeRepository;
 
 
+    @Transactional
     public ResponseEntity getReviewInformationAboutMovie(Long movieId) {
 
         try {
@@ -109,7 +111,7 @@ public class SingleMoviePageService {
         featureCountMap.put("hasGoodProduction", reviewRepository.countHasGoodProduction(movie));
         featureCountMap.put("hasGoodCharacterCharming", reviewRepository.countHasGoodCharacterCharming(movie));
         featureCountMap.put("hasGoodDiction", reviewRepository.countHasGoodDiction(movie));
-
+        featureCountMap.put("hasGoodStory", reviewRepository.countHasGoodStory(movie));
         List<Map.Entry<String, Integer>> entryList = new ArrayList<>(featureCountMap.entrySet());
         Collections.sort(entryList, (entry1, entry2) -> {
             return entry2.getValue().compareTo(entry1.getValue()); // 내림차순 정렬
@@ -125,9 +127,8 @@ public class SingleMoviePageService {
         }
 
         MovieFeatureDto top3Feature = MovieFeatureDto.builder()
-            .top1Feature(topFeatureList.get(0))
-            .top2Feature(topFeatureList.get(1))
-            .top3Feature(topFeatureList.get(2)).build();
+            .topKeywordList(topFeatureList)
+            .build();
 
         return top3Feature;
     }
