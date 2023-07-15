@@ -15,4 +15,5 @@ spring:
       - ttkey
       - jwt
       - mail
+      - key
     active: prod
