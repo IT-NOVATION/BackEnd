@@ -34,7 +34,7 @@ public class StarService {
             if (existingStar.isPresent()) {//존재하면, 스타 스코어만 업데이트
 
                 Star star = existingStar.get();
-                star.updateScore(singleStarEvaluateDto.getStarScore());
+                star.updateScore(singleStarEvaluateRequestDto.getStarScore());
                 starRepository.save(star);
 
             } else {//존재하지 않는다면, 새롭게 생성
