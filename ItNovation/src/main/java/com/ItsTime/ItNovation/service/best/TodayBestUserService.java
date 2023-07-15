@@ -37,7 +37,7 @@ public class TodayBestUserService {
      */
     public ResponseEntity getBestUserInfo() {
         Pageable pageable = PageRequest.of(0, 5);
-        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(yesterday,
+        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable); // -> 이거 전날 기준으로 고쳐야 함!
         System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
 
