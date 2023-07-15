@@ -25,30 +25,37 @@ public class StarService {
 
 
     @Transactional
-    public ResponseEntity singleStarEvaluate(@RequestBody SingleStarEvaluateRequestDto singleStarEvaluateRequestDto){
+    public ResponseEntity singleStarEvaluate(SingleStarEvaluateRequestDto singleStarEvaluateRequestDto,User findUser){
         try{
-            User user = userRepository.findById(singleStarEvaluateRequestDto.getUserId())
-                    .orElseThrow(()-> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
             Movie movie = movieRepository.findById(singleStarEvaluateRequestDto.getMovieId())
-                    .orElseThrow(()-> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
-            Optional<Star> existingStar = starRepository.findByUserAndMovie(user, movie);
-            if(existingStar.isPresent()) {//존재하면, 스타 스코어만 업데이트
+                    .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
+            Optional<Star> existingStar = starRepository.findByUserAndMovie(findUser, movie);
+            if (existingStar.isPresent()) {//존재하면, 스타 스코어만 업데이트
                 Star star = existingStar.get();
                 star.updateScore(singleStarEvaluateRequestDto.getStarScore());
                 starRepository.save(star);
-            }else{//존재하지 않는다면, 새롭게 생성
-            Star build = Star.builder()
-                    .user(user)
-                    .movie(movie)
-                    .score(singleStarEvaluateRequestDto.getStarScore())
-                    .build();
+            } else {//존재하지 않는다면, 새롭게 생성
+                Star build = Star.builder()
+                        .user(findUser)
+                        .movie(movie)
+                        .score(singleStarEvaluateRequestDto.getStarScore())
+                        .build();
 
-            starRepository.save(build);
+                starRepository.save(build);
+
             }
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+
+    }
+
+    @Transactional
+    public Float getMovieAvgScore(long movieId) {
+        float score = starRepository.findAvgScoreByMovieId(movieId);
+        return score;
     }
 
 }
