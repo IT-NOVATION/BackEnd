@@ -16,12 +16,12 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
     @Override
     Optional<ReviewLike> findById(Long id);
 
-    @Query("SELECT rl.user FROM ReviewLike rl " +
+    @Query("SELECT rl.review.user FROM ReviewLike rl " +
         "WHERE rl.reviewLike = true " +
         "AND DATE(rl.createdDate) = :yesterday " +
-        "GROUP BY rl.user " +
-        "ORDER BY COUNT(rl.user) DESC")
-    List<User> findTopUsersWithTodayDate(@Param("yesterday")LocalDate date,Pageable pageable);
+        "GROUP BY rl.review.user " +
+        "ORDER BY COUNT(rl.review.user.id) DESC")
+    List<User> findTopUsersWithYesterdayDate(@Param("yesterday")LocalDate date,Pageable pageable);
 
 
     @Query("SELECT r FROM Review r " +
