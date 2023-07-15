@@ -2,25 +2,24 @@ package com.ItsTime.ItNovation.domain.movielog.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Getter
 public class MovieLogResponseDto {
 
-    private final MovieLogUserInfoDto movieLogUserInfoDto;
-    private final List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList;
-    private final List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList;
-    private final List<MovieLogReviewsInfoDto> movieLogReviewsInfoDtoList;
-    private final List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList;
+    private  MovieLogUserInfoDto nowUser;
+    private  List<MovieLogfollowersInfoDto> followers;
+    private  List<MovieLogfollowingInfoDto> followings;
+    private  List<MovieLogReviewInfoDto> reviews;
+    private  List<MovieLogInterestedMovieInfoDto> interestedMovie;
 
     @Builder
-    public MovieLogResponseDto(MovieLogUserInfoDto movieLogUserInfoDto, List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList, List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList, List<MovieLogReviewsInfoDto> movieLogReviewsInfoDtoList,List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList) {
-        this.movieLogUserInfoDto = movieLogUserInfoDto;
-        this.movieLogfollowersInfoDtoList = movieLogfollowersInfoDtoList;
-        this.movieLogfollowingInfoDtoList = movieLogfollowingInfoDtoList;
-        this.movieLogReviewsInfoDtoList = movieLogReviewsInfoDtoList;
-        this.movieLogInterestedMovieInfoDtoList = movieLogInterestedMovieInfoDtoList;
+    public MovieLogResponseDto(MovieLogUserInfoDto movieLogUserInfoDto, List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList, List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList, List<MovieLogReviewInfoDto> movieLogReviewInfoDtoList, List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList) {
+        this.nowUser = movieLogUserInfoDto;
+        this.followers = movieLogfollowersInfoDtoList;
+        this.followings = movieLogfollowingInfoDtoList;
+        this.reviews = movieLogReviewInfoDtoList;
+        this.interestedMovie = movieLogInterestedMovieInfoDtoList;
     }
 }
