@@ -29,4 +29,8 @@ public interface FollowRepository extends JpaRepository<FollowState, Long> {
     @Query("SELECT f.pushUser FROM FollowState f WHERE f.targetUser.id = :userId")
     List<User> findFollowersByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT f.targetUser FROM FollowState f where f.pushUser.id=:userId")
+    List<User> findFollowingsByUserId(@Param("userId") Long userId);
+
+
 }
