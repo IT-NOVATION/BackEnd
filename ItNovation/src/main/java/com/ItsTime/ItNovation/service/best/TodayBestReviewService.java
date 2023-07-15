@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +29,10 @@ public class TodayBestReviewService {
     private final LocalDate yesterday = LocalDate.now().minusDays(1);
 
 
+    @Transactional
     public ResponseEntity getBestReviewAndUser() {
         Pageable pageable = PageRequest.of(0, 3);
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+
         List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable);
         try {
