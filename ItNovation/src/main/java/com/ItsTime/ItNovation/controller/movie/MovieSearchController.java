@@ -19,6 +19,7 @@ public class MovieSearchController {
     @GetMapping("/movie")
     public List<MoviePopularDto> searchMoviesByTitle(@RequestParam(name="movieNm") String movieNM) {
         return movieSearchService.searchMoviesByTitle(movieNM);
+
     }
 }
 

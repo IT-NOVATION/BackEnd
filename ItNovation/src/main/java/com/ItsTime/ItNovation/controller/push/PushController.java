@@ -4,10 +4,14 @@ package com.ItsTime.ItNovation.controller.push;
 import com.ItsTime.ItNovation.common.GeneralErrorCode;
 import com.ItsTime.ItNovation.domain.follow.dto.TargetUserRequestDto;
 import com.ItsTime.ItNovation.domain.movieLike.dto.MovieLikeRequestDto;
+
 import com.ItsTime.ItNovation.domain.reviewLike.dto.ReviewLikeRequestDto;
+
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.push.PushService;
+import com.ItsTime.ItNovation.service.user.UserService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ public class PushController {
     private final UserRepository userRepository;
 
 
+
     @PostMapping("/reviewlike")
     public ResponseEntity pushReviewLike(@RequestBody  ReviewLikeRequestDto reviewLikeRequestDto, Authentication authentication){
         String email = authentication.getName();
@@ -35,6 +40,7 @@ public class PushController {
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
         }
     }
 
@@ -44,6 +50,7 @@ public class PushController {
      * 2. follow 테이블이 존재하는데 해제하고 싶은 case
      * @return response
      */
+
     @PostMapping("/follow")
     public ResponseEntity pushFollow(@RequestBody TargetUserRequestDto targetUserRequestDto,Authentication authentication){
             try {
@@ -61,6 +68,7 @@ public class PushController {
             User user = userRepository.findByEmail(authentication.getName())
                     .orElseThrow(() -> new IllegalArgumentException("no user"));
             return pushService.pushMovieLike(user.getId(), movieLikeRequestDto.getMovieId());
+
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(400).body(e.getMessage());
         }

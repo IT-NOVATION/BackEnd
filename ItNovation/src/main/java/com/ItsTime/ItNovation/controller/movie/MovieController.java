@@ -38,7 +38,7 @@ public class MovieController {
     }
 
     @GetMapping("/findMovies")
-    public List<Movie> allMovies(Model model){
+    public List<Movie> allMovies(Model model){ // 수정
         List<Movie> allMovies = movieRepoService.findAllMovies();
         return allMovies;
     }

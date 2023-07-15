@@ -4,6 +4,7 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.star.Star;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
+import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
 import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateRequestDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
@@ -31,9 +32,11 @@ public class StarService {
                     .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
             Optional<Star> existingStar = starRepository.findByUserAndMovie(findUser, movie);
             if (existingStar.isPresent()) {//존재하면, 스타 스코어만 업데이트
+
                 Star star = existingStar.get();
-                star.updateScore(singleStarEvaluateRequestDto.getStarScore());
+                star.updateScore(singleStarEvaluateDto.getStarScore());
                 starRepository.save(star);
+
             } else {//존재하지 않는다면, 새롭게 생성
                 Star build = Star.builder()
                         .user(findUser)
@@ -42,6 +45,7 @@ public class StarService {
                         .build();
 
                 starRepository.save(build);
+
 
             }
             return ResponseEntity.status(HttpStatus.OK).body(null);

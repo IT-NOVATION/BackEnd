@@ -89,6 +89,7 @@ public class SecurityConfig {
                 //TODO: 토큰 검증 필요없는 것은 위의 specialUrlMatchers 랑 아래 permitAll 에 등록 필수
 //                .requestMatchers("/signup","/userProfile","/movies","/review", "/review/Info", "today/**","/loginState").permitAll()
                 .requestMatchers(specialUrlMatchers.toArray(new RequestMatcher[0])).permitAll()
+
                 .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
 
