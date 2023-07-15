@@ -88,6 +88,7 @@ public class PushService {
         return build;
     }
 
+    @Transactional
     public ResponseEntity pushFollow(Long pushUserId, Long targetId) {
         try {
             User pushUser = userRepository.findById(pushUserId)
