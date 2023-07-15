@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +36,10 @@ public class TodayBestUserService {
      * Todo -> 전날 기준 집계해서 top User 뽑는 방식으로 고려
      * @return
      */
+    @Transactional
     public ResponseEntity getBestUserInfo() {
         Pageable pageable = PageRequest.of(0, 5);
-        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(yesterday,
+        List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable); // -> 이거 전날 기준으로 고쳐야 함!
         System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
 
