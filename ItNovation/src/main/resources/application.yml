@@ -15,4 +15,5 @@ spring:
       - key
       - jwt
       - mail
+      - key
     active: prod
