@@ -10,6 +10,7 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewCountResponseDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
+import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
@@ -28,6 +29,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
   
     @Transactional
     public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String nowUserEmail) {
@@ -144,6 +146,8 @@ public class ReviewService {
             .hasGoodCharterCharming(review.getHasGoodCharterCharming())
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
+            .star(review.getStar())
+            .reviewLikeNum(reviewLikeRepository.countReviewLikeByReviewId(review.getReviewId()))
             .watchDate(review.getWatchDate())
             .build();
 
