@@ -31,7 +31,7 @@ public class TodayBestReviewService {
     public ResponseEntity getBestReviewAndUser() {
         Pageable pageable = PageRequest.of(0, 3);
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithTodayDate(yesterday,
+        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable);
         try {
             List<TodayBestReviewResponseDto> todayBestReviewResponseDtos = madeResponse(
