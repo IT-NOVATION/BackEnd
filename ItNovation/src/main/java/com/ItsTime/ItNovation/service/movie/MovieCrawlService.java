@@ -2,7 +2,6 @@ package com.ItsTime.ItNovation.service.movie;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
-import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularRecommendResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.domain.popularMovie.PopularMovie;
 import com.ItsTime.ItNovation.domain.popularMovie.PopularMovieRepository;
@@ -32,11 +31,15 @@ import org.springframework.web.client.RestTemplate;
 public class MovieCrawlService {
 
     private final PopularMovieRepository popularMovieRepository;
-    private final StarRepository starRepository;
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
+
+
     @Value("${ttkey}")
     public String API_KEY;
+
+    @Value("${kfkey}")
+    public String KF_API_KEY;
 
     private final String BASE_URL =
         "https://api.themoviedb.org/3/discover/movie?api_key=";
@@ -45,6 +48,11 @@ public class MovieCrawlService {
     private final String BASIC_Movie_URL =
         "https://api.themoviedb.org/3/movie/";
 
+    private final String KOFI_MOVIE_INFO_URL="http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=";
+
+
+
+    private String KOFI_URL= "https://kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key=";
 
     public Map<String, Movie> getTitleAndMovie() {
         //여기 참고 https://developers.themoviedb.org/3/movies/get-movie-images
@@ -61,6 +69,7 @@ public class MovieCrawlService {
     private Map<String, Movie> getTitleAndMovies(
         RestTemplate restTemplate) {  // 이 기능은 반드시 따로 빼서 스케줄러 돌려서 일정 주기마다 하기로 진행
         Map<String, Movie> titleAndMovie = new HashMap<>();
+
         crawlMovieInfo(restTemplate, titleAndMovie);
         return titleAndMovie;
     }
@@ -89,6 +98,63 @@ public class MovieCrawlService {
         }
     }
 
+    private void crawlMovieAudit(Map<String, String> movieInfo, String title)
+        throws JsonProcessingException {
+
+        String KOFI_URL_GET_NAME = KOFI_URL + KF_API_KEY+"&movieNm="+title;
+        log.info("KOFI_URL_GET_NAME = " + KOFI_URL_GET_NAME);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(KOFI_URL_GET_NAME, String.class);
+        String kofi_json = responseEntity.getBody();
+
+        log.info("kofi_json");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(kofi_json);
+        log.info(jsonNode.toString());
+        JsonNode movieListJson = jsonNode.get("movieListResult");
+
+        log.info(movieListJson.toString());
+
+        JsonNode movieInfoJson = movieListJson.get("movieList");
+
+        log.info(movieInfoJson.toString());
+
+        String movieAudit = getMovieAudit(movieInfoJson.get(0).get("movieCd").asText());
+        movieInfo.put("audit", movieAudit);
+
+    }
+
+    private String getMovieAudit(String movieCd) throws JsonProcessingException {
+
+        log.info("====In getMovieAudit====");
+        String AUDIT_URL=KOFI_MOVIE_INFO_URL + KF_API_KEY + "&movieCd=" + movieCd;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> creditEntity = restTemplate.getForEntity(AUDIT_URL, String.class);
+        String movieInfo = creditEntity.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode1 = objectMapper.readTree(movieInfo);
+
+        log.info(movieInfo.toString());
+
+        String audits;
+        try {
+             audits = jsonNode1.get("movieInfoResult").
+                get("movieInfo").
+                get("audits").get(0)
+                .get("watchGradeNm").asText();
+             log.info("======= audits = " + audits);
+        }catch (Exception e){
+            audits = null;
+        }
+
+        log.info(audits);
+
+        return audits;
+    }
+
 
     /**
      * 여기부터 진짜 크롤링
@@ -97,11 +163,12 @@ public class MovieCrawlService {
      * @param results
      */
     private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JsonNode results)
-         {
+        throws JsonProcessingException {
         final String posterBasicPath= "https://www.themoviedb.org/t/p/original";
         for (JsonNode movieNode : results ) {
             Map<String, String> movie_Info = new HashMap<>();
             movie_Info.put("title", movieNode.get("title").asText());
+            crawlMovieAudit(movie_Info, movie_Info.get("title"));
             movieDiscoverCrawl(posterBasicPath, movieNode, movie_Info);
             Integer movieId = movieNode.get("id").asInt();
             // 이제 긁어올것 장르, 배우, 감독, 나라, 러닝타임,
@@ -146,6 +213,7 @@ public class MovieCrawlService {
             movieDirector(movieInfo.get("movieDirector")).
             movieRunningTime(Integer.parseInt(movieInfo.get("movieRunningTime"))).
             movieDetail(movieInfo.get("movieDetail")).
+            movieAudit(movieInfo.get("audit")).
             real_movieId(real_movieId).build();
 
         System.out.println(movieInfo.get("title"));
@@ -168,6 +236,7 @@ public class MovieCrawlService {
         log.info(jsonNode.toString());
         JsonNode jsonNode1 = jsonNode.get("cast");
         JsonNode crew = jsonNode.get("crew");
+        double max_popular = 0;
         for (JsonNode member : jsonNode1) {
             log.info(member.toString());
             if (member.get("known_for_department").asText().equals("Acting")) {
@@ -175,7 +244,12 @@ public class MovieCrawlService {
                     log.info("배우가 비어있다고 합니다?");
                     log.info(member.toString());
                 }
-                movieInfo.put("movieActor", member.get("name").asText());
+                double popularity = member.get("popularity").asDouble();
+                if(max_popular <= popularity){
+                    max_popular=popularity;
+                    movieInfo.put("movieActor", member.get("name").asText());
+                }
+
             }
         }
         for (JsonNode member : crew) {
