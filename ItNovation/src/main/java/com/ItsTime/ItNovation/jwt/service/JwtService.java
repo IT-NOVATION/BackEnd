@@ -5,6 +5,7 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -142,9 +143,14 @@ public class JwtService {
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         log.info("accessToken 추출");
 
-        return Optional.ofNullable(request.getHeader(accessHeader))
-                .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
+        try {
+            return Optional.ofNullable(request.getHeader(accessHeader))
+                    .filter(refreshToken -> refreshToken.startsWith(BEARER))
+                    .map(refreshToken -> refreshToken.replace(BEARER, ""));
+        } catch (JWTDecodeException e) {
+            log.error("토큰 추출 못함! " + e.getMessage());
+            throw new JWTDecodeException(e.getMessage());
+        }
 
     }
 
@@ -163,9 +169,8 @@ public class JwtService {
                     .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
                     .getClaim(EMAIL_CLAIM) // claim(Emial) 가져오기
                     .asString());
-        } catch (IllegalArgumentException e) {
-            log.error("액세스 토큰이 유효하지 않습니다.");
-
+        } catch (JWTVerificationException e) {
+            log.error(e.getMessage());
             return Optional.empty();
         }
     }
