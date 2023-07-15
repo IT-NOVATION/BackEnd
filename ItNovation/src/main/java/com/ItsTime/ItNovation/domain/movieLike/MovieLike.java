@@ -26,10 +26,14 @@ public class MovieLike {
     private Movie movie;
 
 
+
+
+
     @Builder
     public MovieLike(User user, Movie movie) {
         this.user = user;
         this.movie = movie;
+
     }
 
 

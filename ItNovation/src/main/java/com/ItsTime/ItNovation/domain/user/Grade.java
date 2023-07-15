@@ -6,16 +6,16 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Grade {
-    WELCOME("WELCOME"),
-    SILVER("SILVER"),
-    GOLD("GOLD"),
-    VIP("VIP");
+    STANDARD("STANDARD"),
+    PREIMUM("PREIMUM"),
+    VIP("VIP"),
+    SPECIAL("SPECIAL");
 
     private final String key;
 
 
     public static Grade getDefault() {
-        return WELCOME;
+        return STANDARD;
     }
 
 }

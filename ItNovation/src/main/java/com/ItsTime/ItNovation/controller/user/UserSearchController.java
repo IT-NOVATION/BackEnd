@@ -11,24 +11,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("search")
 public class UserSearchController {
 
    private final UserSearchService userSearchService;
 
 
 
-    @PostMapping("/test/search/user")
-    public ResponseEntity<List<UserSearchResponseDto>> searchUser(@RequestBody UserSearchRequestDto searchNickName){
+    @GetMapping("/user")
+    public ResponseEntity<List<UserSearchResponseDto>> searchUser(@RequestParam(name="userNm") String userName){
         List<UserSearchResponseDto> response = new ArrayList<>();
         try {
-            response = userSearchService.getResponse(searchNickName.getSearchNickName());
+            response = userSearchService.getResponse(userName);
             return ResponseEntity.status(200).body(response);
 
         }catch (Exception e){
