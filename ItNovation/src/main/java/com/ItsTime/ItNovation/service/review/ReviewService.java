@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.service.review;
 
+import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
@@ -13,16 +14,16 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
+import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
-
+    private final FollowRepository followRepository;
     private final ReviewLikeRepository reviewLikeRepository;
 
 
@@ -89,40 +90,66 @@ public class ReviewService {
     }
 
     @Transactional
-    public ResponseEntity reviewRead(Long reviewId) {
-
+    public ResponseEntity reviewRead(Long reviewId, String email) {
         try {
+            Optional<User> loginUser= Optional.empty();
+            if(email != null){
+                loginUser = userRepository.findByEmail(email);
+            }
             Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없습니다."));
             Movie movie = review.getMovie();
             User user = review.getUser();
 
-            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user);
+            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user, loginUser);
             return ResponseEntity.status(200).body(reviewReadResponseDto);
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user) {
+    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user, Optional<User> loginUser) {
         ReviewInfoDto reviewInfoDto = madeReviewInfoDto(review);
         ReviewMovieInfoDto reviewMovieInfoDto = madeMovieInfoDto(movie);
         ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user);
+        ReviewLoginUserInfoDto reviewLoginUserInfoDto = madeLoginUserInfoDto(loginUser, review.getUser());
 
-        return mergeInfoDto(reviewInfoDto, reviewMovieInfoDto, reviewUserInfoDto);
+        return mergeInfoDto(reviewInfoDto, reviewMovieInfoDto, reviewUserInfoDto, reviewLoginUserInfoDto);
     }
 
+
+
     private ReviewReadResponseDto mergeInfoDto(ReviewInfoDto reviewInfoDto, ReviewMovieInfoDto reviewMovieInfoDto,
-        ReviewUserInfoDto reviewUserInfoDto) {
+        ReviewUserInfoDto reviewUserInfoDto, ReviewLoginUserInfoDto reviewLoginUserInfoDto) {
 
         ReviewReadResponseDto reviewReadResponseDto = ReviewReadResponseDto.builder()
             .review(reviewInfoDto)
             .movie(reviewMovieInfoDto)
             .user(reviewUserInfoDto)
+            .loginUser(reviewLoginUserInfoDto)
             .build();
         
         return reviewReadResponseDto;
 
+    }
+
+
+    private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser) {
+        if(userOptional.isPresent()){
+            log.info("user is Present");
+            User loginUser = userOptional.get();
+            log.info("== loginUser id ===" + loginUser.getId().toString());
+            boolean present = followRepository.findByPushUserAndFollowUser(
+                loginUser.getId(), reviewUser.getId()).isPresent();
+            return ReviewLoginUserInfoDto.builder()
+                .pushedReviewLike(reviewLikeRepository.isUserLike(loginUser))
+                .pushedFollow(present)
+                .build();
+        }
+        return ReviewLoginUserInfoDto.builder()   // 로그인이 아닌 경우
+            .pushedReviewLike(false)
+            .pushedFollow(false)
+            .build();
     }
 
     private ReviewUserInfoDto madeUserInfoDto(User user) {
@@ -133,6 +160,9 @@ public class ReviewService {
             .grade(user.getGrade())
             .introduction(user.getIntroduction())
             .profileImg(user.getProfileImg())
+            .folllowerNum(followRepository.countByFollowedUserId(user.getId()))
+            .followingNum(followRepository.countByFollowingUserId(user.getId()))
+            .hasReviewLike(reviewLikeRepository.isUserLike(user))
             .build();
         return reviewUserInfoDto;
     }
