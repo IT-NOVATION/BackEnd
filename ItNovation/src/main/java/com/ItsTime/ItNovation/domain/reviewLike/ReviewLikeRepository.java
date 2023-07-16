@@ -45,4 +45,6 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
     @Query("select count(*) from ReviewLike rl where rl.review.reviewId=:reviewId and rl.reviewLike=true")
     int countReviewLikeByReviewId(@Param("reviewId") Long reviewId);
 
+    @Query("select rl.reviewLike from ReviewLike rl where rl.user = :user")
+    Boolean isUserLike(@Param("user") User user);
 }
