@@ -3,7 +3,12 @@ package com.ItsTime.ItNovation.controller.review;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadRequestDto;
 
+import com.ItsTime.ItNovation.domain.user.dto.LoginStateDto;
+import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.review.ReviewService;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final JwtService jwtService;
     @PostMapping
     public ResponseEntity reviewWrite(@RequestBody ReviewPostRequestDto reviewPostRequestDto, Authentication authentication) {
 
@@ -29,9 +35,16 @@ public class ReviewController {
     }
 
     @GetMapping("/Info/{reviewId}") // getMapping 으로 변경 -> id값 넘겨주기
-    public ResponseEntity reviewRead(@PathVariable Long reviewId){
-        return reviewService.reviewRead(reviewId);
+    public ResponseEntity reviewRead(@PathVariable Long reviewId, HttpServletRequest request){
+        Optional<String> s = jwtService.extractAccessToken(request);
+        if(s.isPresent()){
+            Optional<String> email = jwtService.extractEmail(s.get());
+            return reviewService.reviewRead(reviewId, email.get());
+        }
+        return reviewService.reviewRead(reviewId, null);
     }
+
+
 
 
     @GetMapping("/movieInfo/{movieId}")
