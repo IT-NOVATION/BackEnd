@@ -21,6 +21,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("Select r from Review r where r.user.id=:userId order by r.createdDate desc")
     List<Review> findNewestReviewByUserId(@Param("userId") Long userId, Pageable pageable);
 
+    @Query("Select r from Review r where r.user.id=:userId order by r.createdDate desc")
+    List<Review> findNewestReviewByUserIdWithNoPageable(@Param("userId") Long userId);
+
 
     @Query("SELECT AVG(r.star) FROM Review r WHERE r.movie.id = :movieId")
     Float findAvgScoreByMovieId(@Param("movieId") Long movieId);
