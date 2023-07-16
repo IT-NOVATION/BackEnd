@@ -56,6 +56,7 @@ public class ReviewService {
                     .hasSpoiler(reviewPostRequestDto.getHasSpoiler())
                     .watchDate(reviewPostRequestDto.getWatchDate())
                     .reviewLikes(null)
+                    .star(reviewPostRequestDto.getStar())
                     .build();
 
             reviewRepository.save(review);
@@ -145,6 +146,7 @@ public class ReviewService {
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
             .watchDate(review.getWatchDate())
+                .star(review.getStar())
             .build();
 
         return reviewInfoDto;

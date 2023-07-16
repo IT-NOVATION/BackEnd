@@ -22,6 +22,8 @@ public class ReviewInfoDto {
     private Boolean hasCheckDate;
     private Boolean hasSpoiler;
     private String watchDate;
+    private Integer reviewLikeNum;
+    private Float star;
 
 
     @Builder
@@ -29,7 +31,7 @@ public class ReviewInfoDto {
         Boolean hasGoodProduction, Boolean hasGoodScenario, Boolean hasGoodDirecting,
         Boolean hasGoodOst, Boolean hasGoodVisual, Boolean hasGoodActing,
         Boolean hasGoodCharterCharming, Boolean hasGoodDiction, Boolean hasCheckDate,
-        Boolean hasSpoiler, String watchDate) {
+        Boolean hasSpoiler, String watchDate,Integer reviewLikeNum,Float star) {
         this.reviewId = reviewId;
         this.reviewTitle = reviewTitle;
         this.reviewMainText = reviewMainText;
@@ -44,5 +46,7 @@ public class ReviewInfoDto {
         this.hasCheckDate = hasCheckDate;
         this.hasSpoiler = hasSpoiler;
         this.watchDate = watchDate;
+        this.reviewLikeNum=reviewLikeNum;
+        this.star=star;
     }
 }
