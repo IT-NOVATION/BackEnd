@@ -76,7 +76,7 @@ public class OAuthAttributes extends BaseTimeEntity {
                 .bgImg(oAuth2UserInfo.getBgImg())
                 .profileImg(oAuth2UserInfo.getProfileImg())
                 .role(Role.GUEST)
-                .grade(Grade.WELCOME)
+                .grade(Grade.STANDARD)
                 .build();
     }
 }

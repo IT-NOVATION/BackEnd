@@ -10,12 +10,17 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewCountResponseDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
+import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
+
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,6 +33,21 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
+
+    private final ReviewLikeRepository reviewLikeRepository;
+
+
+    @Transactional
+    public List<Review> getReviewByUserId(Long userId) {
+        List<Review> reviewList = reviewRepository.findNewestReviewByUserIdWithNoPageable(userId);
+        log.info(String.valueOf(reviewList.size()));
+        if (reviewList.size() == 0) {
+            return null;
+        } else {
+            return reviewList;
+        }
+    }
+
   
     @Transactional
     public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String nowUserEmail) {
@@ -35,31 +55,8 @@ public class ReviewService {
             User nowUser = userRepository.findByEmail(nowUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
             Movie nowMovie = movieRepository.findById(reviewPostRequestDto.getMovieId()).orElseThrow(() -> new IllegalArgumentException("일치하는 영화가 없습니다."));
 
+            saveReview(reviewPostRequestDto, nowUser, nowMovie);
 
-            log.info(reviewPostRequestDto.getReviewTitle());
-            log.info(reviewPostRequestDto.getReviewMainText());
-            Review review=Review.builder().star(reviewPostRequestDto.getStar())
-                    .movie(nowMovie)
-                    .user(nowUser)
-                    .reviewTitle(reviewPostRequestDto.getReviewTitle())
-                    .reviewMainText(reviewPostRequestDto.getReviewMainText())
-                    .hasGoodStory(reviewPostRequestDto.getHasGoodStory())
-                    .hasGoodProduction(reviewPostRequestDto.getHasGoodProduction())
-                    .hasGoodScenario(reviewPostRequestDto.getHasGoodScenario())
-                    .hasGoodDirecting(reviewPostRequestDto.getHasGoodDirecting())
-                    .hasGoodOst(reviewPostRequestDto.getHasGoodOst())
-                    .hasGoodVisual(reviewPostRequestDto.getHasGoodVisual())
-                    .hasGoodActing(reviewPostRequestDto.getHasGoodActing())
-                    .hasGoodCharterCharming(reviewPostRequestDto.getHasGoodCharterCharming())
-                    .hasGoodDiction(reviewPostRequestDto.getHasGoodDiction())
-                    .hasCheckDate(reviewPostRequestDto.getHasCheckDate())
-                    .hasSpoiler(reviewPostRequestDto.getHasSpoiler())
-                    .watchDate(reviewPostRequestDto.getWatchDate())
-                    .reviewLikes(null)
-                    .star(reviewPostRequestDto.getStar())
-                    .build();
-
-            reviewRepository.save(review);
             return ResponseEntity.status(201).body("성공적으로 생성되었습니다");
         }catch (IllegalArgumentException e) {
             //TODO: 에러 메시지  -> 관심영화 API에서 이 경우 에러 처리하면됨
@@ -67,6 +64,31 @@ public class ReviewService {
         }
 
     }
+
+    private void saveReview(ReviewPostRequestDto reviewPostRequestDto, User nowUser, Movie nowMovie) {
+        Review review=Review.builder().star(reviewPostRequestDto.getStar())
+                .movie(nowMovie)
+                .user(nowUser)
+                .reviewTitle(reviewPostRequestDto.getReviewTitle())
+                .reviewMainText(reviewPostRequestDto.getReviewMainText())
+                .hasGoodStory(reviewPostRequestDto.getHasGoodStory())
+                .hasGoodProduction(reviewPostRequestDto.getHasGoodProduction())
+                .hasGoodScenario(reviewPostRequestDto.getHasGoodScenario())
+                .hasGoodDirecting(reviewPostRequestDto.getHasGoodDirecting())
+                .hasGoodOst(reviewPostRequestDto.getHasGoodOst())
+                .hasGoodVisual(reviewPostRequestDto.getHasGoodVisual())
+                .hasGoodActing(reviewPostRequestDto.getHasGoodActing())
+                .hasGoodCharterCharming(reviewPostRequestDto.getHasGoodCharterCharming())
+                .hasGoodDiction(reviewPostRequestDto.getHasGoodDiction())
+                .hasCheckDate(reviewPostRequestDto.getHasCheckDate())
+                .hasSpoiler(reviewPostRequestDto.getHasSpoiler())
+                .watchDate(reviewPostRequestDto.getWatchDate())
+                .reviewLikes(null)
+                .build();
+
+        reviewRepository.save(review);
+    }
+
     @Transactional
     public ResponseEntity reviewRead(Long reviewId) {
 
@@ -145,6 +167,8 @@ public class ReviewService {
             .hasGoodCharterCharming(review.getHasGoodCharterCharming())
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
+            .star(review.getStar())
+            .reviewLikeNum(reviewLikeRepository.countReviewLikeByReviewId(review.getReviewId()))
             .watchDate(review.getWatchDate())
                 .star(review.getStar())
             .build();

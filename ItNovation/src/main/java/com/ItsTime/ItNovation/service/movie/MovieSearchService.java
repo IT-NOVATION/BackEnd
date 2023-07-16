@@ -17,9 +17,8 @@ public class MovieSearchService {
     private final MovieRepository movieRepository;
     private final StarRepository starRepository;
 
-    public List<MoviePopularDto> searchMoviesByTitle(MovieSearchRequestDto searchDto) {
-        String search = searchDto.getSearch();
-        List<Movie> movies = movieRepository.findByTitleContaining(searchDto.getSearch());
+    public List<MoviePopularDto> searchMoviesByTitle(String movieNM) {
+        List<Movie> movies = movieRepository.findByTitleContaining(movieNM);
         List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
         for (Movie movie : movies) {
             Float starScore = starRepository.findAvgScoreByMovieId(movie.getId());
