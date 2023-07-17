@@ -39,7 +39,9 @@ public class ReviewController {
         Optional<String> s = jwtService.extractAccessToken(request);
         if(s.isPresent()){
             Optional<String> email = jwtService.extractEmail(s.get());
-            return reviewService.reviewRead(reviewId, email.get());
+            if(email.isPresent()) {
+                return reviewService.reviewRead(reviewId, email.get());
+            }
         }
         return reviewService.reviewRead(reviewId, null);
     }
