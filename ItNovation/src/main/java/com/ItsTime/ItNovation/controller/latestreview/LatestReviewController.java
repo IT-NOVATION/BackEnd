@@ -16,7 +16,7 @@ import java.util.List;
 public class LatestReviewController {
     private final ReviewService reviewService;
 
-    @GetMapping("/test/today/latestReview")
+    @GetMapping("/today/latestReview")
     public ResponseEntity <List<LatestReviewResponseDto>> LatestReviews(){
         List<LatestReviewResponseDto> LatestReviewers = reviewService.getLatestReviews();
         return ResponseEntity.ok(LatestReviewers);
