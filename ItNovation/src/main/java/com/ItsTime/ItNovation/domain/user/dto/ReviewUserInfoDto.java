@@ -14,7 +14,7 @@ public class ReviewUserInfoDto {
     private Grade grade;
     private String introduction;
     private String profileImg;
-    private Long folllowerNum;
+    private Long followerNum;
     private Long followingNum;
     private Boolean hasReviewLike;
 
@@ -24,14 +24,14 @@ public class ReviewUserInfoDto {
 
     @Builder
     public ReviewUserInfoDto(Long userId, String bgImg, String nickname, Grade grade,
-        String introduction, String profileImg, Long folllowerNum, Long followingNum, Boolean hasReviewLike) {
+        String introduction, String profileImg, Long followerNum, Long followingNum, Boolean hasReviewLike) {
         this.userId = userId;
         this.bgImg = bgImg;
         this.nickname = nickname;
         this.grade = grade;
         this.introduction = introduction;
         this.profileImg = profileImg;
-        this.folllowerNum = folllowerNum;
+        this.followerNum = followerNum;
         this.followingNum = followingNum;
         this.hasReviewLike=hasReviewLike;
     }

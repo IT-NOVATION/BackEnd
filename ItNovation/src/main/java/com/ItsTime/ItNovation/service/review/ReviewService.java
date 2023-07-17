@@ -111,8 +111,8 @@ public class ReviewService {
     private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user, Optional<User> loginUser) {
         ReviewInfoDto reviewInfoDto = madeReviewInfoDto(review);
         ReviewMovieInfoDto reviewMovieInfoDto = madeMovieInfoDto(movie);
-        ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user);
-        ReviewLoginUserInfoDto reviewLoginUserInfoDto = madeLoginUserInfoDto(loginUser, review.getUser());
+        ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user,review);
+        ReviewLoginUserInfoDto reviewLoginUserInfoDto = madeLoginUserInfoDto(loginUser, review.getUser(), review);
 
         return mergeInfoDto(reviewInfoDto, reviewMovieInfoDto, reviewUserInfoDto, reviewLoginUserInfoDto);
     }
@@ -134,7 +134,7 @@ public class ReviewService {
     }
 
 
-    private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser) {
+    private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser, Review review) {
         if(userOptional.isPresent()){
             log.info("user is Present");
             User loginUser = userOptional.get();
@@ -142,7 +142,7 @@ public class ReviewService {
             boolean present = followRepository.findByPushUserAndFollowUser(
                 loginUser.getId(), reviewUser.getId()).isPresent();
             return ReviewLoginUserInfoDto.builder()
-                .pushedReviewLike(reviewLikeRepository.isUserLike(loginUser))
+                .pushedReviewLike(isUserLikeReview(review, loginUser))
                 .pushedFollow(present)
                 .build();
         }
@@ -152,7 +152,16 @@ public class ReviewService {
             .build();
     }
 
-    private ReviewUserInfoDto madeUserInfoDto(User user) {
+    private Boolean isUserLikeReview(Review review, User loginUser) {
+
+        if(reviewLikeRepository.isUserLike(loginUser, review).isEmpty()){
+            return false;
+        };
+
+        return reviewLikeRepository.isUserLike(loginUser, review).get();
+    }
+
+    private ReviewUserInfoDto madeUserInfoDto(User user, Review review) {
         ReviewUserInfoDto reviewUserInfoDto = ReviewUserInfoDto.builder()
             .userId(user.getId())
             .bgImg(user.getBgImg())
@@ -160,9 +169,9 @@ public class ReviewService {
             .grade(user.getGrade())
             .introduction(user.getIntroduction())
             .profileImg(user.getProfileImg())
-            .folllowerNum(followRepository.countByFollowedUserId(user.getId()))
+            .followerNum(followRepository.countByFollowedUserId(user.getId()))
             .followingNum(followRepository.countByFollowingUserId(user.getId()))
-            .hasReviewLike(reviewLikeRepository.isUserLike(user))
+            .hasReviewLike(isUserLikeReview(review, user))
             .build();
         return reviewUserInfoDto;
     }
