@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.user.UserLoginStateService;
 import com.ItsTime.ItNovation.service.user.UserProfileService;
 import com.ItsTime.ItNovation.service.user.UserService;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/userProfile/me")
+    @PutMapping("/userProfile/me")
     public ResponseEntity userProfileMe(@RequestBody UserProfileDtoMe userProfileDtoMe, Authentication authentication) {
         log.info("userProfileMe");
         String email = authentication.getName(); // 현재 사용자의 이메일 추출
@@ -65,13 +66,19 @@ public class UserController {
     @GetMapping("/loginState")
     public ResponseEntity<LoginStateDto> userLoginState(HttpServletRequest request) {
         log.info("loginstate");
-        Optional<String> accessToken = jwtService.extractAccessToken(request);
-
-        if (accessToken.isEmpty()) {
+        try {
+            Optional<String> accessToken = jwtService.extractAccessToken(request);
+            if (accessToken.isEmpty()) {
+                return userLoginStateService.loginState(null);
+            } else {
+                return userLoginStateService.loginState(accessToken.get());
+            }
+        }catch (JWTDecodeException e) {
+            log.error("토큰 추출 오류: " + e.getMessage());
             return userLoginStateService.loginState(null);
-        }else{
-            return userLoginStateService.loginState(accessToken.get());
+
         }
+
 
     }
 }

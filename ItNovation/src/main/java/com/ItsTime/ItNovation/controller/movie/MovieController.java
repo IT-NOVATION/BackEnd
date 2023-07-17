@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/test/api/v1/movies")
+@RequestMapping("/movies")
 @Slf4j
 public class MovieController {
 
@@ -38,7 +38,7 @@ public class MovieController {
     }
 
     @GetMapping("/findMovies")
-    public List<Movie> allMovies(Model model){
+    public List<Movie> allMovies(Model model){ // 수정
         List<Movie> allMovies = movieRepoService.findAllMovies();
         return allMovies;
     }

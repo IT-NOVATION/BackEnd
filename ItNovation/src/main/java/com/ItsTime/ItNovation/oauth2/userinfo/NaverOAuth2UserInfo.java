@@ -61,6 +61,6 @@ public class NaverOAuth2UserInfo extends OAuth2UserInfo {
 
     @Override
     public String getGrade(){
-        return Grade.WELCOME.name();}
+        return Grade.STANDARD.name();}
 
 }

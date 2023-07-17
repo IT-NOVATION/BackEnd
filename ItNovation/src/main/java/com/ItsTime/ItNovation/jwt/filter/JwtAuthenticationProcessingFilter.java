@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 
 import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.jwt.util.PasswordUtil;
+import com.auth0.jwt.JWT;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -155,7 +156,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         } else {
             //토큰 존재하지 않는 경우
             log.info("엑세스 토큰 헤더에 없음");
-
+            throw new JwtException(JwtErrorCode.UNKNOWN_TOKEN.getMessage());
 
         }
         response.setStatus(HttpServletResponse.SC_OK);
