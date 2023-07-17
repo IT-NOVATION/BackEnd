@@ -17,7 +17,6 @@ import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -118,18 +117,16 @@ public class ReviewService {
     private ReviewReadResponseDto mergeInfoDto(ReviewInfoDto reviewInfoDto, ReviewMovieInfoDto reviewMovieInfoDto,
         ReviewUserInfoDto reviewUserInfoDto) {
 
-        ReviewReadResponseDto reviewReadResponseDto = ReviewReadResponseDto.builder()
+        return ReviewReadResponseDto.builder()
             .review(reviewInfoDto)
             .movie(reviewMovieInfoDto)
             .user(reviewUserInfoDto)
             .build();
-        
-        return reviewReadResponseDto;
 
     }
 
     private ReviewUserInfoDto madeUserInfoDto(User user) {
-        ReviewUserInfoDto reviewUserInfoDto = ReviewUserInfoDto.builder()
+        return ReviewUserInfoDto.builder()
             .userId(user.getId())
             .bgImg(user.getBgImg())
             .nickname(user.getNickname())
@@ -137,11 +134,11 @@ public class ReviewService {
             .introduction(user.getIntroduction())
             .profileImg(user.getProfileImg())
             .build();
-        return reviewUserInfoDto;
     }
 
     private ReviewMovieInfoDto madeMovieInfoDto(Movie movie) {
-        ReviewMovieInfoDto reviewMovieInfoDto = ReviewMovieInfoDto.builder()
+
+        return ReviewMovieInfoDto.builder()
             .movieId(movie.getId())
             .movieCountry(movie.getMovieCountry())
             .movieImg(movie.getMovieImg())
@@ -149,13 +146,11 @@ public class ReviewService {
             .movieReleaseDate(movie.getMovieDate())
             .title(movie.getTitle())
             .build();
-
-        return reviewMovieInfoDto;
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
 
-        ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
+        return ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
             .hasCheckDate(review.getHasCheckDate())
             .hasGoodActing(review.getHasGoodActing())
@@ -173,8 +168,6 @@ public class ReviewService {
             .reviewLikeNum(reviewLikeRepository.countReviewLikeByReviewId(review.getReviewId()))
             .watchDate(review.getWatchDate())
             .build();
-
-        return reviewInfoDto;
     }
     @Transactional
     public ResponseEntity getMovieInfo(Long movieId) {
@@ -191,12 +184,11 @@ public class ReviewService {
 
     private ReviewPostMovieInfoResponseDto buildResponse(Long movieId,
         Movie findMovie) {
-        ReviewPostMovieInfoResponseDto responseDto = ReviewPostMovieInfoResponseDto.builder()
+        return ReviewPostMovieInfoResponseDto.builder()
             .movieId(movieId)
             .movieImg(findMovie.getMovieImg())
             .title(findMovie.getTitle())
             .build();
-        return responseDto;
     }
     @Transactional
     public ResponseEntity reviewCount(Long movieId){
@@ -212,6 +204,7 @@ public class ReviewService {
         }
     }
 
+    @Transactional
     public List<LatestReviewResponseDto> getLatestReviews() {
         List<User> recentReviewers = reviewRepository.findNewestReview(PageRequest.of(0, 3));
         return recentReviewers.stream().map(recentReviewer -> {
