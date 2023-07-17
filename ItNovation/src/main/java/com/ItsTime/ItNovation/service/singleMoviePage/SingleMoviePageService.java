@@ -88,6 +88,9 @@ public class SingleMoviePageService {
             .movieLikeCount(movieLikeRepository.countMovieLike(movie))
             .movieRunningTime(movie.getMovieRunningTime())
             .movieReleasedDate(movie.getMovieDate())
+            .movieDirector(movie.getMovieDirector())
+            .movieCountry(movie.getMovieCountry())
+            .movieAge(movie.getMovieAudit())
             .top3HasFeature(findTop3Feature(movie))
             .build();
         return singleMoviePageMovieInfoDto;

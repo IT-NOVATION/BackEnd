@@ -17,6 +17,9 @@ public class SingleMoviePageMovieInfoDto {
     private String movieDetail;
     private MovieFeatureDto top3HasFeature;
     private Integer movieLikeCount;
+    private String movieDirector;
+    private String movieAge;
+    private String movieCountry;
     private Float avgStarScore;
 
 
@@ -25,7 +28,7 @@ public class SingleMoviePageMovieInfoDto {
         String movieReleasedDate,
         Integer movieRunningTime, String movieActor, String movieDetail,
         MovieFeatureDto top3HasFeature,
-        Integer movieLikeCount, Float avgStarScore) {
+        Integer movieLikeCount, Float avgStarScore, String movieDirector, String movieAge, String movieCountry) {
         this.movieImg = movieImg;
         this.title = title;
         this.movieGenre = movieGenre;
@@ -36,5 +39,8 @@ public class SingleMoviePageMovieInfoDto {
         this.top3HasFeature = top3HasFeature;
         this.movieLikeCount = movieLikeCount;
         this.avgStarScore = avgStarScore;
+        this.movieDirector = movieDirector;
+        this.movieAge = movieAge;
+        this.movieCountry = movieCountry;
     }
 }
