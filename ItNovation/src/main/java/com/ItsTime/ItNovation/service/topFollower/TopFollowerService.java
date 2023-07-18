@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class TopFollowerService {
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
 
+    @Transactional
     public List<TopFollowerResponseDto> getTopFollowers() {
         List<User> topPushUsers = followRepository.findTop3PushUsersByTargetUserCount();
 
