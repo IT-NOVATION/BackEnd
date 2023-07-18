@@ -16,7 +16,7 @@ import java.util.List;
 public class TopFollowerController {
     private final TopFollowerService topFollowerService;
 
-    @GetMapping("/test/today/popularUser")
+    @GetMapping("/today/popularUser")
     public ResponseEntity<List<TopFollowerResponseDto>> getTopFollowers() {
         List<TopFollowerResponseDto> topFollowers = topFollowerService.getTopFollowers();
         return ResponseEntity.ok(topFollowers);
