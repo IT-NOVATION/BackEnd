@@ -9,6 +9,7 @@ public class SingleMoviePageMovieInfoDto {
 
 
     private String movieImg;
+    private String movieBgImg;
     private String title;
     private String movieGenre;
     private String movieReleasedDate;
@@ -24,12 +25,13 @@ public class SingleMoviePageMovieInfoDto {
 
 
     @Builder
-    public SingleMoviePageMovieInfoDto(String movieImg, String title, String movieGenre,
+    public SingleMoviePageMovieInfoDto(String movieImg,String movieBgImg, String title, String movieGenre,
         String movieReleasedDate,
         Integer movieRunningTime, String movieActor, String movieDetail,
         MovieFeatureDto top3HasFeature,
         Integer movieLikeCount, Float avgStarScore, String movieDirector, String movieAge, String movieCountry) {
         this.movieImg = movieImg;
+        this.movieBgImg = movieBgImg;
         this.title = title;
         this.movieGenre = movieGenre;
         this.movieReleasedDate = movieReleasedDate;

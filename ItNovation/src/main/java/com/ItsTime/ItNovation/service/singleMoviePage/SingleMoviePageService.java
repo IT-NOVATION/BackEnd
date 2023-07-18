@@ -12,6 +12,7 @@ import com.ItsTime.ItNovation.domain.review.dto.SingleMoviePageReviewInfoDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.singleMoviePage.SingleMoviePageResponseDto;
 import com.ItsTime.ItNovation.domain.singleMoviePage.SingleMoviePageReviewAndUserDto;
+import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.dto.SingleMoviePageUserInfoDto;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class SingleMoviePageService {
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final MovieLikeRepository movieLikeRepository;
-
+    private final StarRepository starRepository;
 
 
     @Transactional
@@ -80,10 +81,11 @@ public class SingleMoviePageService {
     private SingleMoviePageMovieInfoDto madeSingleMovieDto(Movie movie) {
         SingleMoviePageMovieInfoDto singleMoviePageMovieInfoDto = SingleMoviePageMovieInfoDto.builder()
             .movieImg(movie.getMovieImg())
+            .movieBgImg(movie.getMovieBgImg())
             .movieActor(movie.getMovieActor())
             .movieDetail(movie.getMovieDetail())
             .movieGenre(movie.getMovieGenre())
-            .avgStarScore(4.0f)
+            .avgStarScore(starRepository.findAvgScoreByMovieId(movie.getId()))
             .title(movie.getTitle())
             .movieLikeCount(movieLikeRepository.countMovieLike(movie))
             .movieRunningTime(movie.getMovieRunningTime())
