@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -178,14 +179,17 @@ public class MovieLogService {
         MovieLogMovieofReviewsInfoDto movieLogMovieofReviewsInfoDto = MovieLogMovieofReviewsInfoDto.builder()
                 .movieId(movieLogReviewList.get(i).getMovie().getId())
                 .movieImg(movieLogReviewList.get(i).getMovie().getMovieImg()).build();
+
+        String createdDate = String.valueOf(movieLogReviewList.get(i).getUser().getCreatedDate()).split("T")[0];
         return MovieLogReviewInfoDto.builder()
                 .reviewId(movieLogReviewList.get(i).getReviewId())
                 .reviewTitle(movieLogReviewList.get(i).getReviewTitle())
                 .star(movieLogReviewList.get(i).getStar())
                 .reviewMainText(movieLogReviewList.get(i).getReviewMainText())
                 //TODO: BaseTimeEntity 넘겨줄때 string 으로 할지 localdatetime 으로 할지 상의해보고 수정하기
-                .createdDate(String.valueOf(movieLogReviewList.get(i).getCreatedDate()))
+                .createdDate(createdDate)
                 .likeCount(reviewLikecount)
+                .hasSpoiler(movieLogReviewList.get(i).getHasSpoiler())
                 //TODO: 댓글 서비스 구현 후 수정하기
                 .comments(0)
                 .movieLogMovieofReviewsInfoDtoList(movieLogMovieofReviewsInfoDto)
