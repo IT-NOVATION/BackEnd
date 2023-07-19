@@ -5,6 +5,7 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieFeatureDto;
 import com.ItsTime.ItNovation.domain.movie.dto.SingleMoviePageMovieInfoDto;
+import com.ItsTime.ItNovation.domain.movieLike.MovieLike;
 import com.ItsTime.ItNovation.domain.movieLike.MovieLikeRepository;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
@@ -12,8 +13,11 @@ import com.ItsTime.ItNovation.domain.review.dto.SingleMoviePageReviewInfoDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.singleMoviePage.SingleMoviePageResponseDto;
 import com.ItsTime.ItNovation.domain.singleMoviePage.SingleMoviePageReviewAndUserDto;
+import com.ItsTime.ItNovation.domain.star.Star;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
+import com.ItsTime.ItNovation.domain.user.dto.SingleMoviePageLoginUserInfoDto;
 import com.ItsTime.ItNovation.domain.user.dto.SingleMoviePageUserInfoDto;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +43,11 @@ public class SingleMoviePageService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final MovieLikeRepository movieLikeRepository;
     private final StarRepository starRepository;
+    private final UserRepository userRepository;
 
 
     @Transactional
-    public ResponseEntity getReviewInformationAboutMovie(Long movieId) {
+    public ResponseEntity getReviewInformationAboutMovie(Long movieId, String email) {
 
         try {
             Movie findMovie = movieRepository.findByMovieId(movieId)
@@ -51,6 +57,7 @@ public class SingleMoviePageService {
                 reviewRepository.findAllByMovie(findMovie);
             List<SingleMoviePageReviewAndUserDto> singleMoviePageReviewAndUserDtos = new LinkedList<>();
 
+
             for (Review review : reviewList) {
                 SingleMoviePageReviewAndUserDto reviewAndUserInfoDto = SingleMoviePageReviewAndUserDto.builder()
                     .user(madeSignUserInfoDto(review))
@@ -58,10 +65,11 @@ public class SingleMoviePageService {
                     .build();
                 singleMoviePageReviewAndUserDtos.add(reviewAndUserInfoDto);
             }
-
+            log.info("마지막 과정 직전 로직");
             SingleMoviePageResponseDto movieAndReviewAndUserInfoDto = SingleMoviePageResponseDto.builder()
                 .movie(madeSingleMovieDto(findMovie))
                 .reviewAndUserInfoList(singleMoviePageReviewAndUserDtos)
+                .loginUserInfoDto(madeLoginUserInfoDto(email, findMovie))
                 .build();
 
             return ResponseEntity.status(200).body(movieAndReviewAndUserInfoDto);
@@ -71,11 +79,47 @@ public class SingleMoviePageService {
         catch (Exception e){
             return ResponseEntity.status(400).body("서버에서 오류가 발생했습니다.");
         }
+    }
+
+    private SingleMoviePageLoginUserInfoDto madeLoginUserInfoDto(String email, Movie movie) {
+        Boolean pushMovieLike = false;
+        Float reviewStar = 0.0f;
+        Float movieStar = 0.0f;
+        log.info("madeLoginUserInfoDto 입장");
+        if(email == null){
+            log.info("email 값은" + email);
+            return madeDto(reviewStar,
+                movieStar, pushMovieLike);
+        }
+        log.info("email 값은" + email);
+        User user = userRepository.findByEmail(email).get();
+        log.info(user.getEmail());
+        if(starRepository.findByUserAndMovie(user,movie).isPresent()){
+            movieStar=starRepository.findByUserAndMovie(user,movie).get().getScore();
+        }
+        log.info("round1 clear");
+        if(reviewRepository.findByUserAndMovie(user,movie).isPresent()){
+            reviewStar = reviewRepository.findByUserAndMovie(user,movie).get().getStar();
+        }
+        log.info("round 2 clear");
+
+        if(movieLikeRepository.findByUserIdAndMovieId(user.getId(), movie.getId()).isPresent()){
+            pushMovieLike= true;
+        }
 
 
 
+        log.info("madeLoginUserInfoDto 끝");
 
+        return madeDto(reviewStar,movieStar,pushMovieLike);
+    }
 
+    private SingleMoviePageLoginUserInfoDto madeDto(Float reviewStar, Float movieStar, Boolean pushMovieLike) {
+        return SingleMoviePageLoginUserInfoDto.builder()
+            .pushedMovieLike(pushMovieLike)
+            .reviewStar(reviewStar)
+            .movieStar(movieStar)
+            .build();
     }
 
     private SingleMoviePageMovieInfoDto madeSingleMovieDto(Movie movie) {
@@ -85,7 +129,7 @@ public class SingleMoviePageService {
             .movieActor(movie.getMovieActor())
             .movieDetail(movie.getMovieDetail())
             .movieGenre(movie.getMovieGenre())
-            .avgStarScore(starRepository.findAvgScoreByMovieId(movie.getId()))
+            .avgStarScore(getAvgScoreByMovieId(movie))
             .title(movie.getTitle())
             .movieLikeCount(movieLikeRepository.countMovieLike(movie))
             .movieRunningTime(movie.getMovieRunningTime())
@@ -96,6 +140,15 @@ public class SingleMoviePageService {
             .top3HasFeature(findTop3Feature(movie))
             .build();
         return singleMoviePageMovieInfoDto;
+    }
+
+    private Float getAvgScoreByMovieId(Movie movie) {
+        Float avgScoreByMovieId = starRepository.findAvgScoreByMovieId(movie.getId());
+        if(avgScoreByMovieId == null){
+            return 0.0f;
+        }
+
+        return starRepository.findAvgScoreByMovieId(movie.getId());
     }
 
     private MovieFeatureDto findTop3Feature(Movie movie) {  // 여기 코드 너무 고정적임 유동적이질 않음. ㅠㅠ 유동성있도록 기획에게 물어보고 변경해야 할 부분
@@ -150,10 +203,15 @@ public class SingleMoviePageService {
             .createdDate(review.getCreatedDate().toLocalDate())
             .reviewMainText(review.getReviewMainText())
             .hasSpoiler(review.getHasSpoiler())
-            .starScore(review.getStar())
+            .starScore(getStar(review))
             .reviewLikeCount(reviewLikeCount)
             .build();
         return singleMoviePageReviewInfoDto;
+    }
+
+    private static Float getStar(Review review) {
+        Float star = review.getStar();
+        return review.getStar();
     }
 
     private SingleMoviePageUserInfoDto madeSignUserInfoDto(Review review) {
