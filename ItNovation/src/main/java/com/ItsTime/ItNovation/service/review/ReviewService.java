@@ -39,13 +39,7 @@ public class ReviewService {
 
     @Transactional
     public List<Review> getReviewByUserId(Long userId) {
-        List<Review> reviewList = reviewRepository.findNewestReviewByUserIdWithNoPageable(userId);
-        log.info(String.valueOf(reviewList.size()));
-        if (reviewList.size() == 0) {
-            return null;
-        } else {
-            return reviewList;
-        }
+        return reviewRepository.findNewestReviewByUserIdWithNoPageable(userId);
     }
 
   
