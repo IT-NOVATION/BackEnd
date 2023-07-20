@@ -26,7 +26,7 @@ public class TopFollowerService {
         List<User> topPushUsers = followRepository.findTop3PushUsersByTargetUserCount();
 
         return topPushUsers.stream().map(topPushUser -> {
-            List<TopFollowerReviewResponseDto> reviews = reviewRepository.findNewestReviewByUserId(topPushUser.getId(), PageRequest.of(0, 3))
+            List<TopFollowerReviewResponseDto> reviews = reviewRepository.findNewestReviewByUserId(topPushUser.getId(), PageRequest.of(0, 2))
                     .stream()
                     .map(review -> TopFollowerReviewResponseDto.builder()
                             .reviewId(review.getReviewId())
