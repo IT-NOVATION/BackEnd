@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -96,6 +97,7 @@ public class MovieLogService {
         log.info("팔로잉 수 "+String.valueOf(size));
         List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList = new ArrayList<>();
 
+        //팔로잉 없으면 빈 배열 반환
         MovieLogfollowingInfoDto movieLogfollowersInfoDto = null;
         for (int i = 0; i < size; i++) {
             movieLogfollowersInfoDto = MovieLogfollowingInfoDto.builder()
@@ -123,6 +125,8 @@ public class MovieLogService {
         List<User> userList = followService.getFollowersByUserId(id);
         int size = userList.size();
         log.info("팔로워 수 "+String.valueOf(size));
+
+        //팔로워 없으면 빈 배열 반환
 
         List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList = new ArrayList<>();
 
@@ -160,9 +164,11 @@ public class MovieLogService {
     }
     private List<Review> getReviewList(Long id) {
         List<Review> reviewList = reviewService.getReviewByUserId(id);
+
         if (reviewList == null) {
             //TODO: 프론트 에러 응답
-            throw new IllegalArgumentException(GeneralErrorCode.NO_REVIEW.getMessage());
+//            throw new IllegalArgumentException(GeneralErrorCode.NO_REVIEW.getMessage());
+            return new ArrayList<>();
         }
         return reviewList;
     }
@@ -178,14 +184,17 @@ public class MovieLogService {
         MovieLogMovieofReviewsInfoDto movieLogMovieofReviewsInfoDto = MovieLogMovieofReviewsInfoDto.builder()
                 .movieId(movieLogReviewList.get(i).getMovie().getId())
                 .movieImg(movieLogReviewList.get(i).getMovie().getMovieImg()).build();
+
+        String createdDate = String.valueOf(movieLogReviewList.get(i).getUser().getCreatedDate()).split("T")[0];
         return MovieLogReviewInfoDto.builder()
                 .reviewId(movieLogReviewList.get(i).getReviewId())
                 .reviewTitle(movieLogReviewList.get(i).getReviewTitle())
                 .star(movieLogReviewList.get(i).getStar())
                 .reviewMainText(movieLogReviewList.get(i).getReviewMainText())
                 //TODO: BaseTimeEntity 넘겨줄때 string 으로 할지 localdatetime 으로 할지 상의해보고 수정하기
-                .createdDate(String.valueOf(movieLogReviewList.get(i).getCreatedDate()))
+                .createdDate(createdDate)
                 .likeCount(reviewLikecount)
+                .hasSpoiler(movieLogReviewList.get(i).getHasSpoiler())
                 //TODO: 댓글 서비스 구현 후 수정하기
                 .comments(0)
                 .movieLogMovieofReviewsInfoDtoList(movieLogMovieofReviewsInfoDto)
