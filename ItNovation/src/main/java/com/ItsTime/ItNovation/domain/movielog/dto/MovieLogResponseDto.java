@@ -13,13 +13,15 @@ public class MovieLogResponseDto {
     private  List<MovieLogfollowingInfoDto> followings;
     private  List<MovieLogReviewInfoDto> reviews;
     private  List<MovieLogInterestedMovieInfoDto> interestedMovie;
+    private Boolean isLoginedUserFollowsNowUser;
 
     @Builder
-    public MovieLogResponseDto(MovieLogUserInfoDto movieLogUserInfoDto, List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList, List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList, List<MovieLogReviewInfoDto> movieLogReviewInfoDtoList, List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList) {
+    public MovieLogResponseDto(MovieLogUserInfoDto movieLogUserInfoDto, List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList, List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList, List<MovieLogReviewInfoDto> movieLogReviewInfoDtoList, List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList,Boolean isLoginedUserFollowsNowUser) {
         this.nowUser = movieLogUserInfoDto;
         this.followers = movieLogfollowersInfoDtoList;
         this.followings = movieLogfollowingInfoDtoList;
         this.reviews = movieLogReviewInfoDtoList;
         this.interestedMovie = movieLogInterestedMovieInfoDtoList;
+        this.isLoginedUserFollowsNowUser = isLoginedUserFollowsNowUser;
     }
 }

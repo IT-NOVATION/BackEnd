@@ -12,6 +12,8 @@ public interface StarRepository extends JpaRepository<Star, Long> {
     @Query("SELECT AVG(s.score) FROM Star s WHERE s.movie.id = :movieId")
     Float findAvgScoreByMovieId(@Param("movieId") Long movieId);
 
+    @Query("SELECT AVG(s.score) FROM Star s WHERE s.movie.id = :movieId")
+    Optional<Float> findAvgScoreByMovieIdOnMovieLog(@Param("movieId") Long movieId);
     Optional<Star> findByUserAndMovie(User user, Movie movie);
 }
 
