@@ -49,8 +49,10 @@ public class ReviewService {
             User nowUser = userRepository.findByEmail(nowUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
             Movie nowMovie = movieRepository.findById(reviewPostRequestDto.getMovieId()).orElseThrow(() -> new IllegalArgumentException("일치하는 영화가 없습니다."));
 
-            saveReview(reviewPostRequestDto, nowUser, nowMovie);
-            return ResponseEntity.status(201).body("성공적으로 생성되었습니다");
+            Review writtenReview=saveReview(reviewPostRequestDto, nowUser, nowMovie);
+
+
+            return ResponseEntity.status(201).body(writtenReview.getReviewId());
         }catch (IllegalArgumentException e) {
             //TODO: 에러 메시지  -> 관심영화 API에서 이 경우 에러 처리하면됨
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -58,7 +60,7 @@ public class ReviewService {
 
     }
 
-    private void saveReview(ReviewPostRequestDto reviewPostRequestDto, User nowUser, Movie nowMovie) {
+    private Review saveReview(ReviewPostRequestDto reviewPostRequestDto, User nowUser, Movie nowMovie) {
         Review review=Review.builder().star(reviewPostRequestDto.getStar())
                 .movie(nowMovie)
                 .user(nowUser)
@@ -80,6 +82,7 @@ public class ReviewService {
                 .build();
 
         reviewRepository.save(review);
+        return review;
     }
 
     @Transactional
