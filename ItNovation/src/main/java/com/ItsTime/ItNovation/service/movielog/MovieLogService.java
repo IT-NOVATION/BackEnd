@@ -97,6 +97,7 @@ public class MovieLogService {
         log.info("팔로잉 수 "+String.valueOf(size));
         List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList = new ArrayList<>();
 
+        //팔로잉 없으면 빈 배열 반환
         MovieLogfollowingInfoDto movieLogfollowersInfoDto = null;
         for (int i = 0; i < size; i++) {
             movieLogfollowersInfoDto = MovieLogfollowingInfoDto.builder()
@@ -124,6 +125,8 @@ public class MovieLogService {
         List<User> userList = followService.getFollowersByUserId(id);
         int size = userList.size();
         log.info("팔로워 수 "+String.valueOf(size));
+
+        //팔로워 없으면 빈 배열 반환
 
         List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList = new ArrayList<>();
 
@@ -161,9 +164,11 @@ public class MovieLogService {
     }
     private List<Review> getReviewList(Long id) {
         List<Review> reviewList = reviewService.getReviewByUserId(id);
+
         if (reviewList == null) {
             //TODO: 프론트 에러 응답
-            throw new IllegalArgumentException(GeneralErrorCode.NO_REVIEW.getMessage());
+//            throw new IllegalArgumentException(GeneralErrorCode.NO_REVIEW.getMessage());
+            return new ArrayList<>();
         }
         return reviewList;
     }
