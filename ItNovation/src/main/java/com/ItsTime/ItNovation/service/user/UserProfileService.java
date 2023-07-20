@@ -57,7 +57,7 @@ public class UserProfileService {
 
         if (Objects.equals(user.getId(), findUserByNickName.getId())) {
             log.info("기존에 존재하는 닉네임과 유사합니다");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(GeneralErrorCode.CONFLICT_NICKNAME.getMessage());
+            return ResponseEntity.status(HttpStatus.OK).body(GeneralErrorCode.CONFLICT_NICKNAME.getMessage());
         }
         log.info("중복되는 닉네임");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(GeneralErrorCode.DUPLICATED_NICKNAME.getMessage());
