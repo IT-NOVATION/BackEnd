@@ -4,7 +4,6 @@ import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.star.Star;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
-import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
 import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateRequestDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Optional;
 
@@ -57,9 +55,9 @@ public class StarService {
     }
 
     @Transactional
-    public Float getMovieAvgScore(long movieId) {
-        float score = starRepository.findAvgScoreByMovieId(movieId);
-        return score;
+    public float getMovieAvgScore(long movieId) {
+        Optional<Float> score = starRepository.findAvgScoreByMovieIdOnMovieLog(movieId);
+        return score.orElse(0f);
     }
 
 }
