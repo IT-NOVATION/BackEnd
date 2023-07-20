@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -190,16 +189,16 @@ public class ReviewService {
 
         ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
-            .hasCheckDate(review.getHasCheckDate())
-            .hasGoodActing(review.getHasGoodActing())
-            .hasGoodDiction(review.getHasGoodDiction())
-            .hasSpoiler(review.getHasSpoiler())
-            .hasGoodDirecting(review.getHasGoodDirecting())
-            .hasGoodOst(review.getHasGoodOst())
-            .hasGoodScenario(review.getHasGoodScenario())
-            .hasGoodProduction(review.getHasGoodProduction())
-            .hasGoodVisual(review.getHasGoodVisual())
-            .hasGoodCharterCharming(review.getHasGoodCharterCharming())
+            .hasCheckDate(validateNull(review.getHasCheckDate()))
+            .hasGoodActing(validateNull(review.getHasGoodActing()))
+            .hasGoodDiction(validateNull(review.getHasGoodDiction()))
+            .hasSpoiler(validateNull(review.getHasSpoiler()))
+            .hasGoodDirecting(validateNull(review.getHasGoodDirecting()))
+            .hasGoodOst(validateNull(review.getHasGoodOst()))
+            .hasGoodScenario(validateNull(review.getHasGoodScenario()))
+            .hasGoodProduction(validateNull(review.getHasGoodProduction()))
+            .hasGoodVisual(validateNull(review.getHasGoodVisual()))
+            .hasGoodCharterCharming(validateNull(review.getHasGoodCharterCharming()))
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
             .star(review.getStar())
@@ -209,6 +208,14 @@ public class ReviewService {
 
         return reviewInfoDto;
     }
+
+    private Boolean validateNull(Boolean feature) {
+        if(feature==null){
+            return false;
+        }
+        return feature;
+    }
+
     @Transactional
     public ResponseEntity getMovieInfo(Long movieId) {
         try {
