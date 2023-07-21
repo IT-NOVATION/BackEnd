@@ -57,7 +57,7 @@ public class CommentService {
     public ResponseEntity readComment(int page, Long reviewId) {
         try {
 
-            Pageable pageable = PageRequest.of(page - 1, 5);
+            Pageable pageable = PageRequest.of(page - 1, 15);
             List<Comment> newestByComment = commentRepository.findByNewestComment(reviewId, pageable);
             List<CommentReadDto> commentReadDtoList = new ArrayList<>();
             int lastPage = getLastPage();
@@ -123,7 +123,7 @@ public class CommentService {
         try {
             commentRepository.deleteById(commentId);
 
-            GradeService.checkGrade()
+            //GradeService.checkGrade()
             return ResponseEntity.status(200).body("삭제 성공했습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("삭제에 실패했습니다.");
