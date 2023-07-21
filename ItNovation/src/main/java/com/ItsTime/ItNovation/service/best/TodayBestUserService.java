@@ -65,15 +65,15 @@ public class TodayBestUserService {
 
     private void madeInternalResponseDto(List<TopUserReviewDto> topUserReviewDtos,
         List<TopUserResponseDto> top5UserResponseDtos, User user, User loginUser) {
-        int followers = user.getFollowStates().size();
+        Long following = (long) user.getFollowStates().size();
         log.info(yesterday.toString());
-        Long following = followRepository.countByFollowedUserId(user.getId());
+        Long followers = followRepository.countByFollowedUserId(user.getId());
         List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(yesterday, user.getId());
         addBestReview(topUserReviewDtos, reviews);
         Pageable remainPageable = PageRequest.of(0, 2);
         addNewestReview(topUserReviewDtos, user, remainPageable);
         TopUserResponseDto topUserResponseDto = buildTopUserResponseDto(
-            topUserReviewDtos, user, followers, following, loginUser);
+            topUserReviewDtos, user, following, followers, loginUser);
         top5UserResponseDtos.add(topUserResponseDto);
     }
 
@@ -99,7 +99,7 @@ public class TodayBestUserService {
     }
 
     private TopUserResponseDto buildTopUserResponseDto(
-        List<TopUserReviewDto> topUserReviewDtos, User user, int followers, Long following, User loginUser) {
+        List<TopUserReviewDto> topUserReviewDtos, User user, Long following, Long followers, User loginUser) {
         TopUserResponseDto topUserResponseDto = TopUserResponseDto.builder()
             .userId(user.getId())
             .profileImg(user.getProfileImg())
