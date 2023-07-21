@@ -10,11 +10,13 @@ import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
+import com.ItsTime.ItNovation.service.grade.GradeService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommentService {
 
     private final CommentRepository commentRepository;
@@ -64,13 +67,16 @@ public class CommentService {
             validatePageRequest(page, lastPage);
             CommentReadResponseDto responseDto = getCommentReadResponseDto(
                 page, newestByComment, commentReadDtoList, lastPage);
+
             return ResponseEntity.status(200).body(responseDto);
         } catch (Exception e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
-    private static void validatePageRequest(int page, int lastPage) {
+    private void validatePageRequest(int page, int lastPage) {
+        log.info(String.valueOf(lastPage));
+        log.info(String.valueOf(page));
         if (lastPage < page) {
             throw new IllegalArgumentException("잘못된 페이지를 호출하였습니다!");
         }
