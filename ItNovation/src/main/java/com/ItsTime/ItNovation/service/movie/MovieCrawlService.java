@@ -33,6 +33,7 @@ public class MovieCrawlService {
     private final PopularMovieRepository popularMovieRepository;
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
+    private final StarRepository starRepository;
 
 
     @Value("${ttkey}")
@@ -53,6 +54,9 @@ public class MovieCrawlService {
 
 
     private String KOFI_URL= "https://kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key=";
+
+
+
 
     public Map<String, Movie> getTitleAndMovie() {
         //여기 참고 https://developers.themoviedb.org/3/movies/get-movie-images
@@ -313,20 +317,21 @@ public class MovieCrawlService {
                 savePopularMovie(movieInfo);
             }
 
-            Movie id = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
+            Movie movie = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
             String title = (String) movieInfo.get("title");
             String movieImg = (String) movieInfo.get("movieImg");
             Double popularity = (Double) movieInfo.get("popularity");
 
             MoviePopularDto moviePopularDto = MoviePopularDto.builder()
-                    .movieId(id.getId())
+                    .movieId(movie.getId())
                     .movieTitle(title)
                     .movieImg(movieImg)
                     .popularity(popularity.intValue())
+                    .starScore(getAvgScoreByMovieId(movie))
                     .build();
 
             PopularMovie moviePopular = PopularMovie.builder()
-                    .movieId(id.getId())
+                    .movieId(movie.getId())
                     .title(title)
                     .movieImg(movieImg)
                     .popularity(popularity)
@@ -336,6 +341,15 @@ public class MovieCrawlService {
         }
 
         return moviePopularDtos;
+    }
+
+    private Float getAvgScoreByMovieId(Movie movie) {
+        Float avgScoreByMovie = starRepository.findAvgScoreByMovieId(movie.getId());
+        if(avgScoreByMovie == null){
+            return 0.0f;
+        }
+
+        return starRepository.findAvgScoreByMovieId(movie.getId());
     }
 
     private static void buildMovieInfo(JsonNode movieNode, Map<String, Object> movieInfo) {
