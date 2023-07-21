@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.domain.comment;
 
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByNewestComment(@Param("reviewId")Long reviewId, Pageable pageable);
 
 
+    @Query("select c from Comment  c where c.review.reviewId=:reviewId")
+    List<Comment> findAllByReviewId(@Param("reviewId") Long reviewId);
 }
