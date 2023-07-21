@@ -290,7 +290,7 @@ public class MovieCrawlService {
     public List<MoviePopularDto> getPopularMovies(){
         RestTemplate restTemplate = new RestTemplate();
         popularMovieRepository.deleteAll();
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular" + "?api_key=" + API_KEY+"&language=ko-KR", String.class);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY+"&language=ko-KR", String.class);
         String json = responseEntity.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> movies = new ArrayList<>();
@@ -402,7 +402,7 @@ public class MovieCrawlService {
     }
 
     private MovieRecommendDto mapMovieToResponseDto(Movie movie) {
-        Float averageStarScore = reviewRepository.findAvgScoreByMovieId(movie.getId());
+        Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId());
 
         return MovieRecommendDto.builder()
                 .movieId(movie.getId())

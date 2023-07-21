@@ -12,6 +12,9 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
+import com.ItsTime.ItNovation.domain.star.Star;
+import com.ItsTime.ItNovation.domain.star.StarRepository;
+import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
@@ -35,6 +38,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
     private final ReviewLikeRepository reviewLikeRepository;
+    private final StarRepository starRepository;
 
 
     @Transactional
@@ -61,7 +65,9 @@ public class ReviewService {
     }
 
     private Review saveReview(ReviewPostRequestDto reviewPostRequestDto, User nowUser, Movie nowMovie) {
-        Review review=Review.builder().star(reviewPostRequestDto.getStar())
+
+
+        Review review=Review.builder().star(saveStarAndGet(reviewPostRequestDto, nowMovie, nowUser))
                 .movie(nowMovie)
                 .user(nowUser)
                 .reviewTitle(reviewPostRequestDto.getReviewTitle())
@@ -83,6 +89,26 @@ public class ReviewService {
 
         reviewRepository.save(review);
         return review;
+    }
+
+    private Float saveStarAndGet(ReviewPostRequestDto reviewPostRequestDto,Movie movie, User user) {
+        Float starScore = reviewPostRequestDto.getStar();
+
+        Optional<Star> existingStar = starRepository.findByUserAndMovie(user, movie);
+        if (existingStar.isPresent()) {//존재하면, 스타 스코어만 업데이트
+            Star star = existingStar.get();
+            star.updateScore(starScore);
+            starRepository.save(star);
+        } else {//존재하지 않는다면, 새롭게 생성
+            Star build = Star.builder()
+                .user(user)
+                .movie(movie)
+                .score(starScore)
+                .build();
+            starRepository.save(build);
+        }
+
+        return starScore;
     }
 
     @Transactional
@@ -186,7 +212,6 @@ public class ReviewService {
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
-
         ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
             .hasCheckDate(validateNull(review.getHasCheckDate()))
