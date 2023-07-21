@@ -4,7 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class LoginStateDto {
+public class
+LoginStateDto {
     private Boolean loginState;
     private Long userId;
     private String nickname;

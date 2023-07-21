@@ -17,8 +17,9 @@ public class TopUserResponseDto {
     private String nickName;
     private String introduction;
     private Grade grade;
-    private int followers;
+    private Long followers;
     private Long followings;
+    private Boolean isLoginedUserFollowsNowUser;
 
 
 
@@ -26,7 +27,7 @@ public class TopUserResponseDto {
 
     @Builder
     public TopUserResponseDto(Long userId, String profileImg, String nickName, String introduction,
-                              Grade grade, int followers, Long followings, List<TopUserReviewDto> reviews) {
+                              Grade grade, Long followers, Long followings, List<TopUserReviewDto> reviews, Boolean isLoginedUserFollowsNowUser) {
         this.userId = userId;
         this.profileImg = profileImg;
         this.nickName = nickName;
@@ -35,5 +36,6 @@ public class TopUserResponseDto {
         this.followers = followers;
         this.followings = followings;
         this.reviews = reviews;
+        this.isLoginedUserFollowsNowUser=isLoginedUserFollowsNowUser;
     }
 }
