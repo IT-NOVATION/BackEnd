@@ -2,7 +2,6 @@ package com.ItsTime.ItNovation.service.movielog;
 
 import com.ItsTime.ItNovation.common.GeneralErrorCode;
 import com.ItsTime.ItNovation.domain.movie.Movie;
-import com.ItsTime.ItNovation.domain.movieLike.MovieLikeRepository;
 import com.ItsTime.ItNovation.domain.movielog.dto.*;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.user.User;
@@ -38,7 +37,7 @@ public class MovieLogService {
     private final JwtService jwtService;
 
     @Transactional
-    public ResponseEntity getMovieLogResponse(String email) {
+    public ResponseEntity getMovieLogResponse(String email, Optional<String> accessToken) {
 
         try {
             User findUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage()));
@@ -46,14 +45,25 @@ public class MovieLogService {
             List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList=getMovieLogFollowers(findUser);
             List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList = getMovieLogFollowings(findUser);
             List<MovieLogReviewInfoDto> movieLogReviewInfoDtoList=getMovieLogReviews(findUser);
-            List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList = getMovieLogInterestedMovies(findUser);
+            List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList = new ArrayList<>();
+            Boolean isLoginedUserFollowsNowUser = false;
 
+            if (accessToken.isPresent()) {
+                String nowUserEmail=jwtService.extractEmail(accessToken.get()).get();
+                User nowLoginedUser = userRepository.findByEmail(nowUserEmail).get();
+
+                isLoginedUserFollowsNowUser = isLoginedUserFollowsNowUser(findUser, nowLoginedUser);
+                movieLogInterestedMovieInfoDtoList = getMovieLogInterestedMovies(findUser, nowLoginedUser);
+            } else {
+                movieLogInterestedMovieInfoDtoList = getMovieLogInterestedMovies(findUser, null);
+            }
             MovieLogResponseDto movieLogResponseDto=MovieLogResponseDto.builder()
                     .movieLogUserInfoDto(movieLogUserInfoDto)
                     .movieLogfollowersInfoDtoList(movieLogfollowersInfoDtoList)
                     .movieLogfollowingInfoDtoList(movieLogfollowingInfoDtoList)
                     .movieLogReviewInfoDtoList(movieLogReviewInfoDtoList)
                     .movieLogInterestedMovieInfoDtoList(movieLogInterestedMovieInfoDtoList)
+                    .isLoginedUserFollowsNowUser(isLoginedUserFollowsNowUser)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK).body(movieLogResponseDto);
@@ -62,6 +72,30 @@ public class MovieLogService {
         }
 
     }
+
+    /**
+     * 
+     * @param findUser
+     * @param nowLoginedUser
+     * @return 현재 로그인 된 유저가 무비로그 주인을 팔로우 하고 있는지의 여부
+     * 자신의 무비로그일 경우, 팔로우 안할 경우 -> false
+     * 팔로우 중일 경우 -> true
+     */
+    private Boolean isLoginedUserFollowsNowUser(User findUser, User nowLoginedUser) {
+        // FIXME: 로그인 한 유저와 무비로그 주인이 같을 경우 현재 프론트에서 처리중
+        List<User> MyfollowingUser = followService.getFollowingsByUserId(nowLoginedUser.getId());
+        if (MyfollowingUser.isEmpty()) {
+            return false;
+        } else {
+            for (User user : MyfollowingUser) {
+                if (MyfollowingUser.contains(findUser)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      *
      * @param findUser
@@ -96,6 +130,7 @@ public class MovieLogService {
         log.info("팔로잉 수 "+String.valueOf(size));
         List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList = new ArrayList<>();
 
+        //팔로잉 없으면 빈 배열 반환
         MovieLogfollowingInfoDto movieLogfollowersInfoDto = null;
         for (int i = 0; i < size; i++) {
             movieLogfollowersInfoDto = MovieLogfollowingInfoDto.builder()
@@ -122,8 +157,6 @@ public class MovieLogService {
     private List<MovieLogfollowersInfoDto> getMovieLogfollowersInfoDtoList(Long id) {
         List<User> userList = followService.getFollowersByUserId(id);
         int size = userList.size();
-        log.info("팔로워 수 "+String.valueOf(size));
-
         List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList = new ArrayList<>();
 
         MovieLogfollowersInfoDto movieLogfollowersInfoDto = null;
@@ -160,9 +193,11 @@ public class MovieLogService {
     }
     private List<Review> getReviewList(Long id) {
         List<Review> reviewList = reviewService.getReviewByUserId(id);
-        if (reviewList == null) {
+
+        if (reviewList.isEmpty()) {
             //TODO: 프론트 에러 응답
-            throw new IllegalArgumentException(GeneralErrorCode.NO_REVIEW.getMessage());
+//            throw new IllegalArgumentException(GeneralErrorCode.NO_REVIEW.getMessage());
+            return new ArrayList<>();
         }
         return reviewList;
     }
@@ -178,14 +213,17 @@ public class MovieLogService {
         MovieLogMovieofReviewsInfoDto movieLogMovieofReviewsInfoDto = MovieLogMovieofReviewsInfoDto.builder()
                 .movieId(movieLogReviewList.get(i).getMovie().getId())
                 .movieImg(movieLogReviewList.get(i).getMovie().getMovieImg()).build();
+
+        String createdDate = String.valueOf(movieLogReviewList.get(i).getUser().getCreatedDate()).split("T")[0];
         return MovieLogReviewInfoDto.builder()
                 .reviewId(movieLogReviewList.get(i).getReviewId())
                 .reviewTitle(movieLogReviewList.get(i).getReviewTitle())
                 .star(movieLogReviewList.get(i).getStar())
                 .reviewMainText(movieLogReviewList.get(i).getReviewMainText())
                 //TODO: BaseTimeEntity 넘겨줄때 string 으로 할지 localdatetime 으로 할지 상의해보고 수정하기
-                .createdDate(String.valueOf(movieLogReviewList.get(i).getCreatedDate()))
+                .createdDate(createdDate)
                 .likeCount(reviewLikecount)
+                .hasSpoiler(movieLogReviewList.get(i).getHasSpoiler())
                 //TODO: 댓글 서비스 구현 후 수정하기
                 .comments(0)
                 .movieLogMovieofReviewsInfoDtoList(movieLogMovieofReviewsInfoDto)
@@ -198,40 +236,55 @@ public class MovieLogService {
      * @param findUser
      * @return 유저의 관심영화 가져오기
      */
-    private List<MovieLogInterestedMovieInfoDto> getMovieLogInterestedMovies(User findUser) {
+    private List<MovieLogInterestedMovieInfoDto> getMovieLogInterestedMovies(User findUser, User nowLoginedUser) {
+
         List<Movie> movieList = movieLikeService.UserInterestedMovieList(findUser.getId());
+
         log.info("getMovieLogInterestedMovies " + movieList.size());
         List<MovieLogInterestedMovieInfoDto> movieLogInterestedMovieInfoDtoList = new ArrayList<>();
         MovieLogInterestedMovieInfoDto movieLogInterestedMovieInfoDto=null;
         for (int i = 0; i < movieList.size(); i++) {
-            movieLogInterestedMovieInfoDto = getMovieLogInterestedMovieInfoDto(findUser, movieList, i);
+            movieLogInterestedMovieInfoDto = getMovieLogInterestedMovieInfoDto(findUser, movieList, i, nowLoginedUser);
             movieLogInterestedMovieInfoDtoList.add(movieLogInterestedMovieInfoDto);
         }
         return movieLogInterestedMovieInfoDtoList;
     }
 
-    private MovieLogInterestedMovieInfoDto getMovieLogInterestedMovieInfoDto(User findUser, List<Movie> movieList, int i) {
+    private MovieLogInterestedMovieInfoDto getMovieLogInterestedMovieInfoDto(User findUser, List<Movie> movieList, int i, User nowLoginedUser) {
         MovieLogInterestedMovieInfoDto movieLogInterestedMovieInfoDto;
         long movieId = movieList.get(i).getId();
         long userId = findUser.getId();
         float avgMovieScore = starService.getMovieAvgScore(movieId);
-        int count = movieLikeService.MovieLikeCountByUserIdAndMovieId(userId, movieId);
-        Boolean isReviewed = false;
-        if (count != 0) {
-            isReviewed = true;
-        }
+        Boolean hasReviewdOfInterestedMovieByLoginedUser = false;
+
+        hasReviewdOfInterestedMovieByLoginedUser = getHasReviewedOfInterestedMovieByLoginUser(nowLoginedUser, movieId, hasReviewdOfInterestedMovieByLoginedUser);
+
         movieLogInterestedMovieInfoDto = MovieLogInterestedMovieInfoDto.builder()
                 .movieId(movieId)
                 .movieImg(movieList.get(i).getMovieImg())
                 .star(avgMovieScore)
                 .title(movieList.get(i).getTitle())
-                .hasReviewed(isReviewed)
+                .hasReviewdByLoginedUser(hasReviewdOfInterestedMovieByLoginedUser)
                 .build();
+
         return movieLogInterestedMovieInfoDto;
     }
 
+    private Boolean getHasReviewedOfInterestedMovieByLoginUser(User nowLoginedUser, long movieId, Boolean hasReviewedOfInterestedMovieByLoginUser) {
+        log.info(String.valueOf(nowLoginedUser.getId()));
+        List<Review> reviewsOfLoginUser = reviewService.getReviewByUserId(nowLoginedUser.getId());
+        if (reviewsOfLoginUser.isEmpty()) {
+            return false;
+        } else {
+            for (Review review : reviewsOfLoginUser) {
+                if (review.getMovie().getId().equals(movieId)) {
+                    hasReviewedOfInterestedMovieByLoginUser = true;
+                }
+            }
+            return hasReviewedOfInterestedMovieByLoginUser;
+        }
 
-
+    }
 
 
 }

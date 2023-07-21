@@ -52,11 +52,11 @@ public class UserController {
         log.info("userProfileMe");
         String email = authentication.getName(); // 현재 사용자의 이메일 추출
 
-        // 사용자 정보 업데이트 및 서비스 호출
-        userProfileService.userProfileMe(userProfileDtoMe, email);
 
-        // 성공적으로 처리되었음을 나타내는 200 상태 코드 반환
-        return ResponseEntity.ok().build();
+        // 사용자 정보 업데이트 및 서비스 호출
+        return userProfileService.userProfileMe(userProfileDtoMe, email);
+
+
     }
     @PutMapping("/userProfile")
     public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto) {

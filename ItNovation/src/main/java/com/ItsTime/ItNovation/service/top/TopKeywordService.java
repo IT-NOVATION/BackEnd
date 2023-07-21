@@ -31,9 +31,7 @@ public class TopKeywordService {
 
         try {
             Movie movie = movieRepository.findById(movieId)
-
                     .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
-
 
             MovieFeatureDto featureCount = getFeatureCount(featureCountMap, movie);
             return ResponseEntity.status(200).body(featureCount);
