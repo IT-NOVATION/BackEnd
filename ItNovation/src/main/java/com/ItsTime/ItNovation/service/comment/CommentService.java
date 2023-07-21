@@ -58,7 +58,7 @@ public class CommentService {
     @Transactional
     public ResponseEntity readComment(int page) {
         try {
-            Pageable pageable = PageRequest.of(page - 1, 5);
+            Pageable pageable = PageRequest.of(page - 1, 15);
             List<Comment> newestByComment = commentRepository.findByNewestComment(pageable);
             List<CommentReadDto> commentReadDtoList = new ArrayList<>();
             int lastPage = getLastPage();
@@ -113,10 +113,10 @@ public class CommentService {
     }
 
     private int getLastPage() {
-        if (commentRepository.findAll().size() % 5 == 0) {
-            return commentRepository.findAll().size() / 5;
+        if (commentRepository.findAll().size() % 15 == 0) {
+            return commentRepository.findAll().size() / 15;
         }
-        return commentRepository.findAll().size() / 5 + 1;
+        return commentRepository.findAll().size() / 15 + 1;
     }
 
     @Transactional
