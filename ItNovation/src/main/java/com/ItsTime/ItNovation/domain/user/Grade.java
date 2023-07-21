@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Grade {
     STANDARD("STANDARD"),
-    PREIMUM("PREIMUM"),
+    PREMIUM("PREMIUM"),
     VIP("VIP"),
     SPECIAL("SPECIAL");
 

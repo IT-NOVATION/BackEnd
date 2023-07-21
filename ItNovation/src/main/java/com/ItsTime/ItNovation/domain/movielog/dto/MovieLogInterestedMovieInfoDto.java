@@ -9,14 +9,15 @@ public class MovieLogInterestedMovieInfoDto {
     private String movieImg;
     private Float star;
     private String title;
-    private Boolean hasReviewed;
+
+    private Boolean hasReviewdByLoginedUser;
 
     @Builder
-    public MovieLogInterestedMovieInfoDto(Long movieId, String movieImg, Float star, String title, Boolean hasReviewed) {
+    public MovieLogInterestedMovieInfoDto(Long movieId, String movieImg, Float star, String title, Boolean hasReviewdByLoginedUser) {
         this.movieId = movieId;
         this.movieImg = movieImg;
         this.star = star;
         this.title = title;
-        this.hasReviewed = hasReviewed;
+        this.hasReviewdByLoginedUser = hasReviewdByLoginedUser;
     }
 }
