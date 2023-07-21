@@ -14,12 +14,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.server.authentication.AnonymousAuthenticationWebFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,10 +54,11 @@ public class CommentService {
 
 
     @Transactional
-    public ResponseEntity readComment(int page) {
+    public ResponseEntity readComment(int page, Long reviewId) {
         try {
-            Pageable pageable = PageRequest.of(page - 1, 15);
-            List<Comment> newestByComment = commentRepository.findByNewestComment(pageable);
+
+            Pageable pageable = PageRequest.of(page - 1, 5);
+            List<Comment> newestByComment = commentRepository.findByNewestComment(reviewId, pageable);
             List<CommentReadDto> commentReadDtoList = new ArrayList<>();
             int lastPage = getLastPage();
             validatePageRequest(page, lastPage);
@@ -123,6 +122,8 @@ public class CommentService {
     public ResponseEntity deleteComment(Long commentId) {
         try {
             commentRepository.deleteById(commentId);
+
+            GradeService.checkGrade()
             return ResponseEntity.status(200).body("삭제 성공했습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("삭제에 실패했습니다.");

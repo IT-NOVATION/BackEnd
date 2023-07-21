@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,9 +36,9 @@ public class CommentController {
      * @param page 당 댓글 5개
      * @return
      */
-    @GetMapping("/read/{page}")
-    public ResponseEntity commentRead(@PathVariable int page){
-        return commentService.readComment(page);
+    @GetMapping("/read")
+    public ResponseEntity commentRead(@RequestParam("page") int page, @RequestParam("reviewId") Long reviewId){
+        return commentService.readComment(page, reviewId);
     }
 
 
