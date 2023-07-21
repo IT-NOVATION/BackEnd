@@ -10,18 +10,16 @@ import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.server.authentication.AnonymousAuthenticationWebFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,25 +30,22 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+
     @Transactional
-    public ResponseEntity writeComment(CommentWriteRequestDto commentDto) {
+    public ResponseEntity writeComment(CommentWriteRequestDto commentDto, String email) {
         try {
+            User findUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
             Comment comment = Comment.builder()
                 .commentText(commentDto.getCommentText())
                 .review(getReview(commentDto))
-                .user(getUser(commentDto))
+                .user(findUser)
                 .build();
             commentRepository.save(comment);
             return ResponseEntity.status(200).body("성공적으로 저장되었습니다.");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
-    }
-
-    private User getUser(CommentWriteRequestDto commentDto) {
-        User user = userRepository.findById(commentDto.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
-        return user;
     }
 
     private Review getReview(CommentWriteRequestDto commentDto) {
@@ -67,17 +62,24 @@ public class CommentService {
             List<Comment> newestByComment = commentRepository.findByNewestComment(pageable);
             List<CommentReadDto> commentReadDtoList = new ArrayList<>();
             int lastPage = getLastPage();
-                CommentReadResponseDto responseDto = getCommentReadResponseDto(
-                    page, newestByComment, commentReadDtoList, lastPage);
-                return ResponseEntity.status(200).body(responseDto);
-        }catch (Exception e){
-            return ResponseEntity.status(400).body("댓글을 읽는데 오류가 발생했습니다.");
+            validatePageRequest(page, lastPage);
+            CommentReadResponseDto responseDto = getCommentReadResponseDto(
+                page, newestByComment, commentReadDtoList, lastPage);
+            return ResponseEntity.status(200).body(responseDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    private static void validatePageRequest(int page, int lastPage) {
+        if (lastPage < page) {
+            throw new IllegalArgumentException("잘못된 페이지를 호출하였습니다!");
         }
     }
 
     private CommentReadResponseDto getCommentReadResponseDto(int page,
         List<Comment> newestByComment, List<CommentReadDto> commentReadDtoList, int lastPage) {
-        for(int i=0; i< newestByComment.size(); i++){
+        for (int i = 0; i < newestByComment.size(); i++) {
             Comment nowComment = newestByComment.get(i);
             CommentReadDto readDto = buildReadDto(nowComment);
             commentReadDtoList.add(readDto);
@@ -111,10 +113,10 @@ public class CommentService {
     }
 
     private int getLastPage() {
-        if(commentRepository.findAll().size()%5==0){
-            return commentRepository.findAll().size()/5;
+        if (commentRepository.findAll().size() % 5 == 0) {
+            return commentRepository.findAll().size() / 5;
         }
-        return commentRepository.findAll().size()/5+1;
+        return commentRepository.findAll().size() / 5 + 1;
     }
 
     @Transactional
@@ -122,7 +124,7 @@ public class CommentService {
         try {
             commentRepository.deleteById(commentId);
             return ResponseEntity.status(200).body("삭제 성공했습니다.");
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(400).body("삭제에 실패했습니다.");
         }
     }

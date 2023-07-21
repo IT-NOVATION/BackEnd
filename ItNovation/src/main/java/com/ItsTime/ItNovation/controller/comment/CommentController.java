@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +22,11 @@ public class CommentController {
 
 
     private final CommentService commentService;
-
     @PostMapping("/write")
-    public ResponseEntity commentWrite(@RequestBody CommentWriteRequestDto commentDto){
-        return commentService.writeComment(commentDto);
+    public ResponseEntity commentWrite(@RequestBody CommentWriteRequestDto commentDto, Authentication authentication){
+        String email = authentication.getName();
+
+        return commentService.writeComment(commentDto, email);
     }
 
 

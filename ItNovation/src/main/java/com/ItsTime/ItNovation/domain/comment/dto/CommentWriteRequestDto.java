@@ -6,8 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class CommentWriteRequestDto {
-    private Long userId;
     private Long reviewId;
     private String commentText;
-
 }
