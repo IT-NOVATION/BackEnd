@@ -3,27 +3,36 @@ package com.ItsTime.ItNovation.service.review;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.movie.dto.LatestReviewMovieResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewPostMovieInfoResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewCountResponseDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
+
+import com.ItsTime.ItNovation.domain.review.dto.*;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
+
+
+
 import com.ItsTime.ItNovation.domain.star.Star;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
+
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
+
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.PageRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -144,16 +153,15 @@ public class ReviewService {
     private ReviewReadResponseDto mergeInfoDto(ReviewInfoDto reviewInfoDto, ReviewMovieInfoDto reviewMovieInfoDto,
         ReviewUserInfoDto reviewUserInfoDto, ReviewLoginUserInfoDto reviewLoginUserInfoDto) {
 
-        ReviewReadResponseDto reviewReadResponseDto = ReviewReadResponseDto.builder()
+        return ReviewReadResponseDto.builder()
             .review(reviewInfoDto)
             .movie(reviewMovieInfoDto)
             .user(reviewUserInfoDto)
             .loginUser(reviewLoginUserInfoDto)
             .build();
-        
-        return reviewReadResponseDto;
 
     }
+
 
 
     private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser, Review review) {
@@ -184,7 +192,7 @@ public class ReviewService {
     }
 
     private ReviewUserInfoDto madeUserInfoDto(User user, Review review) {
-        ReviewUserInfoDto reviewUserInfoDto = ReviewUserInfoDto.builder()
+        return ReviewUserInfoDto.builder()
             .userId(user.getId())
             .bgImg(user.getBgImg())
             .nickname(user.getNickname())
@@ -195,11 +203,11 @@ public class ReviewService {
             .followingNum(followRepository.countByFollowingUserId(user.getId()))
             .hasReviewLike(isUserLikeReview(review, user))
             .build();
-        return reviewUserInfoDto;
     }
 
     private ReviewMovieInfoDto madeMovieInfoDto(Movie movie) {
-        ReviewMovieInfoDto reviewMovieInfoDto = ReviewMovieInfoDto.builder()
+
+        return ReviewMovieInfoDto.builder()
             .movieId(movie.getId())
             .movieCountry(movie.getMovieCountry())
             .movieImg(movie.getMovieImg())
@@ -207,12 +215,10 @@ public class ReviewService {
             .movieReleaseDate(movie.getMovieDate())
             .title(movie.getTitle())
             .build();
-
-        return reviewMovieInfoDto;
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
-        ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
+        return ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
             .hasCheckDate(validateNull(review.getHasCheckDate()))
             .hasGoodActing(validateNull(review.getHasGoodActing()))
@@ -230,8 +236,6 @@ public class ReviewService {
             .reviewLikeNum(reviewLikeRepository.countReviewLikeByReviewId(review.getReviewId()))
             .watchDate(review.getWatchDate())
             .build();
-
-        return reviewInfoDto;
     }
 
     private Boolean validateNull(Boolean feature) {
@@ -256,12 +260,11 @@ public class ReviewService {
 
     private ReviewPostMovieInfoResponseDto buildResponse(Long movieId,
         Movie findMovie) {
-        ReviewPostMovieInfoResponseDto responseDto = ReviewPostMovieInfoResponseDto.builder()
+        return ReviewPostMovieInfoResponseDto.builder()
             .movieId(movieId)
             .movieImg(findMovie.getMovieImg())
             .title(findMovie.getTitle())
             .build();
-        return responseDto;
     }
     @Transactional
     public ResponseEntity reviewCount(Long movieId){
@@ -276,4 +279,31 @@ public class ReviewService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
+    @Transactional
+    public List<LatestReviewResponseDto> getLatestReviews() {
+        List<User> recentReviewers = reviewRepository.findNewestReview(PageRequest.of(0, 3));
+        return recentReviewers.stream().map(recentReviewer -> {
+            List<LatestReviewDto> reviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 3))
+                    .stream()
+                    .map(review -> LatestReviewDto.builder()
+                            .reviewId(review.getReviewId())
+                            .reviewTitle(review.getReviewTitle())
+                            .movie(LatestReviewMovieResponseDto.builder()
+                                    .movieId(review.getMovie().getId())
+                                    .movieImg(review.getMovie().getMovieImg())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList());
+
+            return LatestReviewResponseDto.builder()
+                    .userId(recentReviewer.getId())
+                    .profileImg(recentReviewer.getProfileImg())
+                    .nickname(recentReviewer.getNickname())
+                    .introduction(recentReviewer.getIntroduction())
+                    .reviews(reviews)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
 }
