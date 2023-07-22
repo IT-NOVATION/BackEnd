@@ -63,8 +63,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Long countByMovieId(Long movieId);
 
 
-    @Query("SELECT r.user FROM Review r ORDER BY r.createdDate DESC")
-    List<User> findNewestReview(Pageable pageable);
+    @Query("SELECT r.user FROM Review r GROUP BY r.user ORDER BY MAX(r.createdDate) DESC")
+    List<User> findUsersWithNewestReview(Pageable pageable);
 
     Optional<Review> findByUserAndMovie(User user,Movie movie);
 
