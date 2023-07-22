@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.controller.movie;
+package com.ItsTime.ItNovation.controller.search;
 
 import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchRequestDto;

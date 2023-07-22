@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.controller.user;
+package com.ItsTime.ItNovation.controller.search;
 
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchRequestDto;

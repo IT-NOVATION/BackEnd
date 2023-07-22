@@ -69,7 +69,9 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/review/movieInfo/**"),
             new AntPathRequestMatcher("/custom-logout"),
             new AntPathRequestMatcher("/movielog/**"),
+            new AntPathRequestMatcher("/movie-search/**"),
             new AntPathRequestMatcher("/comment/read/**")
+
 
 
             );
