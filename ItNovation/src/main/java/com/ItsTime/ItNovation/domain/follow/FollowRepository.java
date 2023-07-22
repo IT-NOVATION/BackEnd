@@ -44,7 +44,7 @@ public interface FollowRepository extends JpaRepository<FollowState, Long> {
     List<User> findFollowingsByUserId(@Param("userId") Long userId);
 
 
-    default List<User> findTop3PushUsersByTargetUserCount() {
+    default List<User> findTop3TargetUsersByPushUserCount() {
         return findTop3PushUsersByTargetUserCount(PageRequest.of(0, 3));
     }
 
