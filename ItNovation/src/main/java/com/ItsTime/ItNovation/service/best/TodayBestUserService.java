@@ -115,7 +115,9 @@ public class TodayBestUserService {
     }
 
     private Boolean getIsLoginUserPushFollow(User loginUser, User user) {
-
+        if(loginUser == null){
+            return false;
+        }
         Optional<FollowState> byPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
             loginUser.getId(), user.getId());
         if(byPushUserAndFollowUser.isEmpty()){
