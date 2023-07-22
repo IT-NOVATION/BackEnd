@@ -1,10 +1,12 @@
 package com.ItsTime.ItNovation.domain.user;
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
+import com.ItsTime.ItNovation.domain.comment.Comment;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,14 +41,17 @@ public class User extends BaseTimeEntity {
 
 
     @OneToMany(mappedBy = "user")
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
 
     //ReviewLike 엔티티 클래스가 Review 엔티티 클래스의 reviewId 필드를 참조하여 연관관계를 맺고 있다는 것
     @OneToMany(mappedBy= "user")
-    private List<ReviewLike> reviewLikes;
+    private List<ReviewLike> reviewLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "pushUser")
-    private List<FollowState> followStates;
+    private List<FollowState> followStates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<Comment> commentList = new ArrayList<>();
 
 
     // 유저 권한 설정 메소드
@@ -94,6 +99,14 @@ public class User extends BaseTimeEntity {
         this.bgImg = bgImg;
         return this;
     }
+    public User update( String introduction,String profileImg,String bgImg) {
+
+        this.introduction = introduction;
+        this.profileImg = profileImg;
+        this.bgImg = bgImg;
+        return this;
+    }
+
 
     public User update (String password){
         this.password = password;
