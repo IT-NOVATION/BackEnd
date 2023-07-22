@@ -20,17 +20,9 @@ public class TopFollowerController {
     private final TopFollowerService topFollowerService;
     private final JwtService jwtService;
 
-    @GetMapping("/test/today/popularUser")
-    public ResponseEntity<List<TopFollowerResponseDto>> getTopFollowers(HttpServletRequest request) {
-        Optional<String> s = jwtService.extractAccessToken(request);
-        if(s.isPresent()){
-            Optional<String> email = jwtService.extractEmail(s.get());
-            if(email.isPresent()) {
-                List<TopFollowerResponseDto> topFollowers = topFollowerService.getTopFollowers(email.get());
-                return ResponseEntity.ok(topFollowers);
-            }
-        }
-        List<TopFollowerResponseDto> topFollowers = topFollowerService.getTopFollowers(null);
-        return ResponseEntity.status(200).body(topFollowers);
+    @GetMapping("/today/popularUser")
+    public ResponseEntity getTopFollowers(HttpServletRequest request) {
+        Optional<String> accessToken = jwtService.extractAccessToken(request);
+        return topFollowerService.getTopFollowers(accessToken);
     }
 }
