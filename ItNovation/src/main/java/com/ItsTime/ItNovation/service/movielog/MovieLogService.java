@@ -19,9 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -253,38 +251,57 @@ public class MovieLogService {
     private MovieLogInterestedMovieInfoDto getMovieLogInterestedMovieInfoDto(User findUser, List<Movie> movieList, int i, User nowLoginedUser) {
         MovieLogInterestedMovieInfoDto movieLogInterestedMovieInfoDto;
         long movieId = movieList.get(i).getId();
-        long userId = findUser.getId();
         float avgMovieScore = starService.getMovieAvgScore(movieId);
-        Boolean hasReviewdOfInterestedMovieByLoginedUser = false;
 
-        hasReviewdOfInterestedMovieByLoginedUser = getHasReviewedOfInterestedMovieByLoginUser(nowLoginedUser, movieId, hasReviewdOfInterestedMovieByLoginedUser);
-
-        movieLogInterestedMovieInfoDto = MovieLogInterestedMovieInfoDto.builder()
-                .movieId(movieId)
-                .movieImg(movieList.get(i).getMovieImg())
-                .star(avgMovieScore)
-                .title(movieList.get(i).getTitle())
-                .hasReviewdByLoginedUser(hasReviewdOfInterestedMovieByLoginedUser)
-                .build();
-
-        return movieLogInterestedMovieInfoDto;
-    }
-
-    private Boolean getHasReviewedOfInterestedMovieByLoginUser(User nowLoginedUser, long movieId, Boolean hasReviewedOfInterestedMovieByLoginUser) {
-        log.info(String.valueOf(nowLoginedUser.getId()));
-        List<Review> reviewsOfLoginUser = reviewService.getReviewByUserId(nowLoginedUser.getId());
-        if (reviewsOfLoginUser.isEmpty()) {
-            return false;
+        Map<Boolean,Long> returnValue = getHasReviewedOfInterestedMovieByLoginUser(nowLoginedUser, movieId);
+        if (returnValue.containsKey(true)) {
+            return MovieLogInterestedMovieInfoDto.builder()
+                    .movieId(movieId)
+                    .movieImg(movieList.get(i).getMovieImg())
+                    .star(avgMovieScore)
+                    .title(movieList.get(i).getTitle())
+                    .hasReviewdByLoginedUser(true)
+                    .reviewId(returnValue.get(true))
+                    .build();
         } else {
-            for (Review review : reviewsOfLoginUser) {
-                if (review.getMovie().getId().equals(movieId)) {
-                    hasReviewedOfInterestedMovieByLoginUser = true;
-                }
-            }
-            return hasReviewedOfInterestedMovieByLoginUser;
+            return MovieLogInterestedMovieInfoDto.builder()
+                    .movieId(movieId)
+                    .movieImg(movieList.get(i).getMovieImg())
+                    .star(avgMovieScore)
+                    .title(movieList.get(i).getTitle())
+                    .hasReviewdByLoginedUser(false)
+                    .reviewId(null)
+                    .build();
         }
 
     }
+
+    private Map<Boolean,Long> getHasReviewedOfInterestedMovieByLoginUser(User nowLoginedUser, long movieId) {
+//        log.info(String.valueOf(nowLoginedUser.getId()));
+        Map<Boolean, Long> returnValue = new HashMap<>();
+        returnValue.put(false, null);
+        if (nowLoginedUser == null) {
+            return returnValue;
+        } else {
+            List<Review> reviewsOfLoginUser = reviewService.getReviewByUserId(nowLoginedUser.getId());
+            if (reviewsOfLoginUser.isEmpty()) {
+                return returnValue;
+            } else {
+                for (Review review : reviewsOfLoginUser) {
+                    if (review.getMovie().getId().equals(movieId)) {
+//                        hasReviewedOfInterestedMovieByLoginUser = true;
+                        returnValue.put(true, review.getReviewId());
+                        return returnValue;
+
+                    }
+                }
+                return returnValue;
+            }
+        }
+
+
+    }
+
 
 
 }
