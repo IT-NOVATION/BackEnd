@@ -11,7 +11,7 @@ public class LatestReviewResponseDto {
     private Long userId;
     private String profileImg;
     private Boolean isMyProfile;
-    private Boolean loginUserPushedFollow;
+    private Boolean isNowUserFollowThisUser;
     private String nickname;
     private String introduction;
     private List<LatestReviewDto> reviews;
@@ -21,7 +21,7 @@ public class LatestReviewResponseDto {
         this.userId = userId;
         this.profileImg = profileImg;
         this.isMyProfile = isMyProfile;
-        this.loginUserPushedFollow = loginUserPushedFollow;
+        this.isNowUserFollowThisUser = loginUserPushedFollow;
         this.nickname = nickname;
         this.introduction = introduction;
         this.reviews = reviews;
