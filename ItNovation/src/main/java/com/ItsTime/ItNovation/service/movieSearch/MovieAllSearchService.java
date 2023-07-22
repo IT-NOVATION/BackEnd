@@ -48,8 +48,10 @@ public class MovieAllSearchService {
     private MovieSearchResponseDto getMovieSearchResponseDto(int page, List<Movie> movieList, List<MovieSearchDto> movieSearchDtoList, int lastPage) {
         for (int i = 0; i < movieList.size(); i++) {
             Movie nowMovie = movieList.get(i);
+            log.info(nowMovie.getMovieDate());
             log.info(String.valueOf(nowMovie.getReviews().size()));
             MovieSearchDto movieSearchDto = BuildMovieSearchDto(nowMovie);
+
             movieSearchDtoList.add(movieSearchDto);
         }
         return MovieSearchResponseDto
@@ -115,5 +117,20 @@ public class MovieAllSearchService {
                 .nowPage(page)
                 .firstPage(1)
                 .build();
+    }
+
+    @Transactional
+    public ResponseEntity getMoiveSearchResponseByLatestReleaseDate(int page) {
+        try{
+            Pageable pageable = PageRequest.of(page - 1, 16);
+            List<Movie> movieList = movieRepository.moviesByReleaseDate(pageable);
+
+            List<MovieSearchDto> movieSearchDtoList = new ArrayList<>();
+            int lastPage = getLastPage();
+            MovieSearchResponseDto movieSearchResponseDto = getMovieSearchResponseDto(page, movieList, movieSearchDtoList, lastPage);
+            return ResponseEntity.status(HttpStatus.OK).body(movieSearchResponseDto);
+        }catch (Exception e){
+            return ResponseEntity.status(400).body("영화를 조회하는데 오류가 발생했습니다.");
+        }
     }
 }
