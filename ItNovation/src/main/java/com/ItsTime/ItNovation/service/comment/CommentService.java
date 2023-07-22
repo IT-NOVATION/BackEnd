@@ -5,6 +5,7 @@ import com.ItsTime.ItNovation.domain.comment.Comment;
 import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentReadDto;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentReadResponseDto;
+import com.ItsTime.ItNovation.domain.comment.dto.CommentUserInfoDto;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentWriteRequestDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
@@ -107,8 +108,18 @@ public class CommentService {
             .commentText(nowComment.getCommentText())
             .commentId(nowComment.getId())
             .createDate(getCreatedDate(nowComment))
+            .commentUserInfo(buildCommentUserInfo(nowComment))
             .build();
         return readDto;
+    }
+
+    private CommentUserInfoDto buildCommentUserInfo(Comment nowComment) {
+        User user = nowComment.getUser();
+        return CommentUserInfoDto.builder()
+            .userId(user.getId())
+            .profileImg(user.getProfileImg())
+            .nickname(user.getNickname())
+            .build();
     }
 
     private String getCreatedDate(Comment nowComment) {
