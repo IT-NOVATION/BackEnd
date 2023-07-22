@@ -63,6 +63,7 @@ public class CommentService {
 
             Pageable pageable = PageRequest.of(page - 1, 15);
             List<Comment> newestByComment = commentRepository.findByNewestComment(reviewId, pageable);
+            log.info(String.valueOf(newestByComment.size()));
             List<CommentReadDto> commentReadDtoList = new ArrayList<>();
             int lastPage = getLastPage(reviewId);
             if(lastPage==0){
@@ -137,7 +138,7 @@ public class CommentService {
         if (commentRepository.findAllByReviewId(reviewId).size() % 15 == 0) {
             return commentRepository.findAllByReviewId(reviewId).size() / 15;
         }
-        return commentRepository.findAll().size() / 15 + 1;
+        return commentRepository.findAllByReviewId(reviewId).size() / 15 + 1;
     }
 
     @Transactional
