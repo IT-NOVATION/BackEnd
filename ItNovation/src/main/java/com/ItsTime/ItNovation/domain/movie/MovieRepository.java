@@ -34,6 +34,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     @Query("select m from Movie m")
     List<Movie> movieAllMovieByPageable(Pageable pageable);
 
+    @Query("select m from Movie m order by m.movieDate desc")
+    List<Movie> moviesByReleaseDate(Pageable pageable);
 
 
 
