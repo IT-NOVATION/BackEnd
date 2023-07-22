@@ -5,6 +5,7 @@ import com.ItsTime.ItNovation.domain.comment.Comment;
 import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentReadDto;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentReadResponseDto;
+import com.ItsTime.ItNovation.domain.comment.dto.CommentUserInfoDto;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentWriteRequestDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
@@ -66,6 +67,7 @@ public class CommentService {
 
             Pageable pageable = PageRequest.of(page - 1, 15);
             List<Comment> newestByComment = commentRepository.findByNewestComment(reviewId, pageable);
+            log.info(String.valueOf(newestByComment.size()));
             List<CommentReadDto> commentReadDtoList = new ArrayList<>();
             int lastPage = getLastPage(reviewId);
             if(lastPage==0){
@@ -73,7 +75,7 @@ public class CommentService {
             }
             validatePageRequest(page, lastPage);
             CommentReadResponseDto responseDto = getCommentReadResponseDto(
-                page, newestByComment, commentReadDtoList, lastPage);
+                page, reviewId, newestByComment, commentReadDtoList, lastPage);
 
             return ResponseEntity.status(200).body(responseDto);
         } catch (Exception e) {
@@ -89,7 +91,7 @@ public class CommentService {
         }
     }
 
-    private CommentReadResponseDto getCommentReadResponseDto(int page,
+    private CommentReadResponseDto getCommentReadResponseDto(int page, Long reviewId,
         List<Comment> newestByComment, List<CommentReadDto> commentReadDtoList, int lastPage) {
         for (int i = 0; i < newestByComment.size(); i++) {
             Comment nowComment = newestByComment.get(i);
@@ -101,6 +103,7 @@ public class CommentService {
             .commentList(commentReadDtoList)
             .lastPage(lastPage)
             .nowPage(page)
+            .totalCommentCount(commentRepository.findAllByReviewId(reviewId).size())
             .firstPage(1)
             .build();
         return responseDto;
@@ -111,8 +114,18 @@ public class CommentService {
             .commentText(nowComment.getCommentText())
             .commentId(nowComment.getId())
             .createDate(getCreatedDate(nowComment))
+            .commentUserInfo(buildCommentUserInfo(nowComment))
             .build();
         return readDto;
+    }
+
+    private CommentUserInfoDto buildCommentUserInfo(Comment nowComment) {
+        User user = nowComment.getUser();
+        return CommentUserInfoDto.builder()
+            .userId(user.getId())
+            .profileImg(user.getProfileImg())
+            .nickname(user.getNickname())
+            .build();
     }
 
     private String getCreatedDate(Comment nowComment) {
@@ -130,7 +143,7 @@ public class CommentService {
         if (commentRepository.findAllByReviewId(reviewId).size() % 15 == 0) {
             return commentRepository.findAllByReviewId(reviewId).size() / 15;
         }
-        return commentRepository.findAll().size() / 15 + 1;
+        return commentRepository.findAllByReviewId(reviewId).size() / 15 + 1;
     }
 
     @Transactional

@@ -57,7 +57,7 @@ public class Movie {
     private Long real_movieId;
 
 
-    @OneToMany(mappedBy = "reviewId")
+    @OneToMany(mappedBy = "movie")
     private List<Review> reviews = new ArrayList<Review>();
 
     @Builder
