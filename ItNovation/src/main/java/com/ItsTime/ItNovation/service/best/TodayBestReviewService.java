@@ -2,6 +2,8 @@ package com.ItsTime.ItNovation.service.best;
 
 import com.ItsTime.ItNovation.domain.bestReview.dto.TodayBestReviewDto;
 import com.ItsTime.ItNovation.domain.bestReview.dto.TodayBestReviewResponseDto;
+import com.ItsTime.ItNovation.domain.follow.FollowRepository;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.dto.TodayBestReviewMovieDto;
 import com.ItsTime.ItNovation.domain.review.Review;
@@ -11,6 +13,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import com.ItsTime.ItNovation.domain.user.UserRepository;
+import com.ItsTime.ItNovation.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -25,12 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class TodayBestReviewService {
 
     private final ReviewLikeRepository reviewLikeRepository;
-
-    private final LocalDate yesterday = LocalDate.now().minusDays(1);
-
+    private final UserRepository userRepository;
+    private final FollowRepository followRepository;
+    private final LocalDate yesterday = LocalDate.now().minusDays(0);
+    private String nowUserEmail = null;
+    private final JwtService jwtService;
 
     @Transactional
-    public ResponseEntity getBestReviewAndUser() {
+    public ResponseEntity getBestReviewAndUser(Optional<String> accessToken) {
+        if (accessToken.isPresent()) {
+            nowUserEmail = jwtService.extractEmail(accessToken.get()).get();
+        }
         Pageable pageable = PageRequest.of(0, 3);
 
         List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
@@ -61,7 +72,8 @@ public class TodayBestReviewService {
     private TodayBestReviewResponseDto convertToDto(User user) {
         TodayBestReviewResponseDto bestReviewResponseDto = TodayBestReviewResponseDto.builder()
             .userId(user.getId())
-            .profileImg(user.getProfileImg())
+            .profileImg(user.getProfileImg()).isMyProfile(profileState(nowUserEmail, user.getId()))
+                .isNowUserFollowThisUser(followState(nowUserEmail, user.getId()))
             .nickName(user.getNickname())
             .introduction(user.getIntroduction())
             .reviews(findTodayTop2Review(user))
@@ -69,6 +81,35 @@ public class TodayBestReviewService {
         return bestReviewResponseDto;
     }
 
+    private Boolean profileState(String nowUserEmail, Long userId) {
+        Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
+        log.info(String.valueOf(nowUser.get().getId()));
+
+        Optional<User> checkUser = userRepository.findById(userId);
+        log.info(String.valueOf(checkUser.get().getId()));
+        if (nowUser.isPresent()) {
+            if (nowUser.equals(checkUser)) {
+                return true;
+            } else return false;
+        } else return false;
+
+    }
+
+
+    private Boolean followState(String nowUserEmail, Long userId) {
+        Optional<User> user = userRepository.findByEmail(nowUserEmail);
+
+        /**
+         * 팔로우 하면 true
+         * 아니면 false ( 같은 유저여도 false)
+         */
+        if (user.isPresent()) {
+            Optional<FollowState> followState = followRepository.findByPushUserAndFollowUser(user.get().getId(), userId);
+            return followState.isPresent();
+        } else {
+            return false;
+        }
+    }
     private List<TodayBestReviewDto> findTodayTop2Review(User user) {
         Pageable pageable = PageRequest.of(0, 2);
         List<TodayBestReviewDto> reviewDtos = new ArrayList<>();
