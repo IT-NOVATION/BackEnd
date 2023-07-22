@@ -251,7 +251,7 @@ public class ReviewService {
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
-             if(reviewRepository.countByUserAndMovie(user, findMovie)>1){
+             if(reviewRepository.countByUserAndMovie(user, findMovie)>=1){
                  throw new IllegalArgumentException("이미 유저가 해당 영화의 리뷰를 작성했습니다.");
              }
 
