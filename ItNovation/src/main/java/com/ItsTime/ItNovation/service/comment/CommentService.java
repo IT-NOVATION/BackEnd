@@ -8,6 +8,7 @@ import com.ItsTime.ItNovation.domain.comment.dto.CommentReadResponseDto;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentWriteRequestDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
+import com.ItsTime.ItNovation.domain.user.Grade;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.grade.GradeService;
@@ -132,9 +133,10 @@ public class CommentService {
     @Transactional
     public ResponseEntity deleteComment(Long commentId) {
         try {
-            commentRepository.deleteById(commentId);
 
-            //GradeService.checkGrade()
+
+            commentRepository.deleteById(commentId);
+            grade.checkGrade();
             return ResponseEntity.status(200).body("삭제 성공했습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("삭제에 실패했습니다.");
