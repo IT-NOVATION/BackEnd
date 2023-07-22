@@ -1,25 +1,38 @@
 package com.ItsTime.ItNovation.controller.latestreview;
 
 import com.ItsTime.ItNovation.domain.review.dto.LatestReviewResponseDto;
+import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.review.ReviewService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 public class LatestReviewController {
     private final ReviewService reviewService;
+    private final JwtService jwtService;
 
     @GetMapping("/today/latestReview")
-    public ResponseEntity <List<LatestReviewResponseDto>> LatestReviews(){
-        List<LatestReviewResponseDto> LatestReviewers = reviewService.getLatestReviews();
-        return ResponseEntity.ok(LatestReviewers);
+    public ResponseEntity <List<LatestReviewResponseDto>> LatestReviews(HttpServletRequest request){
+        Optional<String> s = jwtService.extractAccessToken(request);
+        if(s.isPresent()){
+            Optional<String> email = jwtService.extractEmail(s.get());
+            if(email.isPresent()) {
+                List<LatestReviewResponseDto> LatestReviewers = reviewService.getLatestReviews(email.get());
+                return ResponseEntity.ok(LatestReviewers);
+            }
+        }
+        List<LatestReviewResponseDto> LatestReviewers = reviewService.getLatestReviews(null);
+        return ResponseEntity.status(200).body(LatestReviewers);
     }
 
 }
