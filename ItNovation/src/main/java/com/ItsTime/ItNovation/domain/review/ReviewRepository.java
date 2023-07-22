@@ -71,4 +71,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Optional<Review> findByUserAndMovie(User user,Movie movie);
 
+    Long countByUserAndMovie(User user, Movie movie);
 }

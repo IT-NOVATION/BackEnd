@@ -13,19 +13,19 @@ import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.*;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 
-
-
 import com.ItsTime.ItNovation.domain.star.Star;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
-import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
-
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
 
+
 import com.ItsTime.ItNovation.service.grade.GradeService;
+
+
+import com.ItsTime.ItNovation.domain.user.dto.UserPushLikeDto;
 
 
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ import org.springframework.data.domain.PageRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,22 +135,20 @@ public class ReviewService {
     public ResponseEntity reviewRead(Long reviewId, String email) {
         try {
             Optional<User> loginUser= Optional.empty();
-            if(email != null){
-                loginUser = userRepository.findByEmail(email);
-            }
+            User loginedUser = validateLoginUser(email);
             Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없습니다."));
             Movie movie = review.getMovie();
             User user = review.getUser();
 
-            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user, loginUser);
+            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user, loginedUser);
             return ResponseEntity.status(200).body(reviewReadResponseDto);
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user, Optional<User> loginUser) {
+    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user, User loginUser) {
         ReviewInfoDto reviewInfoDto = madeReviewInfoDto(review);
         ReviewMovieInfoDto reviewMovieInfoDto = madeMovieInfoDto(movie);
         ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user,review);
@@ -174,10 +173,9 @@ public class ReviewService {
 
 
 
-    private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser, Review review) {
-        if(userOptional.isPresent()){
+    private ReviewLoginUserInfoDto madeLoginUserInfoDto(User loginUser, User reviewUser, Review review) {
+        if(loginUser != null){
             log.info("user is Present");
-            User loginUser = userOptional.get();
             log.info("== loginUser id ===" + loginUser.getId().toString());
             boolean present = followRepository.findByPushUserAndFollowUser(
                 loginUser.getId(), reviewUser.getId()).isPresent();
@@ -239,6 +237,7 @@ public class ReviewService {
             .hasGoodScenario(validateNull(review.getHasGoodScenario()))
             .hasGoodProduction(validateNull(review.getHasGoodProduction()))
             .hasGoodVisual(validateNull(review.getHasGoodVisual()))
+            .hasGoodStory(validateNull(review.getHasGoodStory()))
             .hasGoodCharterCharming(validateNull(review.getHasGoodCharterCharming()))
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
@@ -256,10 +255,19 @@ public class ReviewService {
     }
 
     @Transactional
-    public ResponseEntity getMovieInfo(Long movieId) {
+    public ResponseEntity getMovieInfo(Long movieId, Authentication authentication) {
         try {
             Movie findMovie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
+
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+             if(reviewRepository.countByUserAndMovie(user, findMovie)>=1){
+                 throw new IllegalArgumentException("이미 유저가 해당 영화의 리뷰를 작성했습니다.");
+             }
+
             ReviewPostMovieInfoResponseDto responseDto = buildResponse(
                 movieId, findMovie);
             return ResponseEntity.status(200).body(responseDto);
@@ -370,4 +378,55 @@ public class ReviewService {
         }
     }
 
+    @Transactional
+    public ResponseEntity getLikeUsers(Long reviewId, String email) {
+        try {
+            return getListResponseEntity(reviewId, email);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    private ResponseEntity<List<UserPushLikeDto>> getListResponseEntity(Long reviewId,
+        String email) {
+        User validateLoginUser = validateLoginUser(email);
+        List<User> findByReviewId = reviewLikeRepository.findAllUserByReviwId(reviewId);
+        List<UserPushLikeDto> likeUsers = new ArrayList<>();
+        for (User user : findByReviewId) {
+            boolean isLoginUserFollowed = false;
+            boolean isMyProfile = false;
+            if(validateLoginUser!=null){
+                if(validateLoginUser.getId() == user.getId()){
+                    isMyProfile=true;
+                }
+                if(followRepository.findByPushUserAndFollowUser(validateLoginUser.getId(), user.getId()).isPresent()){
+                    isLoginUserFollowed=true;
+                }
+            }
+            UserPushLikeDto build = buildUserPushLikeDto(user,
+                isLoginUserFollowed, isMyProfile);
+            likeUsers.add(build);
+        }
+        return ResponseEntity.status(200).body(likeUsers);
+    }
+
+    private User validateLoginUser(String email) {
+        if(email != null){
+            Optional<User> byEmail = userRepository.findByEmail(email);
+            return byEmail.get();
+        }
+        return null;
+    }
+
+    private static UserPushLikeDto buildUserPushLikeDto(User user, boolean isLoginUserFollowed,
+        boolean isMyProfile) {
+        UserPushLikeDto build = UserPushLikeDto.builder()
+            .userId(user.getId())
+            .isMyProfile(isMyProfile)
+            .isLoginUserFollowed(isLoginUserFollowed)
+            .profileImg(user.getProfileImg())
+            .nickname(user.getNickname())
+            .build();
+        return build;
+    }
 }
