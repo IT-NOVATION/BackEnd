@@ -1,5 +1,7 @@
 package com.ItsTime.ItNovation.domain.comment;
 
+import com.ItsTime.ItNovation.domain.review.Review;
+import com.ItsTime.ItNovation.domain.user.User;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -16,4 +18,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("select c from Comment  c where c.review.reviewId=:reviewId")
     List<Comment> findAllByReviewId(@Param("reviewId") Long reviewId);
+
+    @Query("select count(*) from Comment c where c.user.id = :userId")
+    int countByCommentByUserId(@Param("userId") Long userId);
+
+
+
+
 }
