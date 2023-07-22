@@ -52,7 +52,7 @@ public class JwtService {
 
     private final UserRepository userRepository;
 
-    private final Set<String> logoutTokens = new HashSet<>(); // 로그아웃된 토큰 목록
+    public static final Set<String> logoutTokens = new HashSet<>(); // 로그아웃된 토큰 목록
     public void logout(String token) {
         logoutTokens.add(token); // 로그아웃된 토큰을 블랙리스트나 로그아웃 목록에 추가
     }

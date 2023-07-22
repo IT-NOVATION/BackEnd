@@ -7,6 +7,7 @@ import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchRequestDto;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class MovieSearchService {
     private final MovieRepository movieRepository;
     private final StarRepository starRepository;
 
+    @Transactional
     public List<MoviePopularDto> searchMoviesByTitle(String movieNM) {
         List<Movie> movies = movieRepository.findByTitleContaining(movieNM);
         List<MoviePopularDto> moviePopularDtos = new ArrayList<>();

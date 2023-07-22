@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.service.review;
 
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.LatestReviewMovieResponseDto;
@@ -21,11 +22,13 @@ import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
 
 import com.ItsTime.ItNovation.domain.user.dto.UserPushLikeDto;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.ItsTime.ItNovation.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,7 +50,7 @@ public class ReviewService {
     private final FollowRepository followRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final StarRepository starRepository;
-
+    private final JwtService jwtService;
 
     @Transactional
     public List<Review> getReviewByUserId(Long userId) {
@@ -287,29 +290,83 @@ public class ReviewService {
     }
 
     @Transactional
-    public List<LatestReviewResponseDto> getLatestReviews() {
-        List<User> recentReviewers = reviewRepository.findNewestReview(PageRequest.of(0, 3));
-        return recentReviewers.stream().map(recentReviewer -> {
-            List<LatestReviewDto> reviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 3))
-                    .stream()
-                    .map(review -> LatestReviewDto.builder()
-                            .reviewId(review.getReviewId())
-                            .reviewTitle(review.getReviewTitle())
-                            .movie(LatestReviewMovieResponseDto.builder()
-                                    .movieId(review.getMovie().getId())
-                                    .movieImg(review.getMovie().getMovieImg())
-                                    .build())
-                            .build())
-                    .collect(Collectors.toList());
+    public ResponseEntity getLatestReviews(Optional<String> accessToken) {
+        String nowUserEmail = null;
+        if (accessToken.isPresent()) {
+            nowUserEmail = jwtService.extractEmail(accessToken.get()).get();
+        }
+        List<User> recentReviewers = reviewRepository.findUsersWithNewestReview(PageRequest.of(0, 3));
+        List<LatestReviewResponseDto> LatestReviewResponseList = new ArrayList<>();
 
-            return LatestReviewResponseDto.builder()
-                    .userId(recentReviewer.getId())
-                    .profileImg(recentReviewer.getProfileImg())
-                    .nickname(recentReviewer.getNickname())
-                    .introduction(recentReviewer.getIntroduction())
-                    .reviews(reviews)
-                    .build();
-        }).collect(Collectors.toList());
+
+        for (User recentReviewer : recentReviewers) {
+            List<Review> userLatestReviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 2));
+            List<LatestReviewDto> reviews = new ArrayList<>();
+            for (Review review : userLatestReviews) {
+                LatestReviewDto latestReviewDto = getLatestReviewDto(review);
+                reviews.add(latestReviewDto);
+            }
+            LatestReviewResponseDto latestReviewResponseDto = getLatestReviewResponseDto(nowUserEmail, recentReviewer, reviews);
+            LatestReviewResponseList.add(latestReviewResponseDto);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(LatestReviewResponseList);
+    }
+
+    private  LatestReviewDto getLatestReviewDto(Review review) {
+        LatestReviewDto latestReviewDto = LatestReviewDto.builder()
+                .reviewId(review.getReviewId())
+                .reviewTitle(review.getReviewTitle())
+                .movie(LatestReviewMovieResponseDto.builder()
+                        .movieId(review.getMovie().getId())
+                        .movieImg(review.getMovie().getMovieImg())
+                        .build())
+                .build();
+        return latestReviewDto;
+    }
+
+    private LatestReviewResponseDto getLatestReviewResponseDto(String nowUserEmail, User recentReviewer, List<LatestReviewDto> reviews) {
+        LatestReviewResponseDto latestReviewResponseDto = LatestReviewResponseDto.builder()
+                .userId(recentReviewer.getId())
+                .profileImg(recentReviewer.getProfileImg())
+                .isMyProfile(profileState(nowUserEmail, recentReviewer.getId()))
+                .loginUserPushedFollow(followState(nowUserEmail, recentReviewer.getId()))
+                .nickname(recentReviewer.getNickname())
+                .introduction(recentReviewer.getIntroduction())
+                .reviews(reviews)
+                .build();
+        return latestReviewResponseDto;
+    }
+
+
+    private Boolean profileState(String nowUserEmail, Long userId) {
+        Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
+        log.info(String.valueOf(nowUser.get().getId()));
+
+        Optional<User> checkUser = userRepository.findById(userId);
+        log.info(String.valueOf(checkUser.get().getId()));
+        if (nowUser.isPresent()) {
+            if (nowUser.equals(checkUser)) {
+                return true;
+            } else return false;
+        } else return false;
+
+    }
+
+    @Transactional
+    public Boolean followState(String nowUserEmail, Long userId) {
+        Optional<User> user = userRepository.findByEmail(nowUserEmail);
+
+        /**
+         * 팔로우 하면 true
+         * 아니면 false ( 같은 유저여도 false)
+         */
+        if (user.isPresent()) {
+            Optional<FollowState> followState = followRepository.findByPushUserAndFollowUser(user.get().getId(), userId);
+            return followState.isPresent();
+        } else {
+            return false;
+        }
     }
 
     @Transactional

@@ -81,6 +81,7 @@ public class UserService {
         return ResponseEntity.ok("로그아웃 완료");
 
     }
+    @Transactional
     public ResponseEntity<String> updatePassword(String email, String updatedPassword){
         Optional<User> findByEmail = userRepository.findByEmail(email);
 

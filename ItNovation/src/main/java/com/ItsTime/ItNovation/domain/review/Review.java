@@ -3,10 +3,12 @@ package com.ItsTime.ItNovation.domain.review;
 
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
+import com.ItsTime.ItNovation.domain.comment.Comment;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLike;
 import com.ItsTime.ItNovation.domain.user.User;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.*;
 
 import java.util.Date;
@@ -61,12 +63,14 @@ public class Review extends BaseTimeEntity {
 
     //비식별 관계 사용 - 다쪽 엔티티가 일쪽 엔티티의 외래키를 가지는 형태 -> 서로 독립적, 유연
     @OneToMany(mappedBy = "review")
-    private List<ReviewLike> reviewLikes;
+    private List<ReviewLike> reviewLikes = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "review")
+    private List<Comment> commentList = new ArrayList<>();
 
     @Builder
     public Review( Float star, String reviewTitle, String reviewMainText, Boolean hasGoodStory, Boolean hasGoodProduction, Boolean hasGoodScenario, Boolean hasGoodDirecting, Boolean hasGoodOst, Boolean hasGoodVisual, Boolean hasGoodActing, Boolean hasGoodCharterCharming, Boolean hasGoodDiction, Boolean hasCheckDate, Boolean hasSpoiler, String watchDate, Movie movie, User user, List<ReviewLike> reviewLikes) {
-
         this.star = star;
         this.reviewTitle = reviewTitle;
         this.reviewMainText = reviewMainText;
