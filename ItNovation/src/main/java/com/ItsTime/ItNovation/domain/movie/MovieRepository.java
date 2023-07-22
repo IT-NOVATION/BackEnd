@@ -31,6 +31,9 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findMoviesWithReviewCount(Pageable pageable);
 
 
+    @Query("select m from Movie m")
+    List<Movie> movieAllMovieByPageable(Pageable pageable);
+
 
 
 
