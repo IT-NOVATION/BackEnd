@@ -5,7 +5,6 @@ import com.ItsTime.ItNovation.domain.user.User;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -48,4 +47,7 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
 
     @Query("select rl.reviewLike from ReviewLike rl where rl.user = :user and rl.review = :review")
     Optional<Boolean> isUserLike(@Param("user") User user, @Param("review") Review review);
+
+    @Query("select rl.user from ReviewLike rl where rl.review.reviewId = :reviewId and rl.reviewLike=true")
+    List<User> findAllUserByReviwId(@Param("reviewId")Long reviewId);
 }
