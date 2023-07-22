@@ -22,17 +22,11 @@ public class LatestReviewController {
     private final JwtService jwtService;
 
     @GetMapping("/today/latestReview")
-    public ResponseEntity <List<LatestReviewResponseDto>> LatestReviews(HttpServletRequest request){
-        Optional<String> s = jwtService.extractAccessToken(request);
-        if(s.isPresent()){
-            Optional<String> email = jwtService.extractEmail(s.get());
-            if(email.isPresent()) {
-                List<LatestReviewResponseDto> LatestReviewers = reviewService.getLatestReviews(email.get());
-                return ResponseEntity.ok(LatestReviewers);
-            }
-        }
-        List<LatestReviewResponseDto> LatestReviewers = reviewService.getLatestReviews(null);
-        return ResponseEntity.status(200).body(LatestReviewers);
+    public ResponseEntity LatestReviews(HttpServletRequest request){
+        Optional<String> accessToken = jwtService.extractAccessToken(request);
+        return reviewService.getLatestReviews(accessToken);
+
+
     }
 
 }
