@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.ItsTime.ItNovation.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +51,7 @@ public class ReviewService {
     private final FollowRepository followRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final StarRepository starRepository;
-
+    private final JwtService jwtService;
 
     @Transactional
     public List<Review> getReviewByUserId(Long userId) {
@@ -283,9 +284,14 @@ public class ReviewService {
     }
 
     @Transactional
-    public List<LatestReviewResponseDto> getLatestReviews(String email) {
+    public ResponseEntity getLatestReviews(Optional<String> accessToken) {
+        String nowUserEmail = null;
+        if (accessToken.isPresent()) {
+            nowUserEmail = jwtService.extractEmail(accessToken.get()).get();
+        }
         List<User> recentReviewers = reviewRepository.findUsersWithNewestReview(PageRequest.of(0, 3));
-        List<LatestReviewResponseDto> latestReviews = new ArrayList<>();
+        List<LatestReviewResponseDto> LatestReviewResponseList = new ArrayList<>();
+
 
         for (User recentReviewer : recentReviewers) {
             List<Review> userLatestReviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 2));
@@ -294,14 +300,14 @@ public class ReviewService {
                 LatestReviewDto latestReviewDto = getLatestReviewDto(review);
                 reviews.add(latestReviewDto);
             }
-            LatestReviewResponseDto latestReviewResponseDto = getLatestReviewResponseDto(email, recentReviewer, reviews);
-            latestReviews.add(latestReviewResponseDto);
+            LatestReviewResponseDto latestReviewResponseDto = getLatestReviewResponseDto(nowUserEmail, recentReviewer, reviews);
+            LatestReviewResponseList.add(latestReviewResponseDto);
         }
 
-        return latestReviews;
+        return ResponseEntity.status(HttpStatus.OK).body(LatestReviewResponseList);
     }
 
-    private static LatestReviewDto getLatestReviewDto(Review review) {
+    private  LatestReviewDto getLatestReviewDto(Review review) {
         LatestReviewDto latestReviewDto = LatestReviewDto.builder()
                 .reviewId(review.getReviewId())
                 .reviewTitle(review.getReviewTitle())
@@ -313,12 +319,12 @@ public class ReviewService {
         return latestReviewDto;
     }
 
-    private LatestReviewResponseDto getLatestReviewResponseDto(String email, User recentReviewer, List<LatestReviewDto> reviews) {
+    private LatestReviewResponseDto getLatestReviewResponseDto(String nowUserEmail, User recentReviewer, List<LatestReviewDto> reviews) {
         LatestReviewResponseDto latestReviewResponseDto = LatestReviewResponseDto.builder()
                 .userId(recentReviewer.getId())
                 .profileImg(recentReviewer.getProfileImg())
-                .isMyProfile(profileState(email, recentReviewer.getId()))
-                .loginUserPushedFollow(followState(email, recentReviewer.getId()))
+                .isMyProfile(profileState(nowUserEmail, recentReviewer.getId()))
+                .loginUserPushedFollow(followState(nowUserEmail, recentReviewer.getId()))
                 .nickname(recentReviewer.getNickname())
                 .introduction(recentReviewer.getIntroduction())
                 .reviews(reviews)
@@ -326,25 +332,34 @@ public class ReviewService {
         return latestReviewResponseDto;
     }
 
-    @Transactional
-    public Boolean profileState(String email, Long userId) {
-        Optional<User> user = userRepository.findByEmail(email);
+
+    private Boolean profileState(String nowUserEmail, Long userId) {
+        Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
+        log.info(String.valueOf(nowUser.get().getId()));
+
         Optional<User> checkUser = userRepository.findById(userId);
-        if(user.isPresent() && user == checkUser){
-            return false;//로그인 했으며 자신의 프로필이므로 false 반환
-        }
-        return true;
+        log.info(String.valueOf(checkUser.get().getId()));
+        if (nowUser.isPresent()) {
+            if (nowUser.equals(checkUser)) {
+                return true;
+            } else return false;
+        } else return false;
+
     }
 
     @Transactional
-    public Boolean followState(String email, Long userId) {
-        Optional<User> user = userRepository.findByEmail(email);
+    public Boolean followState(String nowUserEmail, Long userId) {
+        Optional<User> user = userRepository.findByEmail(nowUserEmail);
 
+        /**
+         * 팔로우 하면 true
+         * 아니면 false ( 같은 유저여도 false)
+         */
         if (user.isPresent()) {
             Optional<FollowState> followState = followRepository.findByPushUserAndFollowUser(user.get().getId(), userId);
-            return followState.isEmpty(); // 팔로우 상태가 비어있으면 true
+            return followState.isPresent();
         } else {
-            return true;//팔로우 안한 상태면 false
+            return false;
         }
     }
 
