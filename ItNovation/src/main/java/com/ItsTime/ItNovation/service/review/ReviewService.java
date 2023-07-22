@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.service.review;
 
+import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
@@ -11,16 +12,18 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewInfoDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
+import com.ItsTime.ItNovation.domain.star.Star;
+import com.ItsTime.ItNovation.domain.star.StarRepository;
+import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
+import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,8 +36,9 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
-
+    private final FollowRepository followRepository;
     private final ReviewLikeRepository reviewLikeRepository;
+    private final StarRepository starRepository;
 
 
     @Transactional
@@ -61,7 +65,9 @@ public class ReviewService {
     }
 
     private Review saveReview(ReviewPostRequestDto reviewPostRequestDto, User nowUser, Movie nowMovie) {
-        Review review=Review.builder().star(reviewPostRequestDto.getStar())
+
+
+        Review review=Review.builder().star(saveStarAndGet(reviewPostRequestDto, nowMovie, nowUser))
                 .movie(nowMovie)
                 .user(nowUser)
                 .reviewTitle(reviewPostRequestDto.getReviewTitle())
@@ -85,44 +91,99 @@ public class ReviewService {
         return review;
     }
 
-    @Transactional
-    public ResponseEntity reviewRead(Long reviewId) {
+    private Float saveStarAndGet(ReviewPostRequestDto reviewPostRequestDto,Movie movie, User user) {
+        Float starScore = reviewPostRequestDto.getStar();
 
+        Optional<Star> existingStar = starRepository.findByUserAndMovie(user, movie);
+        if (existingStar.isPresent()) {//존재하면, 스타 스코어만 업데이트
+            Star star = existingStar.get();
+            star.updateScore(starScore);
+            starRepository.save(star);
+        } else {//존재하지 않는다면, 새롭게 생성
+            Star build = Star.builder()
+                .user(user)
+                .movie(movie)
+                .score(starScore)
+                .build();
+            starRepository.save(build);
+        }
+
+        return starScore;
+    }
+
+    @Transactional
+    public ResponseEntity reviewRead(Long reviewId, String email) {
         try {
+            Optional<User> loginUser= Optional.empty();
+            if(email != null){
+                loginUser = userRepository.findByEmail(email);
+            }
             Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없습니다."));
             Movie movie = review.getMovie();
             User user = review.getUser();
 
-            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user);
+            ReviewReadResponseDto reviewReadResponseDto = madeResponseDto(review, movie, user, loginUser);
             return ResponseEntity.status(200).body(reviewReadResponseDto);
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user) {
+    private ReviewReadResponseDto madeResponseDto(Review review, Movie movie, User user, Optional<User> loginUser) {
         ReviewInfoDto reviewInfoDto = madeReviewInfoDto(review);
         ReviewMovieInfoDto reviewMovieInfoDto = madeMovieInfoDto(movie);
-        ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user);
+        ReviewUserInfoDto reviewUserInfoDto = madeUserInfoDto(user,review);
+        ReviewLoginUserInfoDto reviewLoginUserInfoDto = madeLoginUserInfoDto(loginUser, review.getUser(), review);
 
-        return mergeInfoDto(reviewInfoDto, reviewMovieInfoDto, reviewUserInfoDto);
+        return mergeInfoDto(reviewInfoDto, reviewMovieInfoDto, reviewUserInfoDto, reviewLoginUserInfoDto);
     }
 
+
+
     private ReviewReadResponseDto mergeInfoDto(ReviewInfoDto reviewInfoDto, ReviewMovieInfoDto reviewMovieInfoDto,
-        ReviewUserInfoDto reviewUserInfoDto) {
+        ReviewUserInfoDto reviewUserInfoDto, ReviewLoginUserInfoDto reviewLoginUserInfoDto) {
 
         ReviewReadResponseDto reviewReadResponseDto = ReviewReadResponseDto.builder()
             .review(reviewInfoDto)
             .movie(reviewMovieInfoDto)
             .user(reviewUserInfoDto)
+            .loginUser(reviewLoginUserInfoDto)
             .build();
         
         return reviewReadResponseDto;
 
     }
 
-    private ReviewUserInfoDto madeUserInfoDto(User user) {
+
+    private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser, Review review) {
+        if(userOptional.isPresent()){
+            log.info("user is Present");
+            User loginUser = userOptional.get();
+            log.info("== loginUser id ===" + loginUser.getId().toString());
+            boolean present = followRepository.findByPushUserAndFollowUser(
+                loginUser.getId(), reviewUser.getId()).isPresent();
+            return ReviewLoginUserInfoDto.builder()
+                .pushedReviewLike(isUserLikeReview(review, loginUser))
+                .pushedFollow(present)
+                .build();
+        }
+        return ReviewLoginUserInfoDto.builder()   // 로그인이 아닌 경우
+            .pushedReviewLike(false)
+            .pushedFollow(false)
+            .build();
+    }
+
+    private Boolean isUserLikeReview(Review review, User loginUser) {
+
+        if(reviewLikeRepository.isUserLike(loginUser, review).isEmpty()){
+            return false;
+        };
+
+        return reviewLikeRepository.isUserLike(loginUser, review).get();
+    }
+
+    private ReviewUserInfoDto madeUserInfoDto(User user, Review review) {
         ReviewUserInfoDto reviewUserInfoDto = ReviewUserInfoDto.builder()
             .userId(user.getId())
             .bgImg(user.getBgImg())
@@ -130,6 +191,9 @@ public class ReviewService {
             .grade(user.getGrade())
             .introduction(user.getIntroduction())
             .profileImg(user.getProfileImg())
+            .followerNum(followRepository.countByFollowedUserId(user.getId()))
+            .followingNum(followRepository.countByFollowingUserId(user.getId()))
+            .hasReviewLike(isUserLikeReview(review, user))
             .build();
         return reviewUserInfoDto;
     }
@@ -148,19 +212,18 @@ public class ReviewService {
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
-
         ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
-            .hasCheckDate(review.getHasCheckDate())
-            .hasGoodActing(review.getHasGoodActing())
-            .hasGoodDiction(review.getHasGoodDiction())
-            .hasSpoiler(review.getHasSpoiler())
-            .hasGoodDirecting(review.getHasGoodDirecting())
-            .hasGoodOst(review.getHasGoodOst())
-            .hasGoodScenario(review.getHasGoodScenario())
-            .hasGoodProduction(review.getHasGoodProduction())
-            .hasGoodVisual(review.getHasGoodVisual())
-            .hasGoodCharterCharming(review.getHasGoodCharterCharming())
+            .hasCheckDate(validateNull(review.getHasCheckDate()))
+            .hasGoodActing(validateNull(review.getHasGoodActing()))
+            .hasGoodDiction(validateNull(review.getHasGoodDiction()))
+            .hasSpoiler(validateNull(review.getHasSpoiler()))
+            .hasGoodDirecting(validateNull(review.getHasGoodDirecting()))
+            .hasGoodOst(validateNull(review.getHasGoodOst()))
+            .hasGoodScenario(validateNull(review.getHasGoodScenario()))
+            .hasGoodProduction(validateNull(review.getHasGoodProduction()))
+            .hasGoodVisual(validateNull(review.getHasGoodVisual()))
+            .hasGoodCharterCharming(validateNull(review.getHasGoodCharterCharming()))
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
             .star(review.getStar())
@@ -170,6 +233,14 @@ public class ReviewService {
 
         return reviewInfoDto;
     }
+
+    private Boolean validateNull(Boolean feature) {
+        if(feature==null){
+            return false;
+        }
+        return feature;
+    }
+
     @Transactional
     public ResponseEntity getMovieInfo(Long movieId) {
         try {

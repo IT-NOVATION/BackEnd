@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.service.best;
 
 import com.ItsTime.ItNovation.domain.bestUser.TopUserResponseDto;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.dto.TopUserMovieDto;
 import com.ItsTime.ItNovation.domain.review.Review;
@@ -9,9 +10,11 @@ import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.TopUserReviewDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +32,7 @@ public class TodayBestUserService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
+    private final UserRepository userRepository;
 
     private final LocalDate yesterday = LocalDate.now().minusDays(1);
 
@@ -37,33 +41,39 @@ public class TodayBestUserService {
      * @return
      */
     @Transactional
-    public ResponseEntity getBestUserInfo() {
+    public ResponseEntity getBestUserInfo(String email) {
         Pageable pageable = PageRequest.of(0, 5);
         List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable); // -> 이거 전날 기준으로 고쳐야 함!
         System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
 
         List<TopUserResponseDto> top5UserResponseDtos = new ArrayList<>();
+        User loginUser = null;
+        Optional<User> findUser = userRepository.findByEmail(email);
+
+        if(findUser.isPresent()){
+            loginUser=findUser.get();
+        }
 
         for (int index = 0; index < top5UsersWithTodayDate.size(); index++) {
             List<TopUserReviewDto> topUserReviewDtos = new ArrayList<>();
             User user = top5UsersWithTodayDate.get(index);
-            madeInternalResponseDto(topUserReviewDtos, top5UserResponseDtos, user);
+            madeInternalResponseDto(topUserReviewDtos, top5UserResponseDtos, user, loginUser);
         }
         return ResponseEntity.status(200).body(top5UserResponseDtos);
     }
 
     private void madeInternalResponseDto(List<TopUserReviewDto> topUserReviewDtos,
-        List<TopUserResponseDto> top5UserResponseDtos, User user) {
-        int followers = user.getFollowStates().size();
+        List<TopUserResponseDto> top5UserResponseDtos, User user, User loginUser) {
+        Long following = (long) user.getFollowStates().size();
         log.info(yesterday.toString());
-        Long following = followRepository.countByFollowedUserId(user.getId());
+        Long followers = followRepository.countByFollowedUserId(user.getId());
         List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(yesterday, user.getId());
         addBestReview(topUserReviewDtos, reviews);
         Pageable remainPageable = PageRequest.of(0, 2);
         addNewestReview(topUserReviewDtos, user, remainPageable);
         TopUserResponseDto topUserResponseDto = buildTopUserResponseDto(
-            topUserReviewDtos, user, followers, following);
+            topUserReviewDtos, user, following, followers, loginUser);
         top5UserResponseDtos.add(topUserResponseDto);
     }
 
@@ -88,8 +98,8 @@ public class TodayBestUserService {
         }
     }
 
-    private static TopUserResponseDto buildTopUserResponseDto(
-        List<TopUserReviewDto> topUserReviewDtos, User user, int followers, Long following) {
+    private TopUserResponseDto buildTopUserResponseDto(
+        List<TopUserReviewDto> topUserReviewDtos, User user, Long following, Long followers, User loginUser) {
         TopUserResponseDto topUserResponseDto = TopUserResponseDto.builder()
             .userId(user.getId())
             .profileImg(user.getProfileImg())
@@ -99,8 +109,19 @@ public class TodayBestUserService {
             .followers(followers)
             .followings(following)
             .reviews(topUserReviewDtos)
+            .isLoginedUserFollowsNowUser(getIsLoginUserPushFollow(loginUser, user))
             .build();
         return topUserResponseDto;
+    }
+
+    private Boolean getIsLoginUserPushFollow(User loginUser, User user) {
+
+        Optional<FollowState> byPushUserAndFollowUser = followRepository.findByPushUserAndFollowUser(
+            loginUser.getId(), user.getId());
+        if(byPushUserAndFollowUser.isEmpty()){
+            return false;
+        }
+        return true;
     }
 
     private TopUserReviewDto getTopUserReviewDto(Review topReview) {

@@ -33,6 +33,7 @@ public class MovieCrawlService {
     private final PopularMovieRepository popularMovieRepository;
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
+    private final StarRepository starRepository;
 
 
     @Value("${ttkey}")
@@ -53,6 +54,9 @@ public class MovieCrawlService {
 
 
     private String KOFI_URL= "https://kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key=";
+
+
+
 
     public Map<String, Movie> getTitleAndMovie() {
         //여기 참고 https://developers.themoviedb.org/3/movies/get-movie-images
@@ -286,7 +290,7 @@ public class MovieCrawlService {
     public List<MoviePopularDto> getPopularMovies(){
         RestTemplate restTemplate = new RestTemplate();
         popularMovieRepository.deleteAll();
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular" + "?api_key=" + API_KEY+"&language=ko-KR", String.class);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY+"&language=ko-KR", String.class);
         String json = responseEntity.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> movies = new ArrayList<>();
@@ -313,20 +317,21 @@ public class MovieCrawlService {
                 savePopularMovie(movieInfo);
             }
 
-            Movie id = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
+            Movie movie = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
             String title = (String) movieInfo.get("title");
             String movieImg = (String) movieInfo.get("movieImg");
             Double popularity = (Double) movieInfo.get("popularity");
 
             MoviePopularDto moviePopularDto = MoviePopularDto.builder()
-                    .movieId(id.getId())
+                    .movieId(movie.getId())
                     .movieTitle(title)
                     .movieImg(movieImg)
                     .popularity(popularity.intValue())
+                    .starScore(getAvgScoreByMovieId(movie))
                     .build();
 
             PopularMovie moviePopular = PopularMovie.builder()
-                    .movieId(id.getId())
+                    .movieId(movie.getId())
                     .title(title)
                     .movieImg(movieImg)
                     .popularity(popularity)
@@ -336,6 +341,15 @@ public class MovieCrawlService {
         }
 
         return moviePopularDtos;
+    }
+
+    private Float getAvgScoreByMovieId(Movie movie) {
+        Float avgScoreByMovie = starRepository.findAvgScoreByMovieId(movie.getId());
+        if(avgScoreByMovie == null){
+            return 0.0f;
+        }
+
+        return starRepository.findAvgScoreByMovieId(movie.getId());
     }
 
     private static void buildMovieInfo(JsonNode movieNode, Map<String, Object> movieInfo) {
@@ -388,7 +402,7 @@ public class MovieCrawlService {
     }
 
     private MovieRecommendDto mapMovieToResponseDto(Movie movie) {
-        Float averageStarScore = reviewRepository.findAvgScoreByMovieId(movie.getId());
+        Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId());
 
         return MovieRecommendDto.builder()
                 .movieId(movie.getId())
