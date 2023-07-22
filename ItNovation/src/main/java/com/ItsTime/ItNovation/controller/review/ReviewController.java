@@ -56,6 +56,19 @@ public class ReviewController {
     }
 
 
+    @GetMapping("/Info/likeUser/{reviewId}")
+    public ResponseEntity reviewInfoLikeUser(@PathVariable Long reviewId, HttpServletRequest request){
+
+        Optional<String> s = jwtService.extractAccessToken(request);
+        if(s.isPresent()){
+            Optional<String> email = jwtService.extractEmail(s.get());
+            if(email.isPresent()) {
+                return reviewService.getLikeUsers(reviewId, email.get());
+            }
+        }
+        return reviewService.getLikeUsers(reviewId, null);
+    }
+
 
 
 }
