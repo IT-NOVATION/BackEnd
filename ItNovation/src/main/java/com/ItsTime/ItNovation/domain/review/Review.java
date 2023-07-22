@@ -11,6 +11,7 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.List;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
