@@ -28,4 +28,10 @@ public class MovieAllSearchController {
 
         return movieAllSearchService.getMoiveSearchResponseByStarScoreOrder(page);
     }
+
+    @GetMapping("/release-order/{page}")
+    public ResponseEntity getMoiveSearchResponseByLatestReleaseDate(@PathVariable int page) {
+
+        return movieAllSearchService.getMoiveSearchResponseByLatestReleaseDate(page);
+    }
 }
