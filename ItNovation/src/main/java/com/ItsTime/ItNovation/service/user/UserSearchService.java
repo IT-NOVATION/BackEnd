@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -19,6 +20,7 @@ public class UserSearchService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public List<UserSearchResponseDto> getResponse(String searchNickName) {
         List<User> findByNickName = userRepository.findByNickname(searchNickName);
         if(findByNickName.isEmpty()){
