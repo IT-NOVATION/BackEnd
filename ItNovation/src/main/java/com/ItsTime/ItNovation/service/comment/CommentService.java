@@ -71,7 +71,7 @@ public class CommentService {
             }
             validatePageRequest(page, lastPage);
             CommentReadResponseDto responseDto = getCommentReadResponseDto(
-                page, newestByComment, commentReadDtoList, lastPage);
+                page, reviewId, newestByComment, commentReadDtoList, lastPage);
 
             return ResponseEntity.status(200).body(responseDto);
         } catch (Exception e) {
@@ -87,7 +87,7 @@ public class CommentService {
         }
     }
 
-    private CommentReadResponseDto getCommentReadResponseDto(int page,
+    private CommentReadResponseDto getCommentReadResponseDto(int page, Long reviewId,
         List<Comment> newestByComment, List<CommentReadDto> commentReadDtoList, int lastPage) {
         for (int i = 0; i < newestByComment.size(); i++) {
             Comment nowComment = newestByComment.get(i);
@@ -99,6 +99,7 @@ public class CommentService {
             .commentList(commentReadDtoList)
             .lastPage(lastPage)
             .nowPage(page)
+            .totalCommentCount(commentRepository.findAllByReviewId(reviewId).size())
             .firstPage(1)
             .build();
         return responseDto;
