@@ -20,6 +20,7 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
+import com.ItsTime.ItNovation.service.grade.GradeService;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class ReviewService {
     private final FollowRepository followRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final StarRepository starRepository;
+    private final GradeService gradeService;
 
 
     @Transactional
@@ -48,13 +50,14 @@ public class ReviewService {
 
   
     @Transactional
-    public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String nowUserEmail) {
+    public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String loginUserEmail) {
         try{
-            User nowUser = userRepository.findByEmail(nowUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
+            User nowUser = userRepository.findByEmail(loginUserEmail).orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
             Movie nowMovie = movieRepository.findById(reviewPostRequestDto.getMovieId()).orElseThrow(() -> new IllegalArgumentException("일치하는 영화가 없습니다."));
 
             Review writtenReview=saveReview(reviewPostRequestDto, nowUser, nowMovie);
 
+            gradeService.validateGrade(nowUser);
 
             return ResponseEntity.status(201).body(writtenReview.getReviewId());
         }catch (IllegalArgumentException e) {
