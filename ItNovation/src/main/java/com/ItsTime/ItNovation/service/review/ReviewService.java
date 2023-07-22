@@ -25,6 +25,7 @@ import com.ItsTime.ItNovation.domain.user.dto.ReviewUserInfoDto;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -162,8 +163,6 @@ public class ReviewService {
     }
 
 
-    private ReviewUserInfoDto madeUserInfoDto(User user) {
-        return ReviewUserInfoDto.builder()
 
     private ReviewLoginUserInfoDto madeLoginUserInfoDto(Optional<User> userOptional, User reviewUser, Review review) {
         if(userOptional.isPresent()){
@@ -193,7 +192,7 @@ public class ReviewService {
     }
 
     private ReviewUserInfoDto madeUserInfoDto(User user, Review review) {
-        ReviewUserInfoDto reviewUserInfoDto = ReviewUserInfoDto.builder()
+        return ReviewUserInfoDto.builder()
             .userId(user.getId())
             .bgImg(user.getBgImg())
             .nickname(user.getNickname())
@@ -219,11 +218,7 @@ public class ReviewService {
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
-
-
         return ReviewInfoDto.builder()
-        ReviewInfoDto reviewInfoDto = ReviewInfoDto.builder()
-
             .reviewId(review.getReviewId())
             .hasCheckDate(validateNull(review.getHasCheckDate()))
             .hasGoodActing(validateNull(review.getHasGoodActing()))
