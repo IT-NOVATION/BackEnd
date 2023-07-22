@@ -282,9 +282,9 @@ public class ReviewService {
 
     @Transactional
     public List<LatestReviewResponseDto> getLatestReviews() {
-        List<User> recentReviewers = reviewRepository.findNewestReview(PageRequest.of(0, 3));
+        List<User> recentReviewers = reviewRepository.findUsersWithNewestReview(PageRequest.of(0, 3));
         return recentReviewers.stream().map(recentReviewer -> {
-            List<LatestReviewDto> reviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 3))
+            List<LatestReviewDto> reviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 2))
                     .stream()
                     .map(review -> LatestReviewDto.builder()
                             .reviewId(review.getReviewId())
