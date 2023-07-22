@@ -23,4 +23,9 @@ public class MovieAllSearchController {
 
         return movieAllSearchService.getMoiveSearchResponseByReviewOrder(page);
     }
+    @GetMapping("/star-score-order/{page}")
+    public ResponseEntity getMoiveSearchResponseByStarScoreOrder(@PathVariable int page) {
+
+        return movieAllSearchService.getMoiveSearchResponseByStarScoreOrder(page);
+    }
 }
