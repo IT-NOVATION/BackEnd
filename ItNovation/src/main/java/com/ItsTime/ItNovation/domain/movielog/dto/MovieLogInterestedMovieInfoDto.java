@@ -11,13 +11,15 @@ public class MovieLogInterestedMovieInfoDto {
     private String title;
 
     private Boolean hasReviewdByLoginedUser;
+    private Long reviewId;
 
     @Builder
-    public MovieLogInterestedMovieInfoDto(Long movieId, String movieImg, Float star, String title, Boolean hasReviewdByLoginedUser) {
+    public MovieLogInterestedMovieInfoDto(Long movieId, String movieImg, Float star, String title, Boolean hasReviewdByLoginedUser,Long reviewId) {
         this.movieId = movieId;
         this.movieImg = movieImg;
         this.star = star;
         this.title = title;
         this.hasReviewdByLoginedUser = hasReviewdByLoginedUser;
+        this.reviewId = reviewId;
     }
 }
