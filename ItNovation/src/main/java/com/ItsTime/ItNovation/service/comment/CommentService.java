@@ -9,6 +9,7 @@ import com.ItsTime.ItNovation.domain.comment.dto.CommentUserInfoDto;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentWriteRequestDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
+import com.ItsTime.ItNovation.domain.user.Grade;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.grade.GradeService;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +34,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final GradeService gradeService;
 
     @Transactional
     public ResponseEntity writeComment(CommentWriteRequestDto commentDto, String email) {
@@ -44,6 +47,7 @@ public class CommentService {
                 .user(findUser)
                 .build();
             commentRepository.save(comment);
+            gradeService.validateGrade(findUser);
             return ResponseEntity.status(200).body("성공적으로 저장되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(e.getMessage());
@@ -145,12 +149,18 @@ public class CommentService {
     @Transactional
     public ResponseEntity deleteComment(Long commentId) {
         try {
+            User user = extractCommentUser(commentId);
             commentRepository.deleteById(commentId);
-
-            //GradeService.checkGrade()
+            gradeService.validateGrade(user);
             return ResponseEntity.status(200).body("삭제 성공했습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("삭제에 실패했습니다.");
         }
+    }
+
+    private User extractCommentUser(Long commentId) {
+        User user = commentRepository.findById(commentId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 댓글 없습니다.")).getUser();
+        return user;
     }
 }
