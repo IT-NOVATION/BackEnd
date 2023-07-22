@@ -81,6 +81,7 @@ public class TodayBestReviewService {
         return bestReviewResponseDto;
     }
 
+    //TODO: 없는 경우 핸들링 필요
     private Boolean profileState(String nowUserEmail, Long userId) {
         Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
         log.info(String.valueOf(nowUser.get().getId()));
