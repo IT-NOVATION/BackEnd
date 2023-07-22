@@ -50,9 +50,9 @@ public class ReviewController {
 
 
     @GetMapping("/movieInfo/{movieId}")
-    public ResponseEntity reviewWriteGetMovieInfo(@PathVariable Long movieId)
+    public ResponseEntity reviewWriteGetMovieInfo(@PathVariable Long movieId, Authentication authentication)
     {
-        return reviewService.getMovieInfo(movieId);
+        return reviewService.getMovieInfo(movieId,authentication);
     }
 
 

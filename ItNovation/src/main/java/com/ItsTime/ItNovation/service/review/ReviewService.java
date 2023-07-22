@@ -14,7 +14,6 @@ import com.ItsTime.ItNovation.domain.review.dto.ReviewReadResponseDto;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.star.Star;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
-import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.ReviewLoginUserInfoDto;
@@ -26,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -242,10 +242,19 @@ public class ReviewService {
     }
 
     @Transactional
-    public ResponseEntity getMovieInfo(Long movieId) {
+    public ResponseEntity getMovieInfo(Long movieId, Authentication authentication) {
         try {
             Movie findMovie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 영화가 존재하지 않습니다."));
+
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+             if(reviewRepository.findByUserAndMovie(user, findMovie).isPresent()){
+                 throw new IllegalArgumentException("이미 유저가 해당 영화의 리뷰를 작성했습니다.");
+             }
+
             ReviewPostMovieInfoResponseDto responseDto = buildResponse(
                 movieId, findMovie);
             return ResponseEntity.status(200).body(responseDto);
