@@ -326,6 +326,7 @@ public class ReviewService {
         return latestReviewResponseDto;
     }
 
+    @Transactional
     public Boolean profileState(String email, Long userId) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<User> checkUser = userRepository.findById(userId);
@@ -335,6 +336,7 @@ public class ReviewService {
         return true;
     }
 
+    @Transactional
     public Boolean followState(String email, Long userId) {
         Optional<User> user = userRepository.findByEmail(email);
 
