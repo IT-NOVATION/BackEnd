@@ -24,6 +24,7 @@ public class ReviewInfoDto {
     private Float star;
     private Integer reviewLikeNum;
     private String watchDate;
+    private Boolean hasGoodStory;
     // reviewLikeNum 추가해야함.
 
 
@@ -31,13 +32,14 @@ public class ReviewInfoDto {
     public ReviewInfoDto(Long reviewId, String reviewTitle, String reviewMainText,
         Boolean hasGoodProduction, Boolean hasGoodScenario, Boolean hasGoodDirecting,
         Boolean hasGoodOst, Boolean hasGoodVisual, Boolean hasGoodActing,
-        Boolean hasGoodCharterCharming, Boolean hasGoodDiction, Boolean hasCheckDate,
+        Boolean hasGoodCharterCharming, Boolean hasGoodDiction, Boolean hasCheckDate, Boolean hasGoodStory,
         Boolean hasSpoiler, Float star, String watchDate, Integer reviewLikeNum) {
         this.reviewId = reviewId;
         this.reviewTitle = reviewTitle;
         this.reviewMainText = reviewMainText;
         this.hasGoodProduction = hasGoodProduction;
         this.hasGoodScenario = hasGoodScenario;
+        this.hasGoodStory =hasGoodStory;
         this.hasGoodDirecting = hasGoodDirecting;
         this.hasGoodOst = hasGoodOst;
         this.hasGoodVisual = hasGoodVisual;

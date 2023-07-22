@@ -225,6 +225,7 @@ public class ReviewService {
             .hasGoodScenario(validateNull(review.getHasGoodScenario()))
             .hasGoodProduction(validateNull(review.getHasGoodProduction()))
             .hasGoodVisual(validateNull(review.getHasGoodVisual()))
+            .hasGoodStory(validateNull(review.getHasGoodStory()))
             .hasGoodCharterCharming(validateNull(review.getHasGoodCharterCharming()))
             .reviewTitle(review.getReviewTitle())
             .reviewMainText(review.getReviewMainText())
