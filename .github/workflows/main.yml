@@ -31,18 +31,12 @@ jobs:
         with:
           distribution: 'corretto' # See 'Supported distributions' for available options
           java-version: '17'
-      - run : ls -al   
+ 
       - name: Grant execute permisson for gradlew # gradlew 실행 권한 부여
         run: chmod +x gradlew
-      - name: init with Gradle
-        uses: gradle/gradle-build-action@v2
-      - run: gradle init
       - run: ls -al
-#       - name: Build with Gradle  
-#         uses: gradle/gradle-build-action@v2
-#         with:
-#           gradle-version: 7.5.1
-#           arguments: build
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean -x test build
+
+
 
