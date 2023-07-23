@@ -8,8 +8,11 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchResponseDto;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ItsTime.ItNovation.domain.user.dto.UserSearchTotalResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,5 +70,25 @@ public class UserSearchService {
             searchUserReviewDtos.add(buildDto);
         }
         return searchUserReviewDtos;
+    }
+
+    public ResponseEntity<UserSearchTotalResponseDto> getTotalResponse(String userName) {
+        List<UserSearchResponseDto> response = new ArrayList<>();
+        response = getResponse(userName);
+        int size = response.size();
+        try{
+            UserSearchTotalResponseDto userSearchTotalResponseDto = UserSearchTotalResponseDto.builder()
+                    .userSearchResponseDtoList(response)
+                    .totalSize(size)
+                    .build();
+            return ResponseEntity.status(200).body(userSearchTotalResponseDto);
+        }catch(Exception e){
+            UserSearchTotalResponseDto userSearchTotalResponseDto = UserSearchTotalResponseDto.builder()
+                    .userSearchResponseDtoList(response)
+                    .totalSize(size)
+                    .build();
+            return ResponseEntity.status(400).body(userSearchTotalResponseDto);
+        }
+
     }
 }
