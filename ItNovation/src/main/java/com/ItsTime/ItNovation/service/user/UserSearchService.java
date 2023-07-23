@@ -75,6 +75,7 @@ public class UserSearchService {
         return searchUserReviewDtos;
     }
 
+    @Transactional
     public ResponseEntity<UserSearchTotalResponseDto> getTotalResponse(String userName) {
         List<UserSearchResponseDto> response = new ArrayList<>();
         response = getResponse(userName);
