@@ -31,7 +31,7 @@ jobs:
         with:
           distribution: 'corretto' # See 'Supported distributions' for available options
           java-version: '17'
-           
+      - run : ls -al   
       - name: Grant execute permisson for gradlew # gradlew 실행 권한 부여
         run: chmod +x gradlew
       - name: init with Gradle
