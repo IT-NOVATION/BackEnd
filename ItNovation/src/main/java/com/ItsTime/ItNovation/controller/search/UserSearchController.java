@@ -3,6 +3,7 @@ package com.ItsTime.ItNovation.controller.search;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchRequestDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchResponseDto;
+import com.ItsTime.ItNovation.domain.user.dto.UserSearchTotalResponseDto;
 import com.ItsTime.ItNovation.service.user.UserSearchService;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +25,8 @@ public class UserSearchController {
 
 
     @GetMapping("/user")
-    public ResponseEntity<List<UserSearchResponseDto>> searchUser(@RequestParam(name="userNm") String userName){
-        List<UserSearchResponseDto> response = new ArrayList<>();
-        try {
-            response = userSearchService.getResponse(userName);
-            return ResponseEntity.status(200).body(response);
-
-        }catch (Exception e){
-            return ResponseEntity.status(400).body(response);
-        }
+    public ResponseEntity <UserSearchTotalResponseDto> searchTargetUser(@RequestParam(name="userNm") String userName){
+        return userSearchService.getTotalResponse(userName);
     }
 
 }
