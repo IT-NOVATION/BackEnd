@@ -76,19 +76,14 @@ public class UserSearchService {
         List<UserSearchResponseDto> response = new ArrayList<>();
         response = getResponse(userName);
         int size = response.size();
+        UserSearchTotalResponseDto userSearchTotalResponseDto = UserSearchTotalResponseDto.builder()
+                .userSearchResponseDtoList(response)
+                .totalSize(size)
+                .build();
         try{
-            UserSearchTotalResponseDto userSearchTotalResponseDto = UserSearchTotalResponseDto.builder()
-                    .userSearchResponseDtoList(response)
-                    .totalSize(size)
-                    .build();
             return ResponseEntity.status(200).body(userSearchTotalResponseDto);
         }catch(Exception e){
-            UserSearchTotalResponseDto userSearchTotalResponseDto = UserSearchTotalResponseDto.builder()
-                    .userSearchResponseDtoList(response)
-                    .totalSize(size)
-                    .build();
             return ResponseEntity.status(400).body(userSearchTotalResponseDto);
         }
-
     }
 }
