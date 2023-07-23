@@ -60,6 +60,10 @@ public class TodayBestUserService {
             User user = top5UsersWithTodayDate.get(index);
             madeInternalResponseDto(topUserReviewDtos, top5UserResponseDtos, user, loginUser);
         }
+        if(top5UserResponseDtos.isEmpty()){
+            return ResponseEntity.status(403).body("topUser 가 존재하지 않습니다!");
+        }
+
         return ResponseEntity.status(200).body(top5UserResponseDtos);
     }
 
