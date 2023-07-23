@@ -29,10 +29,7 @@ jobs:
           distribution: 'corretto' # See 'Supported distributions' for available options
           java-version: '17'
            
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew # (7)
-        shell: bash
-
       - name: Build with Gradle
-        run: ./gradlew clean build -x test # (8)
-        shell: bash
+        uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+        with:
+         arguments: build
