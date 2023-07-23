@@ -1,6 +1,8 @@
 package com.ItsTime.ItNovation.service.singleMoviePage;
 
 
+import com.ItsTime.ItNovation.domain.actor.Actor;
+import com.ItsTime.ItNovation.domain.actor.ActorRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieFeatureDto;
@@ -44,6 +46,7 @@ public class SingleMoviePageService {
     private final MovieLikeRepository movieLikeRepository;
     private final StarRepository starRepository;
     private final UserRepository userRepository;
+    private final ActorRepository actorRepository;
 
 
     @Transactional
@@ -126,9 +129,9 @@ public class SingleMoviePageService {
         SingleMoviePageMovieInfoDto singleMoviePageMovieInfoDto = SingleMoviePageMovieInfoDto.builder()
             .movieImg(movie.getMovieImg())
             .movieBgImg(movie.getMovieBgImg())
-            .movieActor(movie.getMovieActor())
             .movieDetail(movie.getMovieDetail())
             .movieGenre(movie.getMovieGenre())
+            .movieActor(getActorList(movie.getTitle()))
             .avgStarScore(getAvgScoreByMovieId(movie))
             .title(movie.getTitle())
             .movieLikeCount(movieLikeRepository.countMovieLike(movie))
@@ -140,6 +143,18 @@ public class SingleMoviePageService {
             .top3HasFeature(findTop3Feature(movie))
             .build();
         return singleMoviePageMovieInfoDto;
+    }
+
+    private List<String> getActorList(String title) {
+        List<Actor> allByMovieTitle = actorRepository.findAllByMovieTitle(title);
+        List<String> actorNameList = new ArrayList<>();
+        for (int i=0; i<allByMovieTitle.size(); i++) {
+            if(i>6){
+                break;
+            }
+            actorNameList.add(allByMovieTitle.get(i).getActorName());
+        }
+        return actorNameList;
     }
 
     private Float getAvgScoreByMovieId(Movie movie) {
