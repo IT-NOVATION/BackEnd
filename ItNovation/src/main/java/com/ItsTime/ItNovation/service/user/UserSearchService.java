@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.service.user;
 
 
 import com.ItsTime.ItNovation.domain.review.Review;
+import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.SearchUserReviewDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchTotalResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserSearchService {
 
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public List<UserSearchResponseDto> getResponse(String searchNickName) {
@@ -59,7 +62,7 @@ public class UserSearchService {
 
     private List<SearchUserReviewDto> getSearchReviewResponse(User u) {
         List<SearchUserReviewDto> searchUserReviewDtos = new ArrayList<>();
-        List<Review> reviews = u.getReviews();
+        List<Review> reviews = reviewRepository.findNewestReviewByUserId(u.getId(), Pageable.ofSize(2));
         for(Review r : reviews){
             SearchUserReviewDto buildDto = SearchUserReviewDto.builder()
                 .reviewId(r.getReviewId())
