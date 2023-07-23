@@ -45,7 +45,6 @@ public class Movie {
     private String title;
     private String movieImg;
     private String movieBgImg;
-    private String movieActor;
     private String movieDirector;
     private String movieDate;
     private String movieGenre;
@@ -62,14 +61,12 @@ public class Movie {
 
     @Builder
     public Movie(Long real_movieId, String title, String movieImg, String movieBgImg,
-        String movieActor,
         String movieDirector, String movieDate, String movieGenre, String movieCountry,
         String movieDetail, Integer movieRunningTime, String movieAudit) {
         this.real_movieId = real_movieId;
         this.title = title;
         this.movieImg = movieImg;
         this.movieBgImg = movieBgImg;
-        this.movieActor = movieActor;
         this.movieDirector = movieDirector;
         this.movieDate = movieDate;
         this.movieGenre = movieGenre;
@@ -84,7 +81,6 @@ public class Movie {
         this.title = newInfoMovie.title;
         this.movieImg = newInfoMovie.movieImg;
         this.movieBgImg = newInfoMovie.movieBgImg;
-        this.movieActor = newInfoMovie.movieActor;
         this.movieDirector = newInfoMovie.movieDirector;
         this.movieDate = newInfoMovie.movieDate;
         this.movieGenre = newInfoMovie.movieGenre;
