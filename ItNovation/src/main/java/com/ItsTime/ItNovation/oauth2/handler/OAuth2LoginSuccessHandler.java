@@ -48,7 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info(response.getHeader("Authorization"));
 
 
-                String redirectUrl="http://localhost:3000/success?accessToken="+accessToken+"&refreshToken="+refreshToken;
+                String redirectUrl="http://itsmovietime-client.s3-website.ap-northeast-2.amazonaws.com:3000/success?accessToken="+accessToken+"&refreshToken="+refreshToken;
                 response.sendRedirect(redirectUrl);
 
                 userRepository.findByEmail(oAuth2User.getEmail())
