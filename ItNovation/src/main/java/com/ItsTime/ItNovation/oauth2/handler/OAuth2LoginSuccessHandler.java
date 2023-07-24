@@ -48,7 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info(response.getHeader("Authorization"));
 
 
-                String redirectUrl="http://localhost:3000/kakao-redirect/"+accessToken+"/"+refreshToken;
+                String redirectUrl="http://its-movietime.com//kakao-redirect/"+accessToken+"/"+refreshToken;
                 response.sendRedirect(redirectUrl);
 
                 userRepository.findByEmail(oAuth2User.getEmail())
