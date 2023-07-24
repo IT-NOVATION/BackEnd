@@ -6,7 +6,7 @@
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
 env:  
   S3_BUCKET_NAME: buildrepo 
-  PROJECT_NAME: IT-NOVATION
+  PROJECT_NAME: ItNovation
   CODE_DEPLOY_APP_NAME: ItNovation-webservice
   CODE_DEPLOY_GROUP_NAME: ItNovation
   
