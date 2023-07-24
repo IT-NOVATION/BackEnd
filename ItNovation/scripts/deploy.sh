@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPOSITORY=/home/ec2-user/app/step2
-PROJECT_NAME=ItNovation #해당 위치에 properties에 작성한 프로젝트명과 동일하게 작성합니다.
+PROJECT_NAME=ItNovation
 
 echo "> Build 파일 복사"
 cp $REPOSITORY/zip/*.jar $REPOSITORY/
@@ -28,6 +28,6 @@ chmod +x $JAR_NAME
 
 echo "> $JAR_NAME 실행"
 nohup java -jar \
-  -Dspring.config.location=classpath:/application.yml,/home/ec2-user/app/application-oauth.yml,/home/ec2-user/app/application-prod.yml,/home/ec2-user/app/application-jwt.yml,/home/ec2-user/app/application-mail.yml,/home/ec2-user/app/application-key.yml\
+  -Dspring.config.location=classpath:/application.yml,/home/ec2-user/app/application-oauth.yml,/home/ec2-user/app/application-prod.yml,/home/ec2-user/app/application-jwt.yml,/home/ec2-user/app/application-mail.yml,/home/ec2-user/app/application-key.yml \
   -Dspring.profile.active=real \
   $JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
