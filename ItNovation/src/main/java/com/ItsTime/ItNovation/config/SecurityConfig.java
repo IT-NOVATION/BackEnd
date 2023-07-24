@@ -70,7 +70,8 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/custom-logout"),
             new AntPathRequestMatcher("/movielog/**"),
             new AntPathRequestMatcher("/movie-search/**"),
-            new AntPathRequestMatcher("/comment/read/**")
+            new AntPathRequestMatcher("/comment/read/**"),
+            new AntPathRequestMatcher("/passwordfind/**")
 
 
 
