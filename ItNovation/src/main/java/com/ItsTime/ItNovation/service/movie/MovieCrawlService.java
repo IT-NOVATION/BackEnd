@@ -343,15 +343,23 @@ public class MovieCrawlService {
                 .movieTitle(title)
                 .movieImg(movieImg)
                 .popularity(popularity.intValue())
-                .starScore(getAvgScoreByMovieId(movie))
+                .starScore(getAvgScoreByMovieId(movie.getId()))
                 .build();
 
             PopularMovie moviePopular = PopularMovie.builder()
-                .movieId(movie.getId())
                 .title(title)
                 .movieImg(movieImg)
                 .popularity(popularity)
+                .movieRunningTime(movie.getMovieRunningTime())
+                .real_movieId(movie.getReal_movieId())
+                .movieAudit(movie.getMovieAudit())
+                .movieDate(movie.getMovieDate())
+                .movieGenre(movie.getMovieGenre())
+                .movieCountry(movie.getMovieCountry())
+                .movieBgImg(movie.getMovieBgImg())
+                .movieDbId(movie.getId())
                 .build();
+
             popularMovieRepository.save(moviePopular);
             moviePopularDtos.add(moviePopularDto);
         }
@@ -359,13 +367,13 @@ public class MovieCrawlService {
         return moviePopularDtos;
     }
 
-    private Float getAvgScoreByMovieId(Movie movie) {
-        Float avgScoreByMovie = starRepository.findAvgScoreByMovieId(movie.getId());
+    private Float getAvgScoreByMovieId(Long movieId) {
+        Float avgScoreByMovie = starRepository.findAvgScoreByMovieId(movieId);
         if (avgScoreByMovie == null) {
             return 0.0f;
         }
 
-        return starRepository.findAvgScoreByMovieId(movie.getId());
+        return starRepository.findAvgScoreByMovieId(movieId);
     }
 
 
@@ -495,7 +503,6 @@ public class MovieCrawlService {
             log.info("영화 안 emptyProperties 발생!");
             return;
         }
-
         movieRepository.save(movie);
 
     }
@@ -535,5 +542,30 @@ public class MovieCrawlService {
     }
 
 
+    public List<MoviePopularDto> isPopularMoviesInTable() throws JsonProcessingException {
+        List<PopularMovie> all = popularMovieRepository.findAll();
+        log.info(String.valueOf(all.size()));
+        if(all.size()>0){
+            List<PopularMovie> setConvertMovie = all.subList(0, 10);
+            return convertPopularToMoviePopularDto(setConvertMovie);
+        }
+        return getPopularMovies();
+    }
+
+    private List<MoviePopularDto> convertPopularToMoviePopularDto(List<PopularMovie> setConvertMovie) {
+       List<MoviePopularDto> converted = new ArrayList<>();
+        for (PopularMovie popularMovie : setConvertMovie) {
+            MoviePopularDto convertDto = MoviePopularDto.builder()
+                .starScore(getAvgScoreByMovieId(popularMovie.getMovieDbId()))
+                .movieTitle(popularMovie.getTitle())
+                .movieId(popularMovie.getMovieDbId())
+                .popularity(popularMovie.getPopularity().intValue())
+                .movieImg(popularMovie.getMovieImg())
+                .build();
+
+            converted.add(convertDto);
+        }
+        return converted;
+    }
 }
 

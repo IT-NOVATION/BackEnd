@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularRecommendResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public class MovieController {
     @GetMapping("/popularAndRecommend")
     public ResponseEntity getPopularAndRecommend(){
         try {
-            List<MoviePopularDto> popularMovies = movieCrawlService.getPopularMovies();
+            List<MoviePopularDto> popularMovies = getPopularTableMovies();
             List<MovieRecommendDto> topReviewedMovies = movieCrawlService.getTopReviewedMovies();
             if(topReviewedMovies.isEmpty()){
                 throw new IllegalArgumentException("추천 영화 존재 x");
@@ -84,6 +85,12 @@ public class MovieController {
         }catch (Exception e){
             return ResponseEntity.status(403).body(e.getMessage());
         }
+    }
+
+    private List<MoviePopularDto> getPopularTableMovies() throws JsonProcessingException {
+
+        movieCrawlService.isPopularMoviesInTable();
+        return null;
     }
 
 
