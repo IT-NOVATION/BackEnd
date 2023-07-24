@@ -74,14 +74,9 @@ public class TopFollowerService {
 
     private Boolean profileState(String nowUserEmail, Long userId) {
         Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
-        log.info(String.valueOf(nowUser.get().getId()));
-
         Optional<User> checkUser = userRepository.findById(userId);
-        log.info(String.valueOf(checkUser.get().getId()));
         if (nowUser.isPresent()) {
-            if (nowUser.equals(checkUser)) {
-                return true;
-            } else return false;
+            return nowUser.equals(checkUser);
         } else return false;
     }
 
