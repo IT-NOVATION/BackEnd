@@ -38,7 +38,8 @@ public class TodayPopularUserService {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
 
             if (extractedEmail.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
+                //TODO: 토큰 만료 시 로직 추가해야함
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
             } else {
                 nowUserEmail = extractedEmail.get();
             }
