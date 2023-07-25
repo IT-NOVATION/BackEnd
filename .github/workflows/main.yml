@@ -18,7 +18,7 @@ on:
   push:
     branches: 
       - main
-      - release-0.1
+      - fix/final
     
   workflow_dispatch:
 jobs:
