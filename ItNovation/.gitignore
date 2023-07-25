@@ -42,4 +42,3 @@ application-jwt.yml
 application-mail.yml
 application-key.yml
 
-.DS_Store
