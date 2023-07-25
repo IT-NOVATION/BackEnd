@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class RewritePasswordRequestDto {
 
-
+    private String email;
     private String password;
 }

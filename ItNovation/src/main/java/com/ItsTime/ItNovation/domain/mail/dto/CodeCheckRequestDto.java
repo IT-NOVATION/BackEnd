@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public class CodeCheckRequestDto {
 
+    private String email;
     private String code;
 
 }
