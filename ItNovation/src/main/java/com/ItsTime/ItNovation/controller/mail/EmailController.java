@@ -57,7 +57,7 @@ public class EmailController {
 
 
 
-    @PutMapping("/passwordfind/rewritePw")
+    @PostMapping("/passwordfind/rewritePw")
     public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
         String email = rewritePasswordRequestDto.getEmail();
         String updatePassword = rewritePasswordRequestDto.getPassword();
