@@ -20,8 +20,6 @@ public class PopularMovie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
     private Double popularity;
     private String title;
     private String movieImg;

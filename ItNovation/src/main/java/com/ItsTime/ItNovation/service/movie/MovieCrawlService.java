@@ -13,12 +13,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -87,11 +89,12 @@ public class MovieCrawlService {
      */
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
+        String now=LocalDate.now().plusWeeks(2).toString();
         for (int i = 1; i < 5; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
                 // 현재 한국에서 상영중인 영화로 변경
                 + "&page=" + i + "&language=ko-KR" + "&region=KR"
-                + "&sort_by=popularity.desc&include_adult=true&include_video=false"; // api 버전 변경에 다른
+                + "&sort_by=primary_release_date.desc&include_video=false&with_runtime.gte=90&primary_release_date.lte=" + now; // api 버전 변경에 다른
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
 //여기에서도 끌고 올 수 있음. backdropPath 끌고 올 수 있음.
             String json = responseEntity.getBody();
@@ -127,7 +130,6 @@ public class MovieCrawlService {
         JsonNode movieInfoJson = movieListJson.get("movieList");
 
         getMovieInfoKorea(movieInfo, movieInfoJson.get(0).get("movieCd").asText()); //찐 정보 얻어오기
-        // movieInfo.put("audit", movieAudit);
 
     }
 
@@ -228,7 +230,6 @@ public class MovieCrawlService {
     private Movie setMovie(long real_movieId, Map<String, String> movieInfo) {
         log.info("==========\n In setMovie =============");
         log.info(movieInfo.get("title"));
-        log.info(movieInfo.get("movieActor"));
         log.info("===== now movieInfo ======");
         log.info(movieInfo.toString());
         Movie movie = getMovie(real_movieId, movieInfo);
@@ -260,16 +261,16 @@ public class MovieCrawlService {
 
     private Boolean hasEmptyPropertyMovie(Map<String, String> movieInfo) {
         try {
-            isEmpty(movieInfo.get("title"));
-            isEmpty(movieInfo.get("movieImg"));
-            isEmpty(movieInfo.get("movieBgImg"));
-            isEmpty(movieInfo.get("country"));
-            isEmpty(movieInfo.get("movieDate"));
-            isEmpty(movieInfo.get("genre"));
-            isEmpty(movieInfo.get("movieDirector"));
+            isEmpty(movieInfo.get("title")); //
+            isEmpty(movieInfo.get("movieImg")); //
+            isEmpty(movieInfo.get("movieBgImg")); //
+            isEmpty(movieInfo.get("country")); //
+            isEmpty(movieInfo.get("movieDate")); //
+            isEmpty(movieInfo.get("genre")); //
+            isEmpty(movieInfo.get("movieDirector")); //
             isEmpty(movieInfo.get("movieRunningTime"));
-            isEmpty(movieInfo.get("movieDetail"));
-            isEmpty(movieInfo.get("audit"));
+            isEmpty(movieInfo.get("movieDetail")); //
+            isEmpty(movieInfo.get("audit")); //
             return false;
         }catch (IllegalArgumentException e){
             log.info(e.getMessage());
@@ -289,7 +290,8 @@ public class MovieCrawlService {
         popularMovieRepository.deleteAll();
 
         List<Map<String, Object>> movies = new ArrayList<>();
-        for(int i=1; i<=3; i++) {
+        for(int i=1; i<=5; i++) {
+
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(
                 "https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY
                     + "&language=ko-KR&region=KR&page="+i,
@@ -356,10 +358,12 @@ public class MovieCrawlService {
                 .movieDate(movie.getMovieDate())
                 .movieGenre(movie.getMovieGenre())
                 .movieCountry(movie.getMovieCountry())
+                .movieDetail(movie.getMovieDetail())
+                .movieDirector(movie.getMovieDirector())
                 .movieBgImg(movie.getMovieBgImg())
                 .movieDbId(movie.getId())
                 .build();
-
+            log.info("============" + title);
             popularMovieRepository.save(moviePopular);
             moviePopularDtos.add(moviePopularDto);
         }
@@ -493,11 +497,13 @@ public class MovieCrawlService {
     private void savePopularMovie(Map<String, Object> movieInfo) throws JsonProcessingException {
         Map<String, String> convertMovieInfo = new HashMap<>();
         convertMovieInfo(movieInfo, convertMovieInfo);
-
+        log.info("========== savePopularMovie ==============");
+        log.info(convertMovieInfo.toString());
         Integer real_movieId = Integer.parseInt(convertMovieInfo.get("id"));
 
 
         convertMovieInfo.put("country", movieInfo.get("originalLanguage").toString());
+        log.info("=============== " + convertMovieInfo.toString());
         Movie movie = setMovie(real_movieId, convertMovieInfo);
         if(movie==null){
             log.info("영화 안 emptyProperties 발생!");
@@ -518,6 +524,10 @@ public class MovieCrawlService {
         convertMovieInfo.put("originalLanguage", movieInfo.get("originalLanguage").toString());
         convertMovieInfo.put("movieDetail", movieInfo.get("movieDetail").toString());
         convertMovieInfo.put("movieDate", movieInfo.get("movieDate").toString());
+        convertMovieInfo.put("audit", movieInfo.get("audit").toString());
+        convertMovieInfo.put("genre", movieInfo.get("genre").toString());
+        convertMovieInfo.put("movieDirector", movieInfo.get("movieDirector").toString());
+        convertMovieInfo.put("movieRunningTime", movieInfo.get("movieRunningTime").toString());
     }
 
 
