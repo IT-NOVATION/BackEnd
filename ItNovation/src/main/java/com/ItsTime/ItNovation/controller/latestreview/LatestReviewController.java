@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation.controller.latestreview;
 
 import com.ItsTime.ItNovation.domain.review.dto.LatestReviewResponseDto;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.service.movieTalk.TodayLatestReviewService;
 import com.ItsTime.ItNovation.service.review.ReviewService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,13 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class LatestReviewController {
-    private final ReviewService reviewService;
+    private final TodayLatestReviewService todayLatestReviewService;
     private final JwtService jwtService;
 
     @GetMapping("/today/latestReview")
     public ResponseEntity LatestReviews(HttpServletRequest request){
         Optional<String> accessToken = jwtService.extractAccessToken(request);
-        return reviewService.getLatestReviews(accessToken);
+        return todayLatestReviewService.getLatestReviews(accessToken);
 
 
     }

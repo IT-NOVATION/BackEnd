@@ -1,5 +1,6 @@
 package com.ItsTime.ItNovation.service.review;
 
+import com.ItsTime.ItNovation.common.JwtErrorCode;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.Movie;
@@ -31,6 +32,7 @@ import com.ItsTime.ItNovation.domain.user.dto.UserPushLikeDto;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -57,14 +59,24 @@ public class ReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final StarRepository starRepository;
     private final GradeService gradeService;
-    private final JwtService jwtService;
 
 
+
+    /**
+     * @param userId
+     * @return 유저의 리뷰 반환
+     */
     @Transactional
     public List<Review> getReviewByUserId(Long userId) {
         return reviewRepository.findNewestReviewByUserIdWithNoPageable(userId);
     }
 
+    /**
+     *
+     * @param reviewPostRequestDto
+     * @param loginUserEmail
+     * @return 리뷰 쓰기
+     */
   
     @Transactional
     public ResponseEntity reviewWrite(ReviewPostRequestDto reviewPostRequestDto, String loginUserEmail) {
@@ -131,6 +143,11 @@ public class ReviewService {
         return starScore;
     }
 
+    /**
+     * @param reviewId
+     * @param email
+     * @return 리뷰 읽기
+     */
     @Transactional
     public ResponseEntity reviewRead(Long reviewId, String email) {
         try {
@@ -298,82 +315,6 @@ public class ReviewService {
         }
     }
 
-    @Transactional
-    public ResponseEntity getLatestReviews(Optional<String> accessToken) {
-        String nowUserEmail = null;
-        if (accessToken.isPresent()) {
-            nowUserEmail = jwtService.extractEmail(accessToken.get()).get();
-        }
-        List<User> recentReviewers = reviewRepository.findUsersWithNewestReview(PageRequest.of(0, 3));
-        List<LatestReviewResponseDto> LatestReviewResponseList = new ArrayList<>();
-
-
-        for (User recentReviewer : recentReviewers) {
-            List<Review> userLatestReviews = reviewRepository.findNewestReviewByUserId(recentReviewer.getId(), PageRequest.of(0, 2));
-            List<LatestReviewDto> reviews = new ArrayList<>();
-            for (Review review : userLatestReviews) {
-                LatestReviewDto latestReviewDto = getLatestReviewDto(review);
-                reviews.add(latestReviewDto);
-            }
-            LatestReviewResponseDto latestReviewResponseDto = getLatestReviewResponseDto(nowUserEmail, recentReviewer, reviews);
-            LatestReviewResponseList.add(latestReviewResponseDto);
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(LatestReviewResponseList);
-    }
-
-    private  LatestReviewDto getLatestReviewDto(Review review) {
-        LatestReviewDto latestReviewDto = LatestReviewDto.builder()
-                .reviewId(review.getReviewId())
-                .reviewTitle(review.getReviewTitle())
-                .movie(LatestReviewMovieResponseDto.builder()
-                        .movieId(review.getMovie().getId())
-                        .movieImg(review.getMovie().getMovieImg())
-                        .build())
-                .build();
-        return latestReviewDto;
-    }
-
-    private LatestReviewResponseDto getLatestReviewResponseDto(String nowUserEmail, User recentReviewer, List<LatestReviewDto> reviews) {
-        LatestReviewResponseDto latestReviewResponseDto = LatestReviewResponseDto.builder()
-                .userId(recentReviewer.getId())
-                .profileImg(recentReviewer.getProfileImg())
-                .isMyProfile(profileState(nowUserEmail, recentReviewer.getId()))
-                .loginUserPushedFollow(followState(nowUserEmail, recentReviewer.getId()))
-                .nickname(recentReviewer.getNickname())
-                .introduction(recentReviewer.getIntroduction())
-                .reviews(reviews)
-                .build();
-        return latestReviewResponseDto;
-    }
-
-
-    private Boolean profileState(String nowUserEmail, Long userId) {
-        Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
-        Optional<User> checkUser = userRepository.findById(userId);
-        if (nowUser.isPresent()) {
-            if (nowUser.equals(checkUser)) {
-                return true;
-            } else return false;
-        } else return false;
-
-    }
-
-    @Transactional
-    public Boolean followState(String nowUserEmail, Long userId) {
-        Optional<User> user = userRepository.findByEmail(nowUserEmail);
-
-        /**
-         * 팔로우 하면 true
-         * 아니면 false ( 같은 유저여도 false)
-         */
-        if (user.isPresent()) {
-            Optional<FollowState> followState = followRepository.findByPushUserAndFollowUser(user.get().getId(), userId);
-            return followState.isPresent();
-        } else {
-            return false;
-        }
-    }
 
     @Transactional
     public ResponseEntity getLikeUsers(Long reviewId, String email) {
@@ -393,7 +334,7 @@ public class ReviewService {
             boolean isLoginUserFollowed = false;
             boolean isMyProfile = false;
             if(validateLoginUser!=null){
-                if(validateLoginUser.getId() == user.getId()){
+                if(Objects.equals(validateLoginUser.getId(), user.getId())){
                     isMyProfile=true;
                 }
                 if(followRepository.findByPushUserAndFollowUser(validateLoginUser.getId(), user.getId()).isPresent()){
