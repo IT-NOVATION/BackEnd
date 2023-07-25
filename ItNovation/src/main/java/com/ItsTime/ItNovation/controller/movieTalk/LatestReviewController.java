@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.controller.latestreview;
+package com.ItsTime.ItNovation.controller.movieTalk;
 
 import com.ItsTime.ItNovation.domain.review.dto.LatestReviewResponseDto;
 import com.ItsTime.ItNovation.jwt.service.JwtService;

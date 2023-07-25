@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.controller.topfollower;
+package com.ItsTime.ItNovation.controller.movieTalk;
 
 import com.ItsTime.ItNovation.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.movieTalk.TodayPopularUserService;

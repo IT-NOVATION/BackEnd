@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.controller.bestreview;
+package com.ItsTime.ItNovation.controller.movieTalk;
 
 
 import com.ItsTime.ItNovation.jwt.service.JwtService;
