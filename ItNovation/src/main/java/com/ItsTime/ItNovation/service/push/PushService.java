@@ -18,6 +18,8 @@ import com.ItsTime.ItNovation.domain.reviewLike.dto.ReviewLikeRequestDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import java.util.Optional;
+
+import com.ItsTime.ItNovation.notify.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,7 @@ public class PushService {
     private final FollowRepository followRepository;
     private final MovieRepository movieRepository;
     private final MovieLikeRepository movieLikeRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public ResponseEntity pushReviewLike(ReviewLikeRequestDto reviewLikeRequestDto, User findUser) {
@@ -41,6 +44,7 @@ public class PushService {
             log.info(reviewLikeRequestDto.getReviewId().toString());
             Review review = reviewRepository.findById(reviewLikeRequestDto.getReviewId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없어요!"));
+
             Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByReviewIdAndUserId(
                     findUser.getId(), reviewLikeRequestDto.getReviewId());
             return getPushReviewLikeResponseDtoResponseEntity(review, findUser, reviewLike);
@@ -58,14 +62,17 @@ public class PushService {
             reviewLikeRepository.save(build);
             PushReviewLikeResponseDto reviewLikeDto = buildPushReviewLikeResponseDto(
                 build);
+            notificationService.notify(review.getUser().getId(), user.getId(), "reviewLike");
+
             return ResponseEntity.status(200).body(reviewLikeDto);
         }
         else{
             ReviewLike presentReviewLike = reviewLike.get();
             presentReviewLike.updateReviewLike();
 
-            //reviewLikeRepository.save(presentReviewLike); //transactional 작성 꼭 해야함 안 하면 더티 체킹 안함.
-
+            if (presentReviewLike.getReviewLike() == true) {
+                notificationService.notify(review.getUser().getId(), user.getId(), "reviewLike");
+            }
             PushReviewLikeResponseDto reviewLikeDto = buildPushReviewLikeResponseDto(
                 presentReviewLike);
             return ResponseEntity.status(200).body(reviewLikeDto);
@@ -113,13 +120,16 @@ public class PushService {
         if(findByPushUserAndFollowUser.isEmpty()){
             FollowState build = getFollower(pushUser, targetUser);
             followRepository.save(build);
+
             FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
                 .isFollow(true).build();
+            notificationService.notify(targetUser.getId(), pushUser.getId(), "follow");
             return ResponseEntity.status(200).body(followStateResponseDto);
         }
         else{
             FollowState find = findByPushUserAndFollowUser.get();
             followRepository.delete(find);
+
             FollowStateResponseDto followStateResponseDto = FollowStateResponseDto.builder()
                 .isFollow(false).build();
             return ResponseEntity.status(200).body(followStateResponseDto);
@@ -160,6 +170,7 @@ public class PushService {
         if(findByUserAndMovie.isEmpty()){
             MovieLike build = getMovieLike(movieLikeUser, movie);
             movieLikeRepository.save(build);
+
             MovieLikeStateResponseDto movieLikeStateResponseDto = MovieLikeStateResponseDto.builder()
                     .isMovieLike(true).build();
             return ResponseEntity.status(200).body(movieLikeStateResponseDto);
