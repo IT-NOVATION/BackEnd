@@ -152,7 +152,7 @@ public class TodayBestUserService {
         TopUserReviewDto topReviewDto = TopUserReviewDto.builder()
             .star(topReview.getStar())
             .reviewTitle(topReview.getReviewTitle())
-            .createdDate(topReview.getCreatedDate().toString())
+            .createdDate(topReview.getCreatedDate().toLocalDate().toString())
             .reviewId(topReview.getReviewId())
             .reviewLikeCount(reviewLikeCount)
             .reviewMainText(topReview.getReviewMainText())
