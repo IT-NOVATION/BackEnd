@@ -70,11 +70,15 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/custom-logout"),
             new AntPathRequestMatcher("/movielog/**"),
             new AntPathRequestMatcher("/movie-search/**"),
-            new AntPathRequestMatcher("/comment/read/**")
+            new AntPathRequestMatcher("/comment/read/**"),
+            new AntPathRequestMatcher("/passwordfind/**"),
+            new AntPathRequestMatcher("/notifications/**")
 
 
 
-            );
+
+
+    );
 
 
     //HttpSecurity 객체를 사용하여 Spring Security의 인증 및 권한 부여 규칙을 정의
