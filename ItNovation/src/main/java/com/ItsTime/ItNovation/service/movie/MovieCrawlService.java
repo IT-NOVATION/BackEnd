@@ -90,7 +90,7 @@ public class MovieCrawlService {
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
         String now=LocalDate.now().plusWeeks(2).toString();
-        for (int i = 1; i < 5; i++) {
+        for (int i = 31; i < 40; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
                 // 현재 한국에서 상영중인 영화로 변경
                 + "&page=" + i + "&language=ko-KR" + "&region=KR"
@@ -243,6 +243,7 @@ public class MovieCrawlService {
         if(hasEmptyPropertyMovie(movieInfo)){
             return null;
         }
+        log.info("getMovie ==========");
         Movie movie = Movie.builder().
             title(movieInfo.get("title")).
             movieImg(movieInfo.get("movieImg")).
@@ -290,8 +291,7 @@ public class MovieCrawlService {
         popularMovieRepository.deleteAll();
 
         List<Map<String, Object>> movies = new ArrayList<>();
-        for(int i=1; i<=5; i++) {
-
+        for(int i=1; i<=20; i++) {
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(
                 "https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY
                     + "&language=ko-KR&region=KR&page="+i,
@@ -325,20 +325,25 @@ public class MovieCrawlService {
         for (Map<String, Object> movieInfo : selectedMovies) {
             if (movieRepository.findByRealMovieId((Long) movieInfo.get("id")).isEmpty()) {
                 try {
+                    log.info("saveMovie");
                     savePopularMovie(movieInfo);
                 } catch (Exception e) {
+                    e.printStackTrace();
+                    log.info("movie error");
                     continue;
                 }
             }
-            if(count>=10){
-                break;
-            }
             count++;
+            if(movieRepository.findByRealMovieId((Long) movieInfo.get("id")).isEmpty()){
+                continue;
+            }
 
             Movie movie = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
             String title = (String) movieInfo.get("title");
             String movieImg = (String) movieInfo.get("movieImg");
             Double popularity = (Double) movieInfo.get("popularity");
+
+            log.info("round1 ====");
 
             MoviePopularDto moviePopularDto = MoviePopularDto.builder()
                 .movieId(movie.getId())
@@ -347,6 +352,8 @@ public class MovieCrawlService {
                 .popularity(popularity.intValue())
                 .starScore(getAvgScoreByMovieId(movie.getId()))
                 .build();
+
+            log.info("round2 ====");
 
             PopularMovie moviePopular = PopularMovie.builder()
                 .title(title)
@@ -363,9 +370,12 @@ public class MovieCrawlService {
                 .movieBgImg(movie.getMovieBgImg())
                 .movieDbId(movie.getId())
                 .build();
-            log.info("============" + title);
-            popularMovieRepository.save(moviePopular);
-            moviePopularDtos.add(moviePopularDto);
+            log.info("============ last " + title);
+
+            if(popularMovieRepository.findByTitle(movie.getTitle()).isEmpty() && count<=10){
+                popularMovieRepository.save(moviePopular);
+                moviePopularDtos.add(moviePopularDto);
+            }
         }
 
         return moviePopularDtos;
@@ -501,7 +511,6 @@ public class MovieCrawlService {
         log.info(convertMovieInfo.toString());
         Integer real_movieId = Integer.parseInt(convertMovieInfo.get("id"));
 
-
         convertMovieInfo.put("country", movieInfo.get("originalLanguage").toString());
         log.info("=============== " + convertMovieInfo.toString());
         Movie movie = setMovie(real_movieId, convertMovieInfo);
@@ -509,11 +518,17 @@ public class MovieCrawlService {
             log.info("영화 안 emptyProperties 발생!");
             return;
         }
+
+        if(movieRepository.findByTitle(movie.getTitle()).isPresent()){
+            log.info("영화가 이미 존재하고 있습니다. 저장하지 않고 넘어갑니다.");
+            return;
+        }
+
         movieRepository.save(movie);
 
     }
 
-    private static void convertMovieInfo(Map<String, Object> movieInfo,
+    private void convertMovieInfo(Map<String, Object> movieInfo,
         Map<String, String> convertMovieInfo) {
         log.info("convert ---------=====");
         log.info(movieInfo.toString());
@@ -528,7 +543,12 @@ public class MovieCrawlService {
         convertMovieInfo.put("genre", movieInfo.get("genre").toString());
         convertMovieInfo.put("movieDirector", movieInfo.get("movieDirector").toString());
         convertMovieInfo.put("movieRunningTime", movieInfo.get("movieRunningTime").toString());
+
+        log.info("==== converted result =====");
+        log.info(convertMovieInfo.toString());
     }
+
+
 
 
     public List<MovieRecommendDto> getTopReviewedMovies() {
@@ -575,6 +595,7 @@ public class MovieCrawlService {
 
             converted.add(convertDto);
         }
+        log.info(converted.toString());
         return converted;
     }
 }

@@ -88,9 +88,8 @@ public class MovieController {
     }
 
     private List<MoviePopularDto> getPopularTableMovies() throws JsonProcessingException {
-
-        movieCrawlService.isPopularMoviesInTable();
-        return null;
+        List<MoviePopularDto> popularMoviesInTable = movieCrawlService.isPopularMoviesInTable();
+        return popularMoviesInTable;
     }
 
 
