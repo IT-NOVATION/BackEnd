@@ -25,17 +25,20 @@ public class MovieRepoService {
     @Transactional
     public void saveMovie(Map<String, Movie> titleAndMovie){
         for (Entry<String, Movie> newMovie : titleAndMovie.entrySet()) {
-            Optional<Movie> byTitle = movieRepository.findByTitle(
-                newMovie.getValue().getTitle());
+            try {
+                Optional<Movie> byTitle = movieRepository.findByTitle(
+                    newMovie.getValue().getTitle());
 
-            if (byTitle.isPresent()){
-                Movie movie = byTitle.get();
-                movie.updateMovie(newMovie.getValue());
+                if (byTitle.isPresent()) {
+                    Movie movie = byTitle.get();
+                    movie.updateMovie(newMovie.getValue());
+                } else {
+                    movieRepository.save(newMovie.getValue());
+                }
+            }catch (IllegalArgumentException e){
+                log.info("이 영화에 대해서는 이미 값을 저장하고 있거나 해당 영화에 대해서는 오류가 발생하여 저장하지 않습니다.");
+                continue;
             }
-            else{
-                movieRepository.save(newMovie.getValue());
-            }
-
             log.info("DB에 이미 존재하고 있는 영화입니다.");
         }
     }
