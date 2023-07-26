@@ -1,28 +1,33 @@
 package com.ItsTime.ItNovation.service.movie;
+
+import com.ItsTime.ItNovation.domain.actor.Actor;
+import com.ItsTime.ItNovation.domain.actor.ActorRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.domain.popularMovie.PopularMovie;
 import com.ItsTime.ItNovation.domain.popularMovie.PopularMovieRepository;
-import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -31,9 +36,9 @@ import org.springframework.web.client.RestTemplate;
 public class MovieCrawlService {
 
     private final PopularMovieRepository popularMovieRepository;
-    private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
     private final StarRepository starRepository;
+    private final ActorRepository actorRepository;
 
 
     @Value("${ttkey}")
@@ -49,15 +54,15 @@ public class MovieCrawlService {
     private final String BASIC_Movie_URL =
         "https://api.themoviedb.org/3/movie/";
 
-    private final String KOFI_MOVIE_INFO_URL="http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=";
+    private final String KOFI_MOVIE_INFO_URL = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=";
 
 
+    private String KOFI_URL = "https://kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key=";
 
-    private String KOFI_URL= "https://kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key=";
+    private static int flag = 1;
 
 
-
-
+    @Transactional
     public Map<String, Movie> getTitleAndMovie() {
         //여기 참고 https://developers.themoviedb.org/3/movies/get-movie-images
         log.info(BASE_URL + API_KEY);
@@ -80,14 +85,16 @@ public class MovieCrawlService {
 
 
     /**
-     *
      * JsonObject 겹치는 부분 발생해서 JsonNode로 변경해야 될듯
      */
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
+        String now=LocalDate.now().plusWeeks(2).toString();
         for (int i = 1; i < 5; i++) {
-            String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY // 현재 한국에서 상영중인 영화로 변경
-                + "&page=" + i + "&language=ko-KR" + "&region=KR" + "&sort_by=popularity.desc&include_adult=true&include_video=false"; // api 버전 변경에 다른
+            String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
+                // 현재 한국에서 상영중인 영화로 변경
+                + "&page=" + i + "&language=ko-KR" + "&region=KR"
+                + "&sort_by=primary_release_date.desc&include_video=false&with_runtime.gte=90&primary_release_date.lte=" + now; // api 버전 변경에 다른
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
 //여기에서도 끌고 올 수 있음. backdropPath 끌고 올 수 있음.
             String json = responseEntity.getBody();
@@ -96,8 +103,8 @@ public class MovieCrawlService {
                 JsonNode jsonNode = objectMapper.readTree(json);
                 JsonNode results = jsonNode.get("results");
                 nowPagesMovieCrawl(titleAndMovie, results);
-            }catch (Exception e){
-                e.printStackTrace();
+            } catch (Exception e) {
+                continue;
             }
         }
     }
@@ -105,11 +112,12 @@ public class MovieCrawlService {
     private void crawlMovieAudit(Map<String, String> movieInfo, String title)
         throws JsonProcessingException {
 
-        String KOFI_URL_GET_NAME = KOFI_URL + KF_API_KEY+"&movieNm="+title;
+        String KOFI_URL_GET_NAME = KOFI_URL + KF_API_KEY + "&movieNm=" + title;
         log.info("KOFI_URL_GET_NAME = " + KOFI_URL_GET_NAME);
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(KOFI_URL_GET_NAME, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(KOFI_URL_GET_NAME,
+            String.class);
         String kofi_json = responseEntity.getBody();
 
         log.info("kofi_json");
@@ -119,44 +127,68 @@ public class MovieCrawlService {
         log.info(jsonNode.toString());
         JsonNode movieListJson = jsonNode.get("movieListResult");
 
-        log.info(movieListJson.toString());
-
         JsonNode movieInfoJson = movieListJson.get("movieList");
 
-        log.info(movieInfoJson.toString());
-
-        String movieAudit = getMovieAudit(movieInfoJson.get(0).get("movieCd").asText());
-        movieInfo.put("audit", movieAudit);
+        getMovieInfoKorea(movieInfo, movieInfoJson.get(0).get("movieCd").asText()); //찐 정보 얻어오기
 
     }
 
-    private String getMovieAudit(String movieCd) throws JsonProcessingException {
+    private void getMovieInfoKorea(Map<String, String> movieInfo, String movieCd)
+        throws JsonProcessingException {
 
         log.info("====In getMovieAudit====");
-        String AUDIT_URL=KOFI_MOVIE_INFO_URL + KF_API_KEY + "&movieCd=" + movieCd;
+        String AUDIT_URL = KOFI_MOVIE_INFO_URL + KF_API_KEY + "&movieCd=" + movieCd;
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> creditEntity = restTemplate.getForEntity(AUDIT_URL, String.class);
-        String movieInfo = creditEntity.getBody();
+        String movieInfoEntity = creditEntity.getBody();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode1 = objectMapper.readTree(movieInfo);
-
-        log.info(movieInfo.toString());
-
+        JsonNode jsonNode1 = objectMapper.readTree(movieInfoEntity);
+        if (flag == 1) {
+            log.info(jsonNode1.toString());
+            flag = 0;
+        }
         String audits;
         try {
-             audits = jsonNode1.get("movieInfoResult").
-                get("movieInfo").
-                get("audits").get(0)
-                .get("watchGradeNm").asText();
-             log.info("======= audits = " + audits);
-        }catch (Exception e){
+            JsonNode movieInfoJson = jsonNode1.get("movieInfoResult").
+                get("movieInfo");
+
+            movieInfo.put("title", movieInfoJson.get("movieNm").asText());
+            movieInfo.put("movieRunningTime", movieInfoJson.get("showTm").asText());
+            movieInfo.put("country", movieInfoJson.get("nations").get(0).get("nationNm").asText());
+            movieInfo.put("movieDirector",
+                movieInfoJson.get("directors").get(0).get("peopleNm").asText());
+            movieInfo.put("genre", movieInfoJson.get("genres").get(0).get("genreNm").asText());
+            movieInfo.put("audit", movieInfoJson.get("audits").get(0).get("watchGradeNm").asText());
+            movieInfo.put("originalLanguage",
+                movieInfoJson.get("nations").get(0).get("nationNm").asText());
+
+            log.info(movieInfo.toString());
+
+            log.info("====== actor ======");
+            JsonNode actors = movieInfoJson.get("actors");
+            for (JsonNode actor : actors) {
+                log.info("====== in for actor ======");
+                log.info(actor.toString());
+                log.info(movieInfo.get("title"));
+                Actor build = Actor.builder()
+                    .actorName(actor.get("peopleNm").asText())
+                    .movieTitle(movieInfo.get("title"))
+                    .build();
+                actorSave(build);
+            }
+        } catch (Exception e) {
             audits = null;
         }
 
-        log.info(audits);
+        // log.info(audits);
+    }
 
-        return audits;
+    private void actorSave(Actor build) {
+        if(actorRepository.findActorByActorName(build.getActorName()).isPresent()){
+            return;
+        }
+        actorRepository.save(build);
     }
 
 
@@ -168,25 +200,21 @@ public class MovieCrawlService {
      */
     private void nowPagesMovieCrawl(Map<String, Movie> titleAndMovie, JsonNode results)
         throws JsonProcessingException {
-        final String posterBasicPath= "https://www.themoviedb.org/t/p/original";
-        for (JsonNode movieNode : results ) {
+        final String posterBasicPath = "https://www.themoviedb.org/t/p/original";
+        for (JsonNode movieNode : results) {
             Map<String, String> movie_Info = new HashMap<>();
             movie_Info.put("title", movieNode.get("title").asText());
-            crawlMovieAudit(movie_Info, movie_Info.get("title"));
-            movieDiscoverCrawl(posterBasicPath, movieNode, movie_Info);
-            Integer movieId = movieNode.get("id").asInt();
-            // 이제 긁어올것 장르, 배우, 감독, 나라, 러닝타임,
-            long real_movieId = movieId.longValue();
             try {
-                log.info(movie_Info.get("title") + "go to credit crawl");
-                movieCreditCrawl(movieId, movie_Info);
-                movieDetails(movieId, movie_Info);
+                crawlMovieAudit(movie_Info, movie_Info.get("title"));
+                movieDiscoverCrawl(posterBasicPath, movieNode, movie_Info);
+                Integer movieId = movieNode.get("id").asInt();
+                // 이제 긁어올것 장르, 배우, 감독, 나라, 러닝타임,
+                long real_movieId = movieId.longValue();
+                Movie movie = setMovie(real_movieId, movie_Info);
+                titleAndMovie.put(movie.getTitle(), movie);
             }catch (Exception e){
-                e.printStackTrace();
+                log.info(e.getMessage());
             }
-            movie_Info.put("country", movieNode.get("original_language").asText());
-            Movie movie = setMovie(real_movieId, movie_Info);
-            titleAndMovie.put(movie.getTitle(), movie);
 
         }
     }
@@ -195,127 +223,117 @@ public class MovieCrawlService {
         Map<String, String> movie_Info) {
         movie_Info.put("movieImg", posterBasicPath + movieNode.get("poster_path").asText());
         movie_Info.put("movieBgImg", posterBasicPath + movieNode.get("backdrop_path").asText());
-        movie_Info.put("originalLanguage", movieNode.get("original_language").asText());
         movie_Info.put("movieDetail", movieNode.get("overview").asText());
         movie_Info.put("movieDate", movieNode.get("release_date").asText());
-        //System.out.println(releaseDate);
-        //movie_Info.put("movieDate", movieObject.get("release_date").toString());
     }
 
-    private static Movie setMovie(long real_movieId, Map<String, String> movieInfo) {
+    private Movie setMovie(long real_movieId, Map<String, String> movieInfo) {
         log.info("==========\n In setMovie =============");
         log.info(movieInfo.get("title"));
-        log.info(movieInfo.get("movieActor"));
+        log.info("===== now movieInfo ======");
+        log.info(movieInfo.toString());
+        Movie movie = getMovie(real_movieId, movieInfo);
+        if(movie==null){
+            throw new IllegalArgumentException("온전치 못한 영화입니다.");
+        }
+        return movie;
+    }
+
+    private Movie getMovie(long real_movieId, Map<String, String> movieInfo) {
+        if(hasEmptyPropertyMovie(movieInfo)){
+            return null;
+        }
         Movie movie = Movie.builder().
             title(movieInfo.get("title")).
             movieImg(movieInfo.get("movieImg")).
             movieBgImg(movieInfo.get("movieBgImg")).
-            movieActor(movieInfo.get("movieActor")).
             movieCountry(movieInfo.get("country")).
             movieDate(movieInfo.get("movieDate")).
             movieGenre(movieInfo.get("genre")).
             movieDirector(movieInfo.get("movieDirector")).
-            movieRunningTime(Integer.parseInt(movieInfo.get("movieRunningTime"))).
+            movieRunningTime(Integer.parseInt(movieInfo.get("movieRunningTime")
+                )).
             movieDetail(movieInfo.get("movieDetail")).
             movieAudit(movieInfo.get("audit")).
             real_movieId(real_movieId).build();
-
-        System.out.println(movieInfo.get("title"));
         return movie;
     }
 
-    private void movieCreditCrawl(Integer movieId, Map<String, String> movieInfo)
-        throws JsonProcessingException {
-        String movieUrl = String.format(
-            "https://api.themoviedb.org/3/movie/%d/credits?api_key=%s&language=ko-KR",
-            movieId, API_KEY);
-        RestTemplate restTemplate2 = new RestTemplate();
-        ResponseEntity<String> creditEntity = restTemplate2.getForEntity(movieUrl, String.class);
-        String json2 = creditEntity.getBody();
-
-        log.info("in credit");
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
-        //JSONObject credits = jsonObject.getJSONObject("credits");
-        log.info(jsonNode.toString());
-        JsonNode jsonNode1 = jsonNode.get("cast");
-        JsonNode crew = jsonNode.get("crew");
-        double max_popular = 0;
-        for (JsonNode member : jsonNode1) {
-            log.info(member.toString());
-            if (member.get("known_for_department").asText().equals("Acting")) {
-                if(member.get("name").asText().toString().isEmpty()){
-                    log.info("배우가 비어있다고 합니다?");
-                    log.info(member.toString());
-                }
-                double popularity = member.get("popularity").asDouble();
-                if(max_popular <= popularity){
-                    max_popular=popularity;
-                    movieInfo.put("movieActor", member.get("name").asText());
-                }
-
-            }
+    private Boolean hasEmptyPropertyMovie(Map<String, String> movieInfo) {
+        try {
+            isEmpty(movieInfo.get("title")); //
+            isEmpty(movieInfo.get("movieImg")); //
+            isEmpty(movieInfo.get("movieBgImg")); //
+            isEmpty(movieInfo.get("country")); //
+            isEmpty(movieInfo.get("movieDate")); //
+            isEmpty(movieInfo.get("genre")); //
+            isEmpty(movieInfo.get("movieDirector")); //
+            isEmpty(movieInfo.get("movieRunningTime"));
+            isEmpty(movieInfo.get("movieDetail")); //
+            isEmpty(movieInfo.get("audit")); //
+            return false;
+        }catch (IllegalArgumentException e){
+            log.info(e.getMessage());
+            return true;
         }
-        for (JsonNode member : crew) {
-            log.info(member.toString());
-            if (member.get("job").asText().equals("Director")) {
-                movieInfo.put("movieDirector", member.get("name").asText());
-            }
-        }
-
-
     }
 
-    private void movieDetails(Integer movieId, Map<String, String> movieInfo)
-        throws JsonProcessingException {
-        String movieUrl = String.format(
-            "https://api.themoviedb.org/3/movie/%d?api_key=%s&language=ko-KR", movieId,
-            API_KEY);
-        log.info(movieUrl);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> creditEntity = restTemplate.getForEntity(movieUrl, String.class);
-        String json2 = creditEntity.getBody();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        JsonNode jsonNode = objectMapper.readTree(json2); //  Json으로 값들 바꾸고 영화 엔티티에 Actor, Pd 정보들 추가
-        Integer runtime = jsonNode.get("runtime").asInt();
-        JsonNode genresArray = jsonNode.get("genres");
-        JsonNode genre = genresArray.get(0);
-        String real_genre = genre.get("name").asText();
-        System.out.println(movieInfo.get("title") + "= "+ runtime.toString());
-        movieInfo.put("movieRunningTime", runtime.toString());
-        movieInfo.put("genre", real_genre);
+    private void isEmpty(String content) {
+        if(content ==null){
+            throw new IllegalArgumentException("빈 값이 존재합니다.");
+        }
     }
 
-    public List<MoviePopularDto> getPopularMovies(){
+
+    public List<MoviePopularDto> getPopularMovies() throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         popularMovieRepository.deleteAll();
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY+"&language=ko-KR", String.class);
-        String json = responseEntity.getBody();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         List<Map<String, Object>> movies = new ArrayList<>();
-        try {
+        for(int i=1; i<=5; i++) {
+
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(
+                "https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY
+                    + "&language=ko-KR&region=KR&page="+i,
+                String.class);
+            String json = responseEntity.getBody();
+            ObjectMapper objectMapper = new ObjectMapper();
+
             JsonNode jsonNode = objectMapper.readTree(json);
             JsonNode results = jsonNode.get("results");
             for (JsonNode movieNode : results) {
-                Map<String, Object> movieInfo = new HashMap<>();
-                buildMovieInfo(movieNode, movieInfo);
-                movies.add(movieInfo);
+                try {
+                    Map<String, Object> movieInfo = new HashMap<>();
+                    log.info("1. movieNode========");
+                    log.info(movieNode.toString());
+                    buildMovieInfo(movieNode, movieInfo); // 한 영화에 대한 정보
+                    movies.add(movieInfo);
+                } catch (Exception e) {//Json파싱 오류
+                    log.info(e.getMessage());//오류날 시에 Httpstatus 오류를 던져주기
+                }
             }
-        } catch (JsonProcessingException e) {//Json파싱 오류
-            e.printStackTrace();//오류날 시에 Httpstatus 오류를 던져주기
         }
-        log.info(movies.toString());
 
+        //log.info(movies.toString());
+        log.info("movies size=====" + String.valueOf(movies.size()));
         // PopularMovie 테이블에 저장
-        List<Map<String, Object>> selectedMovies = movies.subList(0, Math.min(10, movies.size()));
+        log.info("selected -------===========");
+        List<Map<String, Object>> selectedMovies = movies;
+        log.info(selectedMovies.toString());
         List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
+        int count=0;
         for (Map<String, Object> movieInfo : selectedMovies) {
-            String title2 = (String) movieInfo.get("title");
-            log.info(title2);
-            if(movieRepository.findByRealMovieId((Long) movieInfo.get("id")).isEmpty()) {
-                savePopularMovie(movieInfo);
+            if (movieRepository.findByRealMovieId((Long) movieInfo.get("id")).isEmpty()) {
+                try {
+                    savePopularMovie(movieInfo);
+                } catch (Exception e) {
+                    continue;
+                }
             }
+            if(count>=10){
+                break;
+            }
+            count++;
 
             Movie movie = movieRepository.findByRealMovieId((Long) movieInfo.get("id")).get();
             String title = (String) movieInfo.get("title");
@@ -323,19 +341,29 @@ public class MovieCrawlService {
             Double popularity = (Double) movieInfo.get("popularity");
 
             MoviePopularDto moviePopularDto = MoviePopularDto.builder()
-                    .movieId(movie.getId())
-                    .movieTitle(title)
-                    .movieImg(movieImg)
-                    .popularity(popularity.intValue())
-                    .starScore(getAvgScoreByMovieId(movie))
-                    .build();
+                .movieId(movie.getId())
+                .movieTitle(title)
+                .movieImg(movieImg)
+                .popularity(popularity.intValue())
+                .starScore(getAvgScoreByMovieId(movie.getId()))
+                .build();
 
             PopularMovie moviePopular = PopularMovie.builder()
-                    .movieId(movie.getId())
-                    .title(title)
-                    .movieImg(movieImg)
-                    .popularity(popularity)
-                    .build();
+                .title(title)
+                .movieImg(movieImg)
+                .popularity(popularity)
+                .movieRunningTime(movie.getMovieRunningTime())
+                .real_movieId(movie.getReal_movieId())
+                .movieAudit(movie.getMovieAudit())
+                .movieDate(movie.getMovieDate())
+                .movieGenre(movie.getMovieGenre())
+                .movieCountry(movie.getMovieCountry())
+                .movieDetail(movie.getMovieDetail())
+                .movieDirector(movie.getMovieDirector())
+                .movieBgImg(movie.getMovieBgImg())
+                .movieDbId(movie.getId())
+                .build();
+            log.info("============" + title);
             popularMovieRepository.save(moviePopular);
             moviePopularDtos.add(moviePopularDto);
         }
@@ -343,45 +371,152 @@ public class MovieCrawlService {
         return moviePopularDtos;
     }
 
-    private Float getAvgScoreByMovieId(Movie movie) {
-        Float avgScoreByMovie = starRepository.findAvgScoreByMovieId(movie.getId());
-        if(avgScoreByMovie == null){
+    private Float getAvgScoreByMovieId(Long movieId) {
+        Float avgScoreByMovie = starRepository.findAvgScoreByMovieId(movieId);
+        if (avgScoreByMovie == null) {
             return 0.0f;
         }
 
-        return starRepository.findAvgScoreByMovieId(movie.getId());
+        return starRepository.findAvgScoreByMovieId(movieId);
     }
 
-    private static void buildMovieInfo(JsonNode movieNode, Map<String, Object> movieInfo) {
+
+    private void creditPopularMovie(Map<String, Object> movieInfo, String title)
+        throws JsonProcessingException {
+
+        String KOFI_URL_GET_NAME = KOFI_URL + KF_API_KEY + "&movieNm=" + title;
+        log.info("3. KOFI_URL_GET_NAME = " + KOFI_URL_GET_NAME);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(KOFI_URL_GET_NAME,
+            String.class);
+        String kofi_json = responseEntity.getBody();
+
+        log.info("4. kofi_json");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(kofi_json);
+        log.info(jsonNode.toString());
+        JsonNode movieListJson = jsonNode.get("movieListResult");
+
+        JsonNode movieInfoJson = movieListJson.get("movieList");
+        log.info("movieInfoJson ====" + movieInfoJson.toString());
+
+        String movieCd = movieInfoJson.get(0).get("movieCd").asText();
+        if(movieCd==null){
+            throw new IllegalArgumentException("넘겨가");
+        }
+
+
+        getPopularMovieInfoKorea(movieInfo,
+            movieInfoJson.get(0).get("movieCd").asText()); //찐 정보 얻어오기
+
+        // movieInfo.put("audit", movieAudit);
+
+    }
+
+
+    private void getPopularMovieInfoKorea(Map<String, Object> movieInfo, String movieCd)
+        throws JsonProcessingException {
+        log.info("5. ====In getMovieAudit====");
+        String AUDIT_URL = KOFI_MOVIE_INFO_URL + KF_API_KEY + "&movieCd=" + movieCd;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> creditEntity = restTemplate.getForEntity(AUDIT_URL, String.class);
+        String movieInfoEntity = creditEntity.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode1 = objectMapper.readTree(movieInfoEntity);
+        if (flag == 1) {
+            log.info(jsonNode1.toString());
+            flag = 0;
+        }
+        String audits;
+        log.info("6. json=========");
+        log.info(jsonNode1.toString());
+        try {
+            JsonNode movieInfoJson = jsonNode1.get("movieInfoResult").
+                get("movieInfo");
+
+            log.info("7. movieInfoJson=========");
+            log.info(movieInfoJson.toString());
+            movieInfo.put("title", movieInfoJson.get("movieNm").asText());
+            movieInfo.put("movieRunningTime", movieInfoJson.get("showTm").asText());
+            movieInfo.put("country", movieInfoJson.get("nations").get(0).get("nationNm").asText());
+            movieInfo.put("movieDirector",
+                movieInfoJson.get("directors").get(0).get("peopleNm").asText());
+            movieInfo.put("genre", movieInfoJson.get("genres").get(0).get("genreNm").asText());
+            movieInfo.put("audit", movieInfoJson.get("audits").get(0).get("watchGradeNm").asText());
+            movieInfo.put("originalLanguage",
+                movieInfoJson.get("nations").get(0).get("nationNm").asText());
+
+            log.info("8. movieInfo============");
+            log.info(movieInfo.toString());
+
+            log.info("====== actor ======");
+            JsonNode actors = movieInfoJson.get("actors");
+            for (JsonNode actor : actors) {
+                log.info("====== in for actor ======");
+                log.info(actor.toString());
+                log.info(movieInfo.get("title").toString());
+                Actor build = Actor.builder()
+                    .actorName(actor.get("peopleNm").asText())
+                    .movieTitle(movieInfo.get("title").toString())
+                    .build();
+                actorSave(build);
+            }
+        } catch (Exception e) {
+            audits = null;
+        }
+
+        // log.info(audits);
+    }
+
+    private void buildMovieInfo(JsonNode movieNode, Map<String, Object> movieInfo)
+        throws JsonProcessingException {
+
         movieInfo.put("id", movieNode.get("id").asLong());
         movieInfo.put("title", movieNode.get("title").asText());
-        movieInfo.put("movieImg", "https://www.themoviedb.org/t/p/original"+ movieNode.get("poster_path").asText());
+
+        String title = movieNode.get("title").asText();
+        log.info("2. title ======== ");
+        log.info(title);
+        creditPopularMovie(movieInfo, title);
+
+        //getPopularMovieInfoKorea(movieInfo,title);
+
+        movieInfo.put("movieImg",
+            "https://www.themoviedb.org/t/p/original" + movieNode.get("poster_path").asText());
         movieInfo.put("popularity", movieNode.get("popularity").asDouble());
-        movieInfo.put("movieBgImg", "https://www.themoviedb.org/t/p/original"+ movieNode.get("backdrop_path").asText());
-        movieInfo.put("originalLanguage", movieNode.get("original_language").asText());
+        movieInfo.put("movieBgImg",
+            "https://www.themoviedb.org/t/p/original" + movieNode.get("backdrop_path").asText());
         movieInfo.put("movieDetail", movieNode.get("overview").asText());
         movieInfo.put("movieDate", movieNode.get("release_date").asText());
+
+        log.info(movieInfo.toString());
     }
 
-    private void savePopularMovie(Map<String, Object> movieInfo) {
+    private void savePopularMovie(Map<String, Object> movieInfo) throws JsonProcessingException {
         Map<String, String> convertMovieInfo = new HashMap<>();
-        final String posterBasicPath= "https://www.themoviedb.org/t/p/original";
         convertMovieInfo(movieInfo, convertMovieInfo);
-
+        log.info("========== savePopularMovie ==============");
+        log.info(convertMovieInfo.toString());
         Integer real_movieId = Integer.parseInt(convertMovieInfo.get("id"));
-        try {
-            movieCreditCrawl(real_movieId, convertMovieInfo);
-            movieDetails(real_movieId, convertMovieInfo);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+
+
         convertMovieInfo.put("country", movieInfo.get("originalLanguage").toString());
+        log.info("=============== " + convertMovieInfo.toString());
         Movie movie = setMovie(real_movieId, convertMovieInfo);
+        if(movie==null){
+            log.info("영화 안 emptyProperties 발생!");
+            return;
+        }
         movieRepository.save(movie);
+
     }
 
     private static void convertMovieInfo(Map<String, Object> movieInfo,
         Map<String, String> convertMovieInfo) {
+        log.info("convert ---------=====");
+        log.info(movieInfo.toString());
         convertMovieInfo.put("id", movieInfo.get("id").toString());
         convertMovieInfo.put("title", movieInfo.get("title").toString());
         convertMovieInfo.put("movieImg", movieInfo.get("movieImg").toString());
@@ -389,6 +524,10 @@ public class MovieCrawlService {
         convertMovieInfo.put("originalLanguage", movieInfo.get("originalLanguage").toString());
         convertMovieInfo.put("movieDetail", movieInfo.get("movieDetail").toString());
         convertMovieInfo.put("movieDate", movieInfo.get("movieDate").toString());
+        convertMovieInfo.put("audit", movieInfo.get("audit").toString());
+        convertMovieInfo.put("genre", movieInfo.get("genre").toString());
+        convertMovieInfo.put("movieDirector", movieInfo.get("movieDirector").toString());
+        convertMovieInfo.put("movieRunningTime", movieInfo.get("movieRunningTime").toString());
     }
 
 
@@ -397,23 +536,46 @@ public class MovieCrawlService {
         List<Movie> movies = movieRepository.findTopReviewedMoviesWithLimit(pageable);
 
         return movies.stream()
-                .map(this::mapMovieToResponseDto)
-                .collect(Collectors.toList());
+            .map(this::mapMovieToResponseDto)
+            .collect(Collectors.toList());
     }
 
     private MovieRecommendDto mapMovieToResponseDto(Movie movie) {
         Float averageStarScore = starRepository.findAvgScoreByMovieId(movie.getId());
 
         return MovieRecommendDto.builder()
-                .movieId(movie.getId())
-                .movieTitle(movie.getTitle())
-                .movieImg(movie.getMovieImg())
-                .starScore(averageStarScore != null ? averageStarScore : 0)
-                .build();
+            .movieId(movie.getId())
+            .movieTitle(movie.getTitle())
+            .movieImg(movie.getMovieImg())
+            .starScore(averageStarScore != null ? averageStarScore : 0)
+            .build();
     }
 
 
+    public List<MoviePopularDto> isPopularMoviesInTable() throws JsonProcessingException {
+        List<PopularMovie> all = popularMovieRepository.findAll();
+        log.info(String.valueOf(all.size()));
+        if(all.size()>0){
+            List<PopularMovie> setConvertMovie = all.subList(0, 10);
+            return convertPopularToMoviePopularDto(setConvertMovie);
+        }
+        return getPopularMovies();
+    }
 
+    private List<MoviePopularDto> convertPopularToMoviePopularDto(List<PopularMovie> setConvertMovie) {
+       List<MoviePopularDto> converted = new ArrayList<>();
+        for (PopularMovie popularMovie : setConvertMovie) {
+            MoviePopularDto convertDto = MoviePopularDto.builder()
+                .starScore(getAvgScoreByMovieId(popularMovie.getMovieDbId()))
+                .movieTitle(popularMovie.getTitle())
+                .movieId(popularMovie.getMovieDbId())
+                .popularity(popularMovie.getPopularity().intValue())
+                .movieImg(popularMovie.getMovieImg())
+                .build();
 
+            converted.add(convertDto);
+        }
+        return converted;
+    }
 }
 

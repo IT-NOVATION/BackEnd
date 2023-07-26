@@ -6,6 +6,7 @@ import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularRecommendResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,10 +31,9 @@ public class MovieController {
     private final MovieRepoService movieRepoService;
 
     @GetMapping("/crawl") // 테스트 하실때는 SecurityConfig에 /movies url 추가후 진행하세요!
-    public Map<String, Movie> getMovies(Model model) {
+    public Map<String, Movie> getMovies() {
         Map<String, Movie> titleAndMovie = movieCrawlService.getTitleAndMovie(); // 이 부분 무조건 고쳐야 함. 동기적으로 데이터 가져와서 스케줄링 같은 작업으로 일정 주기에 끌어오는 방법 고안.
         movieRepoService.saveMovie(titleAndMovie);
-        model.addAttribute("movieInfo", titleAndMovie);
         return titleAndMovie;
     }
 
@@ -55,7 +55,12 @@ public class MovieController {
 
     @GetMapping("/popular")
     public List<MoviePopularDto> getPopularMovies() {
-        return movieCrawlService.getPopularMovies();
+        try{
+            return movieCrawlService.getPopularMovies();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @GetMapping("/top-reviewed")
@@ -66,13 +71,26 @@ public class MovieController {
 
     @GetMapping("/popularAndRecommend")
     public ResponseEntity getPopularAndRecommend(){
-        List<MoviePopularDto> popularMovies = movieCrawlService.getPopularMovies();
-        List<MovieRecommendDto> topReviewedMovies = movieCrawlService.getTopReviewedMovies();
-        MoviePopularRecommendResponseDto moviePopularRecommendResponseDto = MoviePopularRecommendResponseDto.builder()
+        try {
+            List<MoviePopularDto> popularMovies = getPopularTableMovies();
+            List<MovieRecommendDto> topReviewedMovies = movieCrawlService.getTopReviewedMovies();
+            if(topReviewedMovies.isEmpty()){
+                throw new IllegalArgumentException("추천 영화 존재 x");
+            }
+            MoviePopularRecommendResponseDto moviePopularRecommendResponseDto = MoviePopularRecommendResponseDto.builder()
                 .popular(popularMovies)
                 .recommended(topReviewedMovies)
                 .build();
-        return ResponseEntity.status(200).body(moviePopularRecommendResponseDto);
+            return ResponseEntity.status(200).body(moviePopularRecommendResponseDto);
+        }catch (Exception e){
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
+    }
+
+    private List<MoviePopularDto> getPopularTableMovies() throws JsonProcessingException {
+
+        movieCrawlService.isPopularMoviesInTable();
+        return null;
     }
 
 

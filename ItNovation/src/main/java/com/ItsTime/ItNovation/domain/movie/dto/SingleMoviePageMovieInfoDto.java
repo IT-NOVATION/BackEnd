@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.domain.movie.dto;
 
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,7 +15,7 @@ public class SingleMoviePageMovieInfoDto {
     private String movieGenre;
     private String movieReleasedDate;
     private Integer movieRunningTime;
-    private String movieActor;
+    private List<String> movieActor;
     private String movieDetail;
     private MovieFeatureDto top3HasFeature;
     private Integer movieLikeCount;
@@ -27,7 +28,7 @@ public class SingleMoviePageMovieInfoDto {
     @Builder
     public SingleMoviePageMovieInfoDto(String movieImg,String movieBgImg, String title, String movieGenre,
         String movieReleasedDate,
-        Integer movieRunningTime, String movieActor, String movieDetail,
+        Integer movieRunningTime, List<String> movieActor, String movieDetail,
         MovieFeatureDto top3HasFeature,
         Integer movieLikeCount, Float avgStarScore, String movieDirector, String movieAge, String movieCountry) {
         this.movieImg = movieImg;
