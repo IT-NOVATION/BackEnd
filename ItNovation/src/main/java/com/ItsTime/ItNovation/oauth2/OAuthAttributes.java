@@ -6,16 +6,21 @@ import com.ItsTime.ItNovation.domain.user.Grade;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.SocialType;
 import com.ItsTime.ItNovation.domain.user.User;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.oauth2.userinfo.GoogleOAuth2UserInfo;
 import com.ItsTime.ItNovation.oauth2.userinfo.KakaoOAuth2UserInfo;
 import com.ItsTime.ItNovation.oauth2.userinfo.NaverOAuth2UserInfo;
 import com.ItsTime.ItNovation.oauth2.userinfo.OAuth2UserInfo;
+import java.util.List;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * 각 소셜별로 받아오는 데이터가 다르므로
@@ -27,6 +32,7 @@ public class OAuthAttributes extends BaseTimeEntity {
 
     private String nameAttributeKey; //OAuth2 로그인 진행 시 키가 되는 값, PK와 유사
     private OAuth2UserInfo oAuth2UserInfo;
+    private UserRepository userRepository;
     @Builder
     public OAuthAttributes(String nameAttributeKey, OAuth2UserInfo oAuth2UserInfo) {
         this.nameAttributeKey = nameAttributeKey;
@@ -72,11 +78,26 @@ public class OAuthAttributes extends BaseTimeEntity {
     public User toEntity(OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()
                 .email(oAuth2UserInfo.getEmail())
-                .nickname("설정필요")
+                .nickname(generateNickname())
                 .bgImg(oAuth2UserInfo.getBgImg())
                 .profileImg(oAuth2UserInfo.getProfileImg())
                 .role(Role.GUEST)
                 .grade(Grade.STANDARD)
                 .build();
+    }
+
+    private String generateNickname() {
+        RestTemplate restTemplate = new RestTemplate();
+        String nickname;
+        while(true) {
+            ResponseEntity<String> forEntity = restTemplate.getForEntity(
+                "https://nickname.hwanmoo.kr/?format=text&count=1", String.class);
+            nickname = forEntity.getBody();
+            Optional<User> userBySameNickName = userRepository.findUserBySameNickName(nickname);
+            if(userBySameNickName.isEmpty()){
+                break;
+            }
+        }
+        return nickname;
     }
 }

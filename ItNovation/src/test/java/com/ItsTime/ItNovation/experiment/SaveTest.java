@@ -2,10 +2,12 @@ package com.ItsTime.ItNovation.experiment;
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
+import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.After;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
@@ -14,13 +16,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @Transactional
+@Slf4j
 public class SaveTest {
 
+
+
+
+    @Autowired
+    private UserRepository userRepository;
+
+
+//    @Test
+//    @Transactional
+//    void test(){
+//        RestTemplate restTemplate = new RestTemplate();
+//        ResponseEntity<String> forEntity = restTemplate.getForEntity(
+//            "https://nickname.hwanmoo.kr/?format=text&count=1", String.class);
+//        String body = forEntity.getBody();
+//        log.info(body);
+//    }
 
 //    @Autowired
 //    private MovieRepoService repoService;
