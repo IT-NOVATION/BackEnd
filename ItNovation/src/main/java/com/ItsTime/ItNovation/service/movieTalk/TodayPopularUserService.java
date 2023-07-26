@@ -1,5 +1,6 @@
-package com.ItsTime.ItNovation.service.topFollower;
+package com.ItsTime.ItNovation.service.movieTalk;
 import com.ItsTime.ItNovation.common.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.JwtErrorCode;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.dto.FollowMovieResponseDto;
@@ -11,7 +12,6 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.json.HTTP;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TopFollowerService {
+public class TodayPopularUserService {
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
     private final JwtService jwtService;
@@ -35,7 +35,14 @@ public class TopFollowerService {
     @Transactional
     public ResponseEntity getTopFollowers(Optional<String> accessToken) {
         if (accessToken.isPresent()) {
-            nowUserEmail = jwtService.extractEmail(accessToken.get()).get();
+            Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
+
+            if (extractedEmail.isEmpty()) {
+                //TODO: 토큰 만료 시 로직 추가해야함
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
+            } else {
+                nowUserEmail = extractedEmail.get();
+            }
         }
         log.info(nowUserEmail);
         Pageable pageable = PageRequest.of(0, 2);
@@ -74,14 +81,9 @@ public class TopFollowerService {
 
     private Boolean profileState(String nowUserEmail, Long userId) {
         Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
-        log.info(String.valueOf(nowUser.get().getId()));
-
         Optional<User> checkUser = userRepository.findById(userId);
-        log.info(String.valueOf(checkUser.get().getId()));
         if (nowUser.isPresent()) {
-            if (nowUser.equals(checkUser)) {
-                return true;
-            } else return false;
+            return nowUser.equals(checkUser);
         } else return false;
     }
 

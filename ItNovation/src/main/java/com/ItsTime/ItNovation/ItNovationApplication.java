@@ -2,6 +2,7 @@ package com.ItsTime.ItNovation;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
@@ -9,7 +10,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class ItNovationApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ItNovationApplication.class, args);
+		SpringApplication application=new SpringApplication(ItNovationApplication.class);
+		application.addListeners(new ApplicationPidFileWriter());
+		application.run(args);
 	}
 
 }

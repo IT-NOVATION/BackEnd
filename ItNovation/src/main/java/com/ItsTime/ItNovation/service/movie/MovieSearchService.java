@@ -3,9 +3,11 @@ package com.ItsTime.ItNovation.service.movie;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.MoviePopularDto;
-import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchRequestDto;
+import com.ItsTime.ItNovation.domain.movie.dto.MovieSearchResponseDto;
 import com.ItsTime.ItNovation.domain.star.StarRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +21,7 @@ public class MovieSearchService {
     private final StarRepository starRepository;
 
     @Transactional
-    public List<MoviePopularDto> searchMoviesByTitle(String movieNM) {
+    public ResponseEntity <MovieSearchResponseDto> searchMoviesByTitle(String movieNM) {
         List<Movie> movies = movieRepository.findByTitleContaining(movieNM);
         List<MoviePopularDto> moviePopularDtos = new ArrayList<>();
         for (Movie movie : movies) {
@@ -29,7 +31,12 @@ public class MovieSearchService {
             }
             moviePopularDtos.add(convertToMovieResponse(movie, starScore));
         }
-        return moviePopularDtos;
+        int size = moviePopularDtos.size();//영화 배열 크기
+        MovieSearchResponseDto movieSearchResponseDto = MovieSearchResponseDto.builder()
+                .movieSearchResult(moviePopularDtos)
+                .totalSize(size)
+                .build();
+        return ResponseEntity.status(200).body(movieSearchResponseDto);
     }
 
     private MoviePopularDto convertToMovieResponse(Movie movie, Float starScore) {//starScore와 Movie Entity를 한곳에서 관리

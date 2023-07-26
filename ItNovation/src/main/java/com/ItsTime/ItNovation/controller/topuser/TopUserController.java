@@ -2,13 +2,12 @@ package com.ItsTime.ItNovation.controller.topuser;
 
 
 import com.ItsTime.ItNovation.jwt.service.JwtService;
-import com.ItsTime.ItNovation.service.best.TodayBestUserService;
+import com.ItsTime.ItNovation.service.bestUser.TodayBestUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
