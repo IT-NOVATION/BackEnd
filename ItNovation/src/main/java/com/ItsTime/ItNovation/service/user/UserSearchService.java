@@ -1,6 +1,8 @@
 package com.ItsTime.ItNovation.service.user;
 
 
+import com.ItsTime.ItNovation.domain.follow.FollowRepository;
+import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.SearchUserReviewDto;
@@ -8,9 +10,12 @@ import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchResponseDto;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchTotalResponseDto;
+import com.ItsTime.ItNovation.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -25,13 +30,17 @@ public class UserSearchService {
 
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final FollowRepository followRepository;
+    private String nowUserEmail = null;
+    private final JwtService jwtService;
+
 
     @Transactional
     public List<UserSearchResponseDto> getResponse(String searchNickName) {
         List<User> findByNickName = userRepository.findByNickname(searchNickName);
         if(findByNickName.isEmpty()){
             log.error("유저가 없습니다.");
-            throw new RuntimeException("유저가 없음 ㅠㅠ");
+            return Collections.emptyList();
         }
         try {
             List<UserSearchResponseDto> userSearchResponseDtos = madeResponseDto(findByNickName);
@@ -48,16 +57,41 @@ public class UserSearchService {
 
         for(User u : findByNickName){
             UserSearchResponseDto userSearchResponseDto = UserSearchResponseDto.builder()
-                .userId(u.getId())
-                .nickName(u.getNickname())
-                .userImg(u.getProfileImg())
-                .introduction(u.getIntroduction())
-                .reviews(getSearchReviewResponse(u))
-                .build();
+                    .userId(u.getId())
+                    .nickName(u.getNickname())
+                    .isMyProfile(profileState(nowUserEmail, u.getId()))
+                    .isNowUserFollowThisUser(followState(nowUserEmail, u.getId()))
+                    .userImg(u.getProfileImg())
+                    .introduction(u.getIntroduction())
+                    .reviews(getSearchReviewResponse(u))
+                    .build();
 
             userSearchResponseDtos.add(userSearchResponseDto);
         }
         return userSearchResponseDtos;
+    }
+
+    private Boolean followState(String nowUserEmail, Long userId) {
+        Optional<User> user = userRepository.findByEmail(nowUserEmail);
+
+        /**
+         * 팔로우 하면 true
+         * 아니면 false ( 같은 유저여도 false)
+         */
+        if (user.isPresent()) {
+            Optional<FollowState> followState = followRepository.findByPushUserAndFollowUser(user.get().getId(), userId);
+            return followState.isPresent();
+        } else {
+            return false;
+        }
+    }
+
+    private Boolean profileState(String nowUserEmail, Long userId) {
+        Optional<User> nowUser = userRepository.findByEmail(nowUserEmail);
+        Optional<User> checkUser = userRepository.findById(userId);
+        if (nowUser.isPresent()) {
+            return nowUser.equals(checkUser);
+        } else return false;
     }
 
     private List<SearchUserReviewDto> getSearchReviewResponse(User u) {
@@ -76,7 +110,17 @@ public class UserSearchService {
     }
 
     @Transactional
-    public ResponseEntity<UserSearchTotalResponseDto> getTotalResponse(String userName) {
+    public ResponseEntity<UserSearchTotalResponseDto> getTotalResponse(String userName, Optional<String> accessToken) {
+        if (accessToken.isPresent()) {
+            Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
+
+            if (extractedEmail.isEmpty()) {
+                //TODO: 토큰 만료 시 로직 추가해야함
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
+            } else {
+                nowUserEmail = extractedEmail.get();
+            }
+        }
         List<UserSearchResponseDto> response = new ArrayList<>();
         response = getResponse(userName);
         int size = response.size();
