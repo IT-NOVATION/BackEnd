@@ -43,6 +43,7 @@ public class TodayBestUserService {
     @Transactional
     public ResponseEntity getBestUserInfo(String email) {
         Pageable pageable = PageRequest.of(0, 5);
+        log.info("hello");
         List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
             pageable); // -> 이거 전날 기준으로 고쳐야 함!
         System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
@@ -81,7 +82,7 @@ public class TodayBestUserService {
         Pageable remainPageable) {
         List<Review> newestReviewByUserId = reviewRepository.findNewestReviewByUserId(
             user.getId(), remainPageable);
-        addTopUserReviewDto(topUserReviewDtos, newestReviewByUserId);
+        addTopUserNewestReviewDto(topUserReviewDtos, newestReviewByUserId);
     }
 
     private void addBestReview(List<TopUserReviewDto> topUserReviewDtos, List<Review> reviews) {
@@ -90,12 +91,24 @@ public class TodayBestUserService {
         topUserReviewDtos.add(topReviewDto);
     }
 
-    private void addTopUserReviewDto(List<TopUserReviewDto> topUserReviewDtos,
+    private void addTopUserNewestReviewDto(List<TopUserReviewDto> topUserReviewDtos,
         List<Review> newestReviewByUserId) {
         for (Review review : newestReviewByUserId) {
             TopUserReviewDto remainDto = getTopUserReviewDto(review);
+            if(isPresentReview(remainDto, topUserReviewDtos)){
+                continue;
+            }
             topUserReviewDtos.add(remainDto);
         }
+    }
+
+    private Boolean isPresentReview(TopUserReviewDto review, List<TopUserReviewDto> topUserReviewDtos) {
+        for (TopUserReviewDto topUserReviewDto : topUserReviewDtos) {
+            if(topUserReviewDto.getReviewId() == review.getReviewId()){
+                return true;
+            }
+        }
+        return false;
     }
 
     private TopUserResponseDto buildTopUserResponseDto(
