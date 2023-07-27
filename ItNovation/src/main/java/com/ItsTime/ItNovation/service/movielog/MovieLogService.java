@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.service.movielog;
 
 import com.ItsTime.ItNovation.common.GeneralErrorCode;
+import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movielog.dto.*;
 import com.ItsTime.ItNovation.domain.review.Review;
@@ -32,6 +33,7 @@ public class MovieLogService {
     private final ReviewLikeService reviewLikeService;
     private final StarService starService;
     private final MovieLikeService movieLikeService;
+    private final CommentRepository commentRepository;
     private final JwtService jwtService;
 
     @Transactional
@@ -223,7 +225,7 @@ public class MovieLogService {
                 .likeCount(reviewLikecount)
                 .hasSpoiler(movieLogReviewList.get(i).getHasSpoiler())
                 //TODO: 댓글 서비스 구현 후 수정하기
-                .comments(0)
+                .comments(commentRepository.findAllByReviewId(movieLogReviewList.get(i).getReviewId()).size())
                 .movieLogMovieofReviewsInfoDtoList(movieLogMovieofReviewsInfoDto)
                 .build();
     }

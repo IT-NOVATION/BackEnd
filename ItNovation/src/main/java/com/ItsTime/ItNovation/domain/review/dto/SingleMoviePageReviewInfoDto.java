@@ -14,18 +14,20 @@ public class SingleMoviePageReviewInfoDto {
     private String reviewMainText;
     private LocalDate createdDate;
     private Float starScore;
-    private Integer reviewLikeCount;
+    private int reviewLikeCount;
+    private int commentCount;
 
 
     @Builder
     public SingleMoviePageReviewInfoDto(Long reviewId, Boolean hasSpoiler, String reviewTitle,
-        String reviewMainText, LocalDate createdDate, Float starScore, Integer reviewLikeCount) {
+        String reviewMainText, LocalDate createdDate, Float starScore, Integer reviewLikeCount, int commentCount) {
         this.reviewId = reviewId;
         this.hasSpoiler = hasSpoiler;
         this.reviewTitle = reviewTitle;
         this.reviewMainText = reviewMainText;
         this.createdDate = createdDate;
         this.starScore = starScore;
+        this.commentCount=commentCount;
         this.reviewLikeCount = reviewLikeCount;
     }
 }
