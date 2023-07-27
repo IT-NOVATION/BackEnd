@@ -25,6 +25,8 @@ public class ReviewInfoDto {
     private Integer reviewLikeNum;
     private String watchDate;
     private Boolean hasGoodStory;
+
+    private String createdDate;
     // reviewLikeNum 추가해야함.
 
 
@@ -33,7 +35,7 @@ public class ReviewInfoDto {
         Boolean hasGoodProduction, Boolean hasGoodScenario, Boolean hasGoodDirecting,
         Boolean hasGoodOst, Boolean hasGoodVisual, Boolean hasGoodActing,
         Boolean hasGoodCharterCharming, Boolean hasGoodDiction, Boolean hasCheckDate, Boolean hasGoodStory,
-        Boolean hasSpoiler, Float star, String watchDate, Integer reviewLikeNum) {
+        Boolean hasSpoiler, Float star, String watchDate, Integer reviewLikeNum, String createdDate) {
         this.reviewId = reviewId;
         this.reviewTitle = reviewTitle;
         this.reviewMainText = reviewMainText;
@@ -51,5 +53,6 @@ public class ReviewInfoDto {
         this.hasSpoiler = hasSpoiler;
         this.reviewLikeNum = reviewLikeNum;
         this.watchDate = watchDate;
+        this.createdDate = createdDate;
     }
 }
