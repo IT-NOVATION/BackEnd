@@ -29,6 +29,8 @@ import com.ItsTime.ItNovation.service.grade.GradeService;
 import com.ItsTime.ItNovation.domain.user.dto.UserPushLikeDto;
 
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -243,6 +245,9 @@ public class ReviewService {
     }
 
     private ReviewInfoDto madeReviewInfoDto(Review review) {
+        LocalDate createDate = review.getCreatedDate().toLocalDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedCreateDate = createDate.format(formatter);//localDate를 String 형식으로 주어진 날짜 패턴에 맞추어 변환
         return ReviewInfoDto.builder()
             .reviewId(review.getReviewId())
             .hasCheckDate(validateNull(review.getHasCheckDate()))
@@ -261,6 +266,7 @@ public class ReviewService {
             .star(review.getStar())
             .reviewLikeNum(reviewLikeRepository.countReviewLikeByReviewId(review.getReviewId()))
             .watchDate(review.getWatchDate())
+            .createdDate(formattedCreateDate)
             .build();
     }
 
@@ -299,6 +305,7 @@ public class ReviewService {
             .movieId(movieId)
             .movieImg(findMovie.getMovieImg())
             .title(findMovie.getTitle())
+            .releaseDate(findMovie.getMovieDate())
             .build();
     }
     @Transactional
