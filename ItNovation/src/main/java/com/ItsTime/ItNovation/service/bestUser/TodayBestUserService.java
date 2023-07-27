@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.service.bestUser;
 
 import com.ItsTime.ItNovation.domain.bestUser.TopUserResponseDto;
+import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.Movie;
@@ -33,6 +34,7 @@ public class TodayBestUserService {
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     private final LocalDate yesterday = LocalDate.now().minusDays(1);
 
@@ -156,6 +158,7 @@ public class TodayBestUserService {
             .reviewId(topReview.getReviewId())
             .reviewLikeCount(reviewLikeCount)
             .reviewMainText(topReview.getReviewMainText())
+            .commentCount(commentRepository.findAllByReviewId(topReview.getReviewId()).size())
             .movie(getMovieDto(topReview.getMovie()))
             .hasSpoiler(topReview.getHasSpoiler())
             .build();

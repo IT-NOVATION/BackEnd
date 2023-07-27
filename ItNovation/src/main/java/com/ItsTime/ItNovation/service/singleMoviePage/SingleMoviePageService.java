@@ -3,6 +3,7 @@ package com.ItsTime.ItNovation.service.singleMoviePage;
 
 import com.ItsTime.ItNovation.domain.actor.Actor;
 import com.ItsTime.ItNovation.domain.actor.ActorRepository;
+import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.MovieFeatureDto;
@@ -47,6 +48,7 @@ public class SingleMoviePageService {
     private final StarRepository starRepository;
     private final UserRepository userRepository;
     private final ActorRepository actorRepository;
+    private final CommentRepository commentRepository;
 
 
     @Transactional
@@ -218,6 +220,7 @@ public class SingleMoviePageService {
             .createdDate(review.getCreatedDate().toLocalDate())
             .reviewMainText(review.getReviewMainText())
             .hasSpoiler(review.getHasSpoiler())
+            .commentCount(commentRepository.findAllByReviewId(review.getReviewId()).size())
             .starScore(getStar(review))
             .reviewLikeCount(reviewLikeCount)
             .build();
