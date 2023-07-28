@@ -53,7 +53,6 @@ public class Review extends BaseTimeEntity {
     private String watchDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    // 현재 엔티티(Review)의 테이블에 조인 컬럼(foreign key)을 생성한다는 의미
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
@@ -61,7 +60,6 @@ public class Review extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    //비식별 관계 사용 - 다쪽 엔티티가 일쪽 엔티티의 외래키를 가지는 형태 -> 서로 독립적, 유연
     @OneToMany(mappedBy = "review")
     private List<ReviewLike> reviewLikes = new ArrayList<>();
 
