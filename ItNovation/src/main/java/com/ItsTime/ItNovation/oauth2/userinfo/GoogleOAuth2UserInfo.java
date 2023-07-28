@@ -22,7 +22,7 @@ public class GoogleOAuth2UserInfo extends OAuth2UserInfo{
 
     @Override
     public String getBgImg() {
-        return "default";
+        return null;
     }
 
     @Override
