@@ -128,7 +128,7 @@ public class TodayBestReviewService {
 
     private void convertToTopBestReviewDtos(List<TodayBestReviewDto> reviewDtos,
         List<Review> top2ReviewsByUserId) {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < top2ReviewsByUserId.size(); i++) {
             Review review = top2ReviewsByUserId.get(i);
             TodayBestReviewDto buildReviewDto = TodayBestReviewDto.builder()
                 .reviewId(review.getReviewId())

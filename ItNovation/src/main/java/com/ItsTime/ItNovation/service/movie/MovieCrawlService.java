@@ -51,9 +51,6 @@ public class MovieCrawlService {
         "https://api.themoviedb.org/3/discover/movie?api_key=";
 
 
-    private final String BASIC_Movie_URL =
-        "https://api.themoviedb.org/3/movie/";
-
     private final String KOFI_MOVIE_INFO_URL = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=";
 
 
@@ -90,7 +87,7 @@ public class MovieCrawlService {
 
     private void crawlMovieInfo(RestTemplate restTemplate, Map<String, Movie> titleAndMovie) {
         String now=LocalDate.now().plusWeeks(2).toString();
-        for (int i = 31; i < 40; i++) {
+        for (int i = 1; i < 30; i++) {
             String url = "https://api.themoviedb.org/3/discover/movie" + "?api_key=" + API_KEY
                 // 현재 한국에서 상영중인 영화로 변경
                 + "&page=" + i + "&language=ko-KR" + "&region=KR"
@@ -148,11 +145,9 @@ public class MovieCrawlService {
             log.info(jsonNode1.toString());
             flag = 0;
         }
-        String audits;
         try {
             JsonNode movieInfoJson = jsonNode1.get("movieInfoResult").
                 get("movieInfo");
-
             movieInfo.put("title", movieInfoJson.get("movieNm").asText());
             movieInfo.put("movieRunningTime", movieInfoJson.get("showTm").asText());
             movieInfo.put("country", movieInfoJson.get("nations").get(0).get("nationNm").asText());
@@ -162,9 +157,7 @@ public class MovieCrawlService {
             movieInfo.put("audit", movieInfoJson.get("audits").get(0).get("watchGradeNm").asText());
             movieInfo.put("originalLanguage",
                 movieInfoJson.get("nations").get(0).get("nationNm").asText());
-
             log.info(movieInfo.toString());
-
             log.info("====== actor ======");
             JsonNode actors = movieInfoJson.get("actors");
             for (JsonNode actor : actors) {
@@ -178,7 +171,7 @@ public class MovieCrawlService {
                 actorSave(build);
             }
         } catch (Exception e) {
-            audits = null;
+            e.printStackTrace();
         }
 
         // log.info(audits);
