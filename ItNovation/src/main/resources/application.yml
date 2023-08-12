@@ -17,3 +17,12 @@ spring:
       - jwt
       - mail
     active: prod
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  api-docs:
+    path: /swagger-ui
+  paths-to-match:
+    - /**
+
