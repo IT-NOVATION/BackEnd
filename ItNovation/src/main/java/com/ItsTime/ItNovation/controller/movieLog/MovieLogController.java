@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.controller;
+package com.ItsTime.ItNovation.controller.movieLog;
 
 
 import com.ItsTime.ItNovation.common.GeneralErrorCode;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/movielog")
+@RequestMapping("/api/v1/movielog")
 public class MovieLogController {
     private final MovieLogService movieLogService;
     private final UserRepository userRepository;
