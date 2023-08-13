@@ -1,6 +1,5 @@
 package com.ItsTime.ItNovation.service.movieTalk;
 
-import com.ItsTime.ItNovation.common.JwtErrorCode;
 import com.ItsTime.ItNovation.domain.bestReview.dto.TodayBestReviewDto;
 import com.ItsTime.ItNovation.domain.bestReview.dto.TodayBestReviewResponseDto;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
@@ -10,7 +9,6 @@ import com.ItsTime.ItNovation.domain.movie.dto.TodayBestReviewMovieDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import com.ItsTime.ItNovation.domain.user.User;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +32,7 @@ public class TodayBestReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
-    private final LocalDate yesterday = LocalDate.now().minusDays(0);
+    private final LocalDate today = LocalDate.now().minusDays(0);
     private String nowUserEmail = null;
     private final JwtService jwtService;
 
@@ -53,7 +50,8 @@ public class TodayBestReviewService {
         }
         Pageable pageable = PageRequest.of(0, 3);
 
-        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
+        List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(
+            today,
             pageable);
         try {
             List<TodayBestReviewResponseDto> todayBestReviewResponseDtos = madeResponse(
@@ -118,7 +116,7 @@ public class TodayBestReviewService {
     private List<TodayBestReviewDto> findTodayTop2Review(User user) {
         Pageable pageable = PageRequest.of(0, 2);
         List<TodayBestReviewDto> reviewDtos = new ArrayList<>();
-        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(yesterday,
+        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(today,
             user.getId(), pageable);
 
         convertToTopBestReviewDtos(reviewDtos, top2ReviewsByUserId);
