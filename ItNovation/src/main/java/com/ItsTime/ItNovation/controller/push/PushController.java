@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/push")
+// 코드 응집성을 높이기 위해 push하에 통합한 case
+@RequestMapping("/api/v1/push")
 @Slf4j
 public class PushController {
 
@@ -30,7 +31,7 @@ public class PushController {
 
 
 
-    @PostMapping("/reviewlike")
+    @PostMapping("/review-like")
     public ResponseEntity pushReviewLike(@RequestBody  ReviewLikeRequestDto reviewLikeRequestDto, Authentication authentication){
         String email = authentication.getName();
         try {
@@ -62,7 +63,7 @@ public class PushController {
             }
     }
 
-    @PostMapping("/movieLike")
+    @PostMapping("/movie-like")
     public ResponseEntity pushMovieLike(@RequestBody MovieLikeRequestDto movieLikeRequestDto, Authentication authentication) {
         try {
             User user = userRepository.findByEmail(authentication.getName())
