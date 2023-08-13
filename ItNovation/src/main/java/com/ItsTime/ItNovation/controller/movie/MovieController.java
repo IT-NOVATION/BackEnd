@@ -7,6 +7,8 @@ import com.ItsTime.ItNovation.domain.movie.dto.MovieRecommendDto;
 import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,36 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/movies")
+@RequestMapping("/api/v1/movies")
 @Slf4j
 public class MovieController {
 
     private final MovieCrawlService movieCrawlService;
     private final MovieRepoService movieRepoService;
 
-    @GetMapping("/crawl") // 테스트 하실때는 SecurityConfig에 /movies url 추가후 진행하세요!
-    public Map<String, Movie> getMovies() {
-        Map<String, Movie> titleAndMovie = movieCrawlService.getTitleAndMovie(); // 이 부분 무조건 고쳐야 함. 동기적으로 데이터 가져와서 스케줄링 같은 작업으로 일정 주기에 끌어오는 방법 고안.
-        movieRepoService.saveMovie(titleAndMovie);
-        return titleAndMovie;
-    }
-
-    @GetMapping("/findMovies")
-    public List<Movie> allMovies(Model model){ // 수정
-        List<Movie> allMovies = movieRepoService.findAllMovies();
-        return allMovies;
-    }
-
-
-    @GetMapping("/{title}")
-    public Movie getMovieTitle(@PathVariable String title){
-        log.info(title);
-        System.out.println("hi");
-        Optional<Movie> find_movie = movieRepoService.findByTitle(title);
-        Movie movie = find_movie.get();
-        return movie;
-    }
-
+    // 캐시
     @GetMapping("/popular")
     public List<MoviePopularDto> getPopularMovies() {
         try{
@@ -62,14 +42,8 @@ public class MovieController {
         }
         return null;
     }
-
-    @GetMapping("/top-reviewed")
-    public ResponseEntity<List<MovieRecommendDto>> getTopReviewedMovies() {
-        List<MovieRecommendDto> movies = movieCrawlService.getTopReviewedMovies();
-        return new ResponseEntity<>(movies, HttpStatus.OK);
-    }
-
-    @GetMapping("/popularAndRecommend")
+    @Tag(name="메인페이지 인기영화 가져오기")
+    @GetMapping("/popular-and-recommend")
     public ResponseEntity getPopularAndRecommend(){
         try {
             List<MoviePopularDto> popularMovies = getPopularTableMovies();
@@ -91,6 +65,7 @@ public class MovieController {
         List<MoviePopularDto> popularMoviesInTable = movieCrawlService.isPopularMoviesInTable();
         return popularMoviesInTable;
     }
+
 
 
 }
