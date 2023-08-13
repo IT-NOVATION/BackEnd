@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/movie-search")
+@RequestMapping("/api/v1/movie-search")
 public class MovieAllSearchController {
     private final MovieAllSearchService movieAllSearchService;
 
