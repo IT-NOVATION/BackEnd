@@ -71,7 +71,9 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/movielog/**"),
             new AntPathRequestMatcher("/movie-search/**"),
             new AntPathRequestMatcher("/comment/read/**"),
-            new AntPathRequestMatcher("/passwordfind/**")
+            new AntPathRequestMatcher("/passwordfind/**"),
+            new AntPathRequestMatcher("/swagger-ui/**"),
+            new AntPathRequestMatcher("/v3/api-docs/**")
 
 
 
