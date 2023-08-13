@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("/api/v1/comment")
 @RequiredArgsConstructor
 @Slf4j
 public class CommentController {
