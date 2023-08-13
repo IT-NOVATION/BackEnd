@@ -18,10 +18,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/email/password-find")
 @Slf4j
 public class EmailController {
 
@@ -30,7 +32,7 @@ public class EmailController {
     private final UserService userService;
     private Map<String, String> authCodeMap = new ConcurrentHashMap<>(); // 동시성 문제가 있을거 같아 ConcurrentHashMap 사용해서 멀티 스레드에서 무사히 돌아갈 수 있도록 진행..
 
-    @PostMapping("/passwordfind/emailSend")
+    @PostMapping("/email-send")
     public ResponseEntity<String> mailConfirm(@RequestBody PasswordFindRequestDto req){
         try {
 
@@ -45,7 +47,7 @@ public class EmailController {
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 
-    @PostMapping("/passwordfind/finalCheck")
+    @PostMapping("/final-check")
     public ResponseEntity<String> checkCode(@RequestBody CodeCheckRequestDto checkRequestDto){
         String sendedCode = checkRequestDto.getCode();
         String email = checkRequestDto.getEmail();
@@ -57,7 +59,7 @@ public class EmailController {
 
 
 
-    @PostMapping("/passwordfind/rewritePw")
+    @PostMapping("/rewrite-pw")
     public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
         String email = rewritePasswordRequestDto.getEmail();
         String updatePassword = rewritePasswordRequestDto.getPassword();
