@@ -53,25 +53,46 @@ public class SecurityConfig {
     List<RequestMatcher> specialUrlMatchers = Arrays.asList(
 
             // CustomJsonUsernamePasswordAuthenticationFilter 가 토큰 검증 이후의 필터이기에 여기에 등록
-            new AntPathRequestMatcher("/login/**"),
-            new AntPathRequestMatcher("/signup"),
-            new AntPathRequestMatcher("/userProfile"),
-            new AntPathRequestMatcher("/test/**"),
+            // user, account 관련
+            new AntPathRequestMatcher("/api/v1/account/login/**"),
+            new AntPathRequestMatcher("/api/v1/account/signup"),
+            new AntPathRequestMatcher("/api/v1/user/profile"),
+            new AntPathRequestMatcher("/api/v1/account/custom-logout"),
             new AntPathRequestMatcher("/oauth2/**"),
-            new AntPathRequestMatcher("/loginState/**"),
-            new AntPathRequestMatcher("/movies/**"),
-            new AntPathRequestMatcher("/search/**"),
-            new AntPathRequestMatcher("/today/**"),
-            new AntPathRequestMatcher("/single/moviePage/**"),
-            new AntPathRequestMatcher("/review/Info/**"),
-            new AntPathRequestMatcher("/top/**"),
-            new AntPathRequestMatcher("/single/movie/reviewCount/**"),
-            //new AntPathRequestMatcher("/review/movieInfo/**"),
-            new AntPathRequestMatcher("/custom-logout"),
-            new AntPathRequestMatcher("/movielog/**"),
-            new AntPathRequestMatcher("/movie-search/**"),
-            new AntPathRequestMatcher("/comment/read/**"),
-            new AntPathRequestMatcher("/passwordfind/**"),
+            new AntPathRequestMatcher("/api/v1/user/state/**"),
+
+            // 댓글관련
+            new AntPathRequestMatcher("/api/v1/comment/read/**"),
+
+            // 비밀번호 찾기 관련
+            new AntPathRequestMatcher("/api/v1/email/password-find/**"),
+
+            // 영화 관련
+            new AntPathRequestMatcher("/api/v1/movies/**"),
+            // 무비서치 관련
+            new AntPathRequestMatcher("/api/v1/movie-search/**"),
+            // 무비로그 관련
+            new AntPathRequestMatcher("/api/v1/movielog/**"),
+            //무비토크관련
+            new AntPathRequestMatcher("/api/v1/movie-talk/**"),
+
+            // 리뷰읽기관련
+            new AntPathRequestMatcher("/api/v1/review/info/**"),
+
+            //리뷰작성관련
+            new AntPathRequestMatcher("/api/v1/review/movie-info/**"),
+            //검색관련
+            new AntPathRequestMatcher("/api/v1/search/**"),
+
+            //개인영화페이지관련
+            new AntPathRequestMatcher("/api/v1/single/movie-page/**"),
+            new AntPathRequestMatcher("/api/v1/single/movie/review-count/**"),
+
+            //top 관련
+            new AntPathRequestMatcher("/api/v1/top/**"),
+            //swagger관련
+
+
             new AntPathRequestMatcher("/swagger-ui/**"),
             new AntPathRequestMatcher("/v3/api-docs/**")
 
