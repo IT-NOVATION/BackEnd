@@ -22,48 +22,34 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @RestController
+@RequestMapping("/api/v1/user")
 public class UserController {
+
     private final UserService userService;
     private final UserProfileService userProfileService;
     private final JwtService jwtService;
     private final UserLoginStateService userLoginStateService;
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
-        log.info("회원가입");
-        return userService.join(signUpRequestDto);
-    }
-    @GetMapping("/custom-logout")
-    public ResponseEntity logout(HttpServletRequest request) {
-        log.info("로그아웃");
-        Optional<String> accessToken = jwtService.extractAccessToken(request);
-        if(accessToken.isEmpty()){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
-        }else{
-            log.info("엑세스 토큰: {}" ,accessToken.get());
-
-            return userService.logout(accessToken.get());
-        }
-
-    }
 
 
-    @PutMapping("/userProfile/me")
-    public ResponseEntity userProfileMe(@RequestBody UserProfileDtoMe userProfileDtoMe, Authentication authentication) {
+    @PutMapping("/auth/profile")
+    public ResponseEntity userProfileMe(@RequestBody UserProfileDtoMe userProfileDtoMe,
+        Authentication authentication) {
         log.info("userProfileMe");
         String email = authentication.getName(); // 현재 사용자의 이메일 추출
-
 
         // 사용자 정보 업데이트 및 서비스 호출
         return userProfileService.userProfileMe(userProfileDtoMe, email);
 
 
     }
-    @PutMapping("/userProfile")
+
+    @PutMapping("/profile")
     public ResponseEntity userProfile(@RequestBody UserProfileDto userProfileDto) {
         log.info("userProfile");
         return userProfileService.userProfile(userProfileDto);
     }
-    @GetMapping("/loginState")
+
+    @GetMapping("/state")
     public ResponseEntity<LoginStateDto> userLoginState(HttpServletRequest request) {
         log.info("loginstate");
         try {
@@ -73,12 +59,10 @@ public class UserController {
             } else {
                 return userLoginStateService.loginState(accessToken.get());
             }
-        }catch (JWTDecodeException e) {
+        } catch (JWTDecodeException e) {
             log.error("토큰 추출 오류: " + e.getMessage());
             return userLoginStateService.loginState(null);
-
         }
-
 
     }
 }
