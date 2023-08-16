@@ -1,20 +1,18 @@
 package com.ItsTime.ItNovation.service.user;
 
 
-import com.ItsTime.ItNovation.common.JwtErrorCode;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.LoginStateDto;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ItsTime.ItNovation.jwt.service.JwtService.logoutTokens;
+import static com.ItsTime.ItNovation.config.jwt.service.JwtService.logoutTokens;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -33,7 +31,6 @@ public class UserLoginStateService {
             return ResponseEntity.status(HttpStatus.OK).body(loginStateDto);
         } else {
             if (logoutTokens.contains(token)) {
-//                throw new JwtException(JwtErrorCode.EXPIRED_TOKEN.getMessage());
                 LoginStateDto loginStateDto = LoginStateDto.builder().loginState(false).userId(null).nickname(null).profileImg(null).build();
                 return ResponseEntity.status(HttpStatus.OK).body(loginStateDto);
             } else {

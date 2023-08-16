@@ -1,6 +1,6 @@
 package com.ItsTime.ItNovation.service.movieTalk;
-import com.ItsTime.ItNovation.common.GeneralErrorCode;
-import com.ItsTime.ItNovation.common.JwtErrorCode;
+import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.dto.FollowMovieResponseDto;
@@ -9,7 +9,7 @@ import com.ItsTime.ItNovation.domain.review.dto.TopFollowerReviewResponseDto;
 import com.ItsTime.ItNovation.domain.topFollower.TopFollowerResponseDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -34,15 +34,15 @@ public class TodayPopularUserService {
 
     @Transactional
     public ResponseEntity getTopFollowers(Optional<String> accessToken) {
+
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
+            try{
+                extractedEmail.ifPresent(s -> nowUserEmail = s);
+            }catch(UnauthorizedException e){
 
-            if (extractedEmail.isEmpty()) {
-                //TODO: 토큰 만료 시 로직 추가해야함
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
-            } else {
-                nowUserEmail = extractedEmail.get();
             }
+
         }
         log.info(nowUserEmail);
         Pageable pageable = PageRequest.of(0, 2);

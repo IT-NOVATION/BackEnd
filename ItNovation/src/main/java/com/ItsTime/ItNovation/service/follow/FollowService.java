@@ -1,9 +1,8 @@
 package com.ItsTime.ItNovation.service.follow;
 
-import com.ItsTime.ItNovation.common.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
 
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
-import com.ItsTime.ItNovation.domain.movielog.dto.MovieLogfollowersInfoDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;

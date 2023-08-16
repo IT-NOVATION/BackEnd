@@ -1,20 +1,16 @@
 package com.ItsTime.ItNovation.service.movieTalk;
 
-import com.ItsTime.ItNovation.common.JwtErrorCode;
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
-import com.ItsTime.ItNovation.domain.movie.MovieRepository;
 import com.ItsTime.ItNovation.domain.movie.dto.LatestReviewMovieResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.review.ReviewRepository;
 import com.ItsTime.ItNovation.domain.review.dto.LatestReviewDto;
 import com.ItsTime.ItNovation.domain.review.dto.LatestReviewResponseDto;
-import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
-import com.ItsTime.ItNovation.domain.star.StarRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
-import com.ItsTime.ItNovation.service.grade.GradeService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +31,7 @@ public class TodayLatestReviewService {
     private final FollowRepository followRepository;
 
     private final JwtService jwtService;
-
+    private String nowUserEmail = null;
     /**
      *
      * @param accessToken
@@ -44,15 +40,13 @@ public class TodayLatestReviewService {
 
     @Transactional
     public ResponseEntity getLatestReviews(Optional<String> accessToken) {
-        String nowUserEmail = null;
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
 
-            if (extractedEmail.isEmpty()) {
-                //TODO: 토큰 만료 시 로직 추가해야함
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
-            } else {
-                nowUserEmail = extractedEmail.get();
+            try{
+                extractedEmail.ifPresent(s -> nowUserEmail = s);
+            }catch(UnauthorizedException e){
+
             }
         }
         List<User> recentReviewers = reviewRepository.findUsersWithNewestReview(PageRequest.of(0, 3));
