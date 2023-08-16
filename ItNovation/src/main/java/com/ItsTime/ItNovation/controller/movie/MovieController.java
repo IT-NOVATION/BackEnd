@@ -8,6 +8,7 @@ import com.ItsTime.ItNovation.service.movie.MovieCrawlService;
 import com.ItsTime.ItNovation.service.movie.MovieRepoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/movies")
+@Tag(name="메인페이지 영화 관련 API")
 @Slf4j
 public class MovieController {
 
@@ -34,6 +36,7 @@ public class MovieController {
 
     // 캐시
     @GetMapping("/popular")
+
     public List<MoviePopularDto> getPopularMovies() {
         try{
             return movieCrawlService.getPopularMovies();
@@ -42,7 +45,7 @@ public class MovieController {
         }
         return null;
     }
-    @Tag(name="메인페이지 인기영화 가져오기")
+    @Operation(summary="메인페이지 인기영화 가져오기")
     @GetMapping("/popular-and-recommend")
     public ResponseEntity getPopularAndRecommend(){
         try {

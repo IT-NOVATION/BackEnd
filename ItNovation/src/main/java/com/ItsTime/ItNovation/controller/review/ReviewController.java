@@ -1,13 +1,14 @@
 package com.ItsTime.ItNovation.controller.review;
 
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.review.dto.ReviewPostRequestDto;
-import com.ItsTime.ItNovation.domain.review.dto.ReviewReadRequestDto;
 
-import com.ItsTime.ItNovation.domain.user.dto.LoginStateDto;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.review.ReviewService;
-import com.auth0.jwt.exceptions.JWTDecodeException;
+
 import io.swagger.v3.oas.annotations.Operation;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @RestController
+@Tag(name="리뷰 API")
 @RequestMapping("/api/v1/review")
 public class ReviewController {
 
@@ -41,9 +43,14 @@ public class ReviewController {
         Optional<String> s = jwtService.extractAccessToken(request);
         if(s.isPresent()){
             Optional<String> email = jwtService.extractEmail(s.get());
-            if(email.isPresent()) {
-                return reviewService.reviewRead(reviewId, email.get());
+            try{
+                if(email.isPresent()) {
+                    return reviewService.reviewRead(reviewId, email.get());
+                }
+            }catch(UnauthorizedException e){
+
             }
+
         }
         return reviewService.reviewRead(reviewId, null);
     }
@@ -64,8 +71,12 @@ public class ReviewController {
         Optional<String> s = jwtService.extractAccessToken(request);
         if(s.isPresent()){
             Optional<String> email = jwtService.extractEmail(s.get());
-            if(email.isPresent()) {
-                return reviewService.getLikeUsers(reviewId, email.get());
+            try{
+                if(email.isPresent()) {
+                    return reviewService.getLikeUsers(reviewId, email.get());
+                }
+            }catch(UnauthorizedException e){
+
             }
         }
         return reviewService.getLikeUsers(reviewId, null);

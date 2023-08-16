@@ -1,6 +1,6 @@
 package com.ItsTime.ItNovation.controller.mail;
 
-import com.ItsTime.ItNovation.common.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
 import com.ItsTime.ItNovation.domain.mail.dto.CodeCheckRequestDto;
 import com.ItsTime.ItNovation.domain.mail.dto.PasswordFindRequestDto;
 import com.ItsTime.ItNovation.domain.mail.dto.RewritePasswordRequestDto;
@@ -10,13 +10,14 @@ import com.ItsTime.ItNovation.service.mail.EmailService;
 import com.ItsTime.ItNovation.service.user.UserService;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/email/password-find")
+@Tag(name="비밀번호 찾기 메일 관련 API")
 @Slf4j
 public class EmailController {
 
@@ -33,6 +35,7 @@ public class EmailController {
     private Map<String, String> authCodeMap = new ConcurrentHashMap<>(); // 동시성 문제가 있을거 같아 ConcurrentHashMap 사용해서 멀티 스레드에서 무사히 돌아갈 수 있도록 진행..
 
     @PostMapping("/email-send")
+    @Operation(summary = "메일 보내기")
     public ResponseEntity<String> mailConfirm(@RequestBody PasswordFindRequestDto req){
         try {
 
@@ -48,6 +51,8 @@ public class EmailController {
     }
 
     @PostMapping("/final-check")
+    @Operation(summary = "입력된 인증번호와 비교하기")
+
     public ResponseEntity<String> checkCode(@RequestBody CodeCheckRequestDto checkRequestDto){
         String sendedCode = checkRequestDto.getCode();
         String email = checkRequestDto.getEmail();
@@ -60,6 +65,8 @@ public class EmailController {
 
 
     @PostMapping("/rewrite-pw")
+    @Operation(summary = "재발급 받은 패스워드로 사용자 정보 업데이트하기")
+
     public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
         String email = rewritePasswordRequestDto.getEmail();
         String updatePassword = rewritePasswordRequestDto.getPassword();
