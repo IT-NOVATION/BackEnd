@@ -1,11 +1,11 @@
 package com.ItsTime.ItNovation.config;
 
+import com.ItsTime.ItNovation.config.jwt.JwtAuthenticationEntryPoint;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import com.ItsTime.ItNovation.jwt.filter.JwtAuthenticationProcessingFilter;
-import com.ItsTime.ItNovation.jwt.filter.JwtExceptionFilter;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.ItsTime.ItNovation.config.jwt.filter.JwtExceptionFilter;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import com.ItsTime.ItNovation.login.filter.CustomJsonUsernamePasswordAuthenticationFilter;
-import com.ItsTime.ItNovation.login.handler.CustomLogoutSuccessHandler;
 import com.ItsTime.ItNovation.login.handler.LoginSuccessHandler;
 import com.ItsTime.ItNovation.login.handler.LoginFailureHandler;
 import com.ItsTime.ItNovation.login.service.LoginService;
@@ -13,24 +13,22 @@ import com.ItsTime.ItNovation.oauth2.handler.OAuth2LoginFailureHandler;
 import com.ItsTime.ItNovation.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.ItsTime.ItNovation.oauth2.service.CustomOAuth2UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -48,39 +46,60 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final JwtAuthenticationEntryPoint entryPoint;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
-
-    List<RequestMatcher> specialUrlMatchers = Arrays.asList(
-
-            // CustomJsonUsernamePasswordAuthenticationFilter 가 토큰 검증 이후의 필터이기에 여기에 등록
-            new AntPathRequestMatcher("/login/**"),
-            new AntPathRequestMatcher("/signup"),
-            new AntPathRequestMatcher("/userProfile"),
-            new AntPathRequestMatcher("/test/**"),
+    private static final List<RequestMatcher> specialUrlMatchers = Arrays.asList(
+            new AntPathRequestMatcher("/api/v1/account/login/**"),
+            new AntPathRequestMatcher("/api/v1/account/signup"),
+            new AntPathRequestMatcher("/api/v1/user/profile"),
+            new AntPathRequestMatcher("/api/v1/account/custom-logout"),
             new AntPathRequestMatcher("/oauth2/**"),
-            new AntPathRequestMatcher("/loginState/**"),
-            new AntPathRequestMatcher("/movies/**"),
-            new AntPathRequestMatcher("/search/**"),
-            new AntPathRequestMatcher("/today/**"),
-            new AntPathRequestMatcher("/single/moviePage/**"),
-            new AntPathRequestMatcher("/review/Info/**"),
-            new AntPathRequestMatcher("/top/**"),
-            new AntPathRequestMatcher("/single/movie/reviewCount/**"),
-            //new AntPathRequestMatcher("/review/movieInfo/**"),
-            new AntPathRequestMatcher("/custom-logout"),
-            new AntPathRequestMatcher("/movielog/**"),
-            new AntPathRequestMatcher("/movie-search/**"),
-            new AntPathRequestMatcher("/comment/read/**"),
-            new AntPathRequestMatcher("/passwordfind/**"),
+            new AntPathRequestMatcher("/api/v1/user/state/**"),
+
+            // 댓글관련
+            new AntPathRequestMatcher("/api/v1/comment/read/**"),
+
+            // 비밀번호 찾기 관련
+            new AntPathRequestMatcher("/api/v1/email/password-find/**"),
+
+            // 영화 관련
+            new AntPathRequestMatcher("/api/v1/movies/**"),
+            // 무비서치 관련
+            new AntPathRequestMatcher("/api/v1/movie-search/**"),
+            // 무비로그 관련
+            new AntPathRequestMatcher("/api/v1/movielog/**"),
+            //무비토크관련
+            new AntPathRequestMatcher("/api/v1/movie-talk/**"),
+
+            // 리뷰읽기관련
+            new AntPathRequestMatcher("/api/v1/review/info/**"),
+
+            //리뷰작성관련
+            new AntPathRequestMatcher("/api/v1/review/movie-info/**"),
+            //검색관련
+            new AntPathRequestMatcher("/api/v1/search/**"),
+
+            //개인영화페이지관련
+            new AntPathRequestMatcher("/api/v1/single/movie-page/**"),
+            new AntPathRequestMatcher("/api/v1/single/movie/review-count/**"),
+
+            //top 관련
+            new AntPathRequestMatcher("/api/v1/top/**"),
+            //swagger관련
+
+
             new AntPathRequestMatcher("/swagger-ui/**"),
             new AntPathRequestMatcher("/v3/api-docs/**")
 
 
 
             );
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring().requestMatchers(specialUrlMatchers.toArray(new RequestMatcher[0]));
+    }
 
-
-    //HttpSecurity 객체를 사용하여 Spring Security의 인증 및 권한 부여 규칙을 정의
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -89,43 +108,30 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                //== URL별 권한 관리 옵션==//
                 .authorizeHttpRequests()
-
-                .requestMatchers("/oauth2/**","/css/**", "/images/**", "/test/**","/js/**").permitAll()
-
-                //TODO: 토큰 검증 필요없는 것은 위의 specialUrlMatchers 랑 아래 permitAll 에 등록 필수
-//                .requestMatchers("/signup","/userProfile","/movies","/review", "/review/Info", "today/**","/loginState").permitAll()
                 .requestMatchers(specialUrlMatchers.toArray(new RequestMatcher[0])).permitAll()
-
-
-                .requestMatchers("/userProfile/me").authenticated() //userProfile과 충돌나지 않게 별도로 설정
                 .anyRequest().authenticated() //위의 지정된 주소 제외 모든 주소들은 인증된 사용자만 접근 가능하다
 
                 .and()
 
-                //== 소셜 로그인 설정 ==//
+
                 .oauth2Login()
                 .successHandler(oAuth2LoginSuccessHandler)
                 .failureHandler(oAuth2LoginFailureHandler)
                 .userInfoEndpoint().userService(customOAuth2UserService);
 
-
-        //TODO: 필터 순서
         http.addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class);
-        http.addFilterBefore(new SecurityFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(jwtExceptionFilter(), jwtAuthenticationProcessingFilter().getClass());
+        http.addFilterBefore(jwtExceptionFilter, jwtAuthenticationProcessingFilter().getClass());
+        http.addFilterBefore(jwtAuthenticationProcessingFilter(), BasicAuthenticationFilter.class)
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
+        ;
 
 
         return http.build();
     }
 
-    @Bean
-    public JwtExceptionFilter jwtExceptionFilter() {
-        JwtExceptionFilter jwtExceptionFilter = new JwtExceptionFilter();
-        return jwtExceptionFilter;
-    }
+
 
 
 
@@ -136,8 +142,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository,specialUrlMatchers);
-        return jwtAuthenticationFilter;
+        return new JwtAuthenticationProcessingFilter(jwtService, userRepository,specialUrlMatchers);
     }
 
     @Bean

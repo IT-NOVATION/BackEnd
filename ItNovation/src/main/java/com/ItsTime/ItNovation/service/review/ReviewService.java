@@ -1,11 +1,8 @@
 package com.ItsTime.ItNovation.service.review;
 
-import com.ItsTime.ItNovation.common.JwtErrorCode;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
-import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.movie.Movie;
 import com.ItsTime.ItNovation.domain.movie.MovieRepository;
-import com.ItsTime.ItNovation.domain.movie.dto.LatestReviewMovieResponseDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewMovieInfoDto;
 import com.ItsTime.ItNovation.domain.movie.dto.ReviewPostMovieInfoResponseDto;
 import com.ItsTime.ItNovation.domain.review.Review;
@@ -36,13 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import com.ItsTime.ItNovation.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.PageRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

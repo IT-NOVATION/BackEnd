@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.filter;
+package com.ItsTime.ItNovation.common.filter;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

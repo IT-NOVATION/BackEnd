@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.service.user;
 
 
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.review.Review;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ItsTime.ItNovation.domain.user.dto.UserSearchTotalResponseDto;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -113,13 +114,13 @@ public class UserSearchService {
     public ResponseEntity<UserSearchTotalResponseDto> getTotalResponse(String userName, Optional<String> accessToken) {
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
+            try{
+                extractedEmail.ifPresent(s -> nowUserEmail = s);
+            }catch (UnauthorizedException e){
 
-            if (extractedEmail.isEmpty()) {
-                //TODO: 토큰 만료 시 로직 추가해야함
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtErrorCode.INVALID_TOKEN.getMessage());
-            } else {
-                nowUserEmail = extractedEmail.get();
             }
+
+
         }
         List<UserSearchResponseDto> response = new ArrayList<>();
         response = getResponse(userName);

@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.jwt.util;
+package com.ItsTime.ItNovation.config.jwt.util;
 
 import java.util.Random;
 

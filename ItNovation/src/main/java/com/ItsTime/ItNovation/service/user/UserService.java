@@ -9,9 +9,7 @@ import com.ItsTime.ItNovation.domain.user.UserRepository;
 
 import com.ItsTime.ItNovation.domain.user.dto.SignUpRequestDto;
 
-import com.ItsTime.ItNovation.domain.user.dto.SignUpResponseDto;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

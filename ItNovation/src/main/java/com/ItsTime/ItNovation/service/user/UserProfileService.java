@@ -1,11 +1,11 @@
 package com.ItsTime.ItNovation.service.user;
 
-import com.ItsTime.ItNovation.common.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDtoMe;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
