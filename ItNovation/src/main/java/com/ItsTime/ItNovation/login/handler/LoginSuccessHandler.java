@@ -1,10 +1,9 @@
 package com.ItsTime.ItNovation.login.handler;
 
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import com.ItsTime.ItNovation.jwt.service.JwtService;
+import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
