@@ -25,4 +25,6 @@ springdoc:
     path: /swagger-ui
   paths-to-match:
     - /**
-
+logging:
+  level:
+    web: debug
