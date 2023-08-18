@@ -75,30 +75,22 @@ public class SecurityConfig {
             // 리뷰읽기관련
             new AntPathRequestMatcher("/api/v1/review/info/**"),
 
-            //리뷰작성관련
-            new AntPathRequestMatcher("/api/v1/review/movie-info/**"),
             //검색관련
             new AntPathRequestMatcher("/api/v1/search/**"),
 
             //개인영화페이지관련
             new AntPathRequestMatcher("/api/v1/single/movie-page/**"),
             new AntPathRequestMatcher("/api/v1/single/movie/review-count/**"),
-
             //top 관련
             new AntPathRequestMatcher("/api/v1/top/**"),
             //swagger관련
-
-
             new AntPathRequestMatcher("/swagger-ui/**"),
             new AntPathRequestMatcher("/v3/api-docs/**")
 
 
 
             );
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(specialUrlMatchers.toArray(new RequestMatcher[0]));
-    }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

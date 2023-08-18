@@ -34,11 +34,7 @@ public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuth
     private final ObjectMapper objectMapper;
 
     public CustomJsonUsernamePasswordAuthenticationFilter(ObjectMapper objectMapper) {
-        /**
-         * super()를 통해 부모 클래스인 AbstractAuthenticationProcessingFilter()의
-         * 생성자 파라미터로 위에서 상수로 선언한 "/login" URL을 설정
-         * 이 필터는 /login 이 요청시 작동함
-         */
+
         super(DEFAULT_LOGIN_PATH_REQUEST_MATCHER);
         this.objectMapper = objectMapper;
     }
@@ -53,8 +49,6 @@ public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuth
         }
         //HTTP 요청의 본문을 문자열로 저장
         String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-
-
         Map<String, String> usernamePasswordMap = objectMapper.readValue(messageBody, Map.class);
 
         String email = usernamePasswordMap.get(USERNAME_KEY);

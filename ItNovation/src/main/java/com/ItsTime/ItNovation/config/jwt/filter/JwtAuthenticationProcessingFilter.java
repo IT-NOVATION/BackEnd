@@ -35,15 +35,22 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final List<RequestMatcher> specialUrlMatchers; // 특정 URL에 대한 매처
-
+    private final List<RequestMatcher> specialUrlMatchers;
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("JwtAuthenticationProcessingFilter 진입");
+        for (RequestMatcher requestMatcher : specialUrlMatchers) {
+            if (requestMatcher.matches(request)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+        log.info("JwtAuthenticationProcessingFilter: Token validation and authentication...");
+        log.info(request.getRequestURI());
+
         String refreshToken = jwtService.extractRefreshToken(request)
-                .filter(token -> jwtService.isTokenValid(token))
+                .filter(jwtService::isTokenValid)
                 .orElse(null);
 
         if (refreshToken != null) {
