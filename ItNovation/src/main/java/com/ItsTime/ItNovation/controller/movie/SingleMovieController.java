@@ -54,14 +54,12 @@ public class SingleMovieController {
     }
     @GetMapping("/movie/review-count/{movieId}")
     @Operation(summary = "해당 영화의 리뷰 수 가져오기")
-
     public ResponseEntity reviewCount(@PathVariable Long movieId){
         return reviewService.reviewCount(movieId);
     }
 
     @GetMapping("/movie-page/{movieId}")
     @Operation(summary = "해당 영화 데이터 가져오기")
-
     public ResponseEntity moviePage(@PathVariable Long movieId, HttpServletRequest request){
         Optional<String> s = jwtService.extractAccessToken(request);
         if(s.isPresent()){
@@ -73,6 +71,5 @@ public class SingleMovieController {
         log.info("로그인 상태가 아닙니다.");
         return singleMoviePageService.getReviewInformationAboutMovie(movieId, null);
     }
-
 
 }

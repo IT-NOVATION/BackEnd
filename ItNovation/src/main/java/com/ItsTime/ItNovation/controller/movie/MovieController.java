@@ -32,11 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class MovieController {
 
     private final MovieCrawlService movieCrawlService;
-    private final MovieRepoService movieRepoService;
 
-    // 캐시
     @GetMapping("/popular")
-
     public List<MoviePopularDto> getPopularMovies() {
         try{
             return movieCrawlService.getPopularMovies();
@@ -54,14 +51,21 @@ public class MovieController {
             if(topReviewedMovies.isEmpty()){
                 throw new IllegalArgumentException("추천 영화 존재 x");
             }
-            MoviePopularRecommendResponseDto moviePopularRecommendResponseDto = MoviePopularRecommendResponseDto.builder()
-                .popular(popularMovies)
-                .recommended(topReviewedMovies)
-                .build();
+            MoviePopularRecommendResponseDto moviePopularRecommendResponseDto = madeResponseDto(
+                popularMovies, topReviewedMovies);
             return ResponseEntity.status(200).body(moviePopularRecommendResponseDto);
         }catch (Exception e){
             return ResponseEntity.status(403).body(e.getMessage());
         }
+    }
+
+    private static MoviePopularRecommendResponseDto madeResponseDto(
+        List<MoviePopularDto> popularMovies, List<MovieRecommendDto> topReviewedMovies) {
+        MoviePopularRecommendResponseDto moviePopularRecommendResponseDto = MoviePopularRecommendResponseDto.builder()
+            .popular(popularMovies)
+            .recommended(topReviewedMovies)
+            .build();
+        return moviePopularRecommendResponseDto;
     }
 
     private List<MoviePopularDto> getPopularTableMovies() throws JsonProcessingException {
