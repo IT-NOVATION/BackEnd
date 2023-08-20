@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.controller.top;
 
 
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
 import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.bestUser.TodayBestUserService;
@@ -41,7 +42,8 @@ public class TopController {
                     return todayBestUserService.getBestUserInfo(email.get());
                 }
             }catch(UnauthorizedException e){
-
+                ErrorCode errorCode = e.getErrorCode();
+                return ResponseEntity.status(errorCode.getHttpStatus()).body(errorCode.getMessage());
             }
         }
         return todayBestUserService.getBestUserInfo(null);
