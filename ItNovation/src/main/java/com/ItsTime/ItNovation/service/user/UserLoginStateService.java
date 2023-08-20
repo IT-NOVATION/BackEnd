@@ -40,7 +40,7 @@ public class UserLoginStateService {
                             .orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
                     LoginStateDto loginStateDto = LoginStateDto.builder().loginState(true).userId(user.getId()).nickname(user.getNickname()).profileImg(user.getProfileImg()).build();
                     return ResponseEntity.status(HttpStatus.OK).body(loginStateDto);
-                } catch (IllegalArgumentException e) {
+                } catch (Exception e) {
                     LoginStateDto loginStateDto = LoginStateDto.builder().loginState(false).userId(null).nickname(null).profileImg(null).build();
                     return ResponseEntity.status(HttpStatus.OK).body(loginStateDto);
 
