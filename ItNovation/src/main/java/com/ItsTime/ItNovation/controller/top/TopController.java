@@ -34,18 +34,17 @@ public class TopController {
     @GetMapping("/yesterday/user")
     @Operation(summary ="전날 기준 베스트 유저")
     public ResponseEntity yesterdayTopUser(HttpServletRequest request){
-        Optional<String> s = jwtService.extractAccessToken(request);
-        if(s.isPresent()){
-            Optional<String> email = jwtService.extractEmail(s.get());
             try {
-                if (email.isPresent()) {
-                    return todayBestUserService.getBestUserInfo(email.get());
+                Optional<String> s = jwtService.extractAccessToken(request);
+                if(s.isPresent()) {
+                    Optional<String> email = jwtService.extractEmail(s.get());
+                    if (email.isPresent()) {
+                        return todayBestUserService.getBestUserInfo(email.get());
+                    }
                 }
-            }catch(UnauthorizedException e){
-                ErrorCode errorCode = e.getErrorCode();
-                return ResponseEntity.status(errorCode.getHttpStatus()).body(errorCode.getMessage());
+            }catch(Exception e){
+                return ResponseEntity.status(ErrorCode.EXPIRED_ACCESS_TOKEN.getHttpStatus()).body(ErrorCode.EXPIRED_ACCESS_TOKEN.getMessage());
             }
-        }
         return todayBestUserService.getBestUserInfo(null);
     }
 
