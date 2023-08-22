@@ -56,7 +56,7 @@ public class MovieLogService {
                 try {
                     extractedEmail.ifPresent(s -> nowUserEmail = s);
                 } catch (UnauthorizedException e) {
-
+                    throw new UnauthorizedException(e.getErrorCode());
                 }
 
                 User nowLoginedUser = null;
@@ -263,7 +263,6 @@ public class MovieLogService {
     }
 
     private MovieLogInterestedMovieInfoDto getMovieLogInterestedMovieInfoDto(User findUser, List<Movie> movieList, int i, User nowLoginedUser) {
-        MovieLogInterestedMovieInfoDto movieLogInterestedMovieInfoDto;
         long movieId = movieList.get(i).getId();
         float avgMovieScore = starService.getMovieAvgScore(movieId);
 

@@ -40,7 +40,7 @@ public class TodayPopularUserService {
             try{
                 extractedEmail.ifPresent(s -> nowUserEmail = s);
             }catch(UnauthorizedException e){
-
+                throw new UnauthorizedException(e.getErrorCode());
             }
 
         }
