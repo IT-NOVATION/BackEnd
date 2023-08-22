@@ -1,10 +1,9 @@
 package com.ItsTime.ItNovation.controller.top;
 
 
-import com.ItsTime.ItNovation.common.exception.ErrorCode;
 import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
-import com.ItsTime.ItNovation.service.bestUser.TodayBestUserService;
+import com.ItsTime.ItNovation.service.top.TodayBestUserService;
 import com.ItsTime.ItNovation.service.top.TopKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,17 +33,20 @@ public class TopController {
     @GetMapping("/yesterday/user")
     @Operation(summary ="전날 기준 베스트 유저")
     public ResponseEntity yesterdayTopUser(HttpServletRequest request){
-            try {
-                Optional<String> s = jwtService.extractAccessToken(request);
-                if(s.isPresent()) {
-                    Optional<String> email = jwtService.extractEmail(s.get());
-                    if (email.isPresent()) {
-                        return todayBestUserService.getBestUserInfo(email.get());
-                    }
+        try {
+            Optional<String> s = jwtService.extractAccessToken(request);
+            if (s.isPresent()) {
+                Optional<String> email = jwtService.extractEmail(s.get());
+
+                if (email.isPresent()) {
+                    return todayBestUserService.getBestUserInfo(email.get());
                 }
-            }catch(Exception e){
-                return ResponseEntity.status(ErrorCode.EXPIRED_ACCESS_TOKEN.getHttpStatus()).body(ErrorCode.EXPIRED_ACCESS_TOKEN.getMessage());
+
             }
+        } catch(UnauthorizedException e){
+            throw new UnauthorizedException(e.getErrorCode());
+        }
+
         return todayBestUserService.getBestUserInfo(null);
     }
 

@@ -1,6 +1,9 @@
 package com.ItsTime.ItNovation.service.comment;
 
 
+import com.ItsTime.ItNovation.common.exception.BadRequestException;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.domain.comment.Comment;
 import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.comment.dto.CommentReadDto;
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +44,7 @@ public class CommentService {
     public ResponseEntity writeComment(CommentWriteRequestDto commentDto, String email) {
         try {
             User findUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
             Comment comment = Comment.builder()
                 .commentText(commentDto.getCommentText())
                 .review(getReview(commentDto))
@@ -48,15 +52,16 @@ public class CommentService {
                 .build();
             commentRepository.save(comment);
             gradeService.validateGrade(findUser);
-            return ResponseEntity.status(200).body("성공적으로 저장되었습니다.");
+            return ResponseEntity.status(HttpStatus.OK).body("성공적으로 저장되었습니다.");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+
     }
 
     private Review getReview(CommentWriteRequestDto commentDto) {
         Review review = reviewRepository.findById(commentDto.getReviewId())
-            .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.REVIEW_NOT_FOUND));
         return review;
     }
 
@@ -64,7 +69,6 @@ public class CommentService {
     @Transactional
     public ResponseEntity readComment(int page, Long reviewId) {
         try {
-
             Pageable pageable = PageRequest.of(page - 1, 15);
             List<Comment> newestByComment = commentRepository.findByNewestComment(reviewId, pageable);
             log.info(String.valueOf(newestByComment.size()));
@@ -77,9 +81,9 @@ public class CommentService {
             CommentReadResponseDto responseDto = getCommentReadResponseDto(
                 page, reviewId, newestByComment, commentReadDtoList, lastPage);
 
-            return ResponseEntity.status(200).body(responseDto);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 

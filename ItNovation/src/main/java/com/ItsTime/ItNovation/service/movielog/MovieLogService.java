@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.service.movielog;
 
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.comment.CommentRepository;
 import com.ItsTime.ItNovation.domain.movie.Movie;
@@ -9,10 +10,7 @@ import com.ItsTime.ItNovation.domain.review.Review;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
-import com.ItsTime.ItNovation.service.follow.FollowService;
-import com.ItsTime.ItNovation.service.movieLike.MovieLikeService;
 import com.ItsTime.ItNovation.service.review.ReviewService;
-import com.ItsTime.ItNovation.service.reviewlike.ReviewLikeService;
 import com.ItsTime.ItNovation.service.star.StarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +41,8 @@ public class MovieLogService {
     public ResponseEntity getMovieLogResponse(String email, Optional<String> accessToken) {
 
         try {
-            User findUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage()));
+            User findUser = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
             MovieLogUserInfoDto movieLogUserInfoDto = getMovieLogUser(findUser);
             List<MovieLogfollowersInfoDto> movieLogfollowersInfoDtoList = getMovieLogFollowers(findUser);
             List<MovieLogfollowingInfoDto> movieLogfollowingInfoDtoList = getMovieLogFollowings(findUser);

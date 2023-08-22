@@ -1,13 +1,14 @@
 package com.ItsTime.ItNovation.controller.movie;
 
 
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.ForbiddenException;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateRequestDto;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.review.ReviewService;
-import com.ItsTime.ItNovation.service.singleMoviePage.SingleMoviePageService;
+import com.ItsTime.ItNovation.service.movie.SingleMoviePageService;
 import com.ItsTime.ItNovation.service.star.StarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,8 +45,8 @@ public class SingleMovieController {
     public ResponseEntity singleStarEvaluate(@RequestBody SingleStarEvaluateRequestDto singleStarEvaluateRequestDto, Authentication authentication){
         String email = authentication.getName();
         try {
-            User findUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException(
-                GeneralErrorCode.UNKNOWN_USER.getMessage()));
+            User findUser = userRepository.findByEmail(email).orElseThrow(() -> new ForbiddenException(
+                    ErrorCode.ENTITY_NOT_FOUND));
             return starService.singleStarEvaluate(singleStarEvaluateRequestDto, findUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
