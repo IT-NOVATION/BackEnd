@@ -97,11 +97,14 @@ public class JwtService {
         log.info("accessToken 추출");
         try {
             return Optional.ofNullable(request.getHeader(accessHeader))
-                    .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                    .map(refreshToken -> refreshToken.replace(BEARER, ""));
+                    .filter(accessToken -> accessToken.startsWith(BEARER))
+                    .map(accessToken -> accessToken.replace(BEARER, ""));
         } catch (JWTDecodeException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }catch(TokenExpiredException e){
+            log.error(e.getMessage());
+            throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         }
 
     }
@@ -116,6 +119,9 @@ public class JwtService {
         } catch (JWTDecodeException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN_VALUE);
+        }catch(TokenExpiredException e){
+            log.error(e.getMessage());
+            throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         }
     }
     /**
