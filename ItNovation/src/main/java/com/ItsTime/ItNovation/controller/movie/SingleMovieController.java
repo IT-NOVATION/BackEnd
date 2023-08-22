@@ -3,6 +3,7 @@ package com.ItsTime.ItNovation.controller.movie;
 
 import com.ItsTime.ItNovation.common.exception.ErrorCode;
 import com.ItsTime.ItNovation.common.exception.ForbiddenException;
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import com.ItsTime.ItNovation.domain.star.dto.SingleStarEvaluateRequestDto;
 import com.ItsTime.ItNovation.domain.user.User;
@@ -64,14 +65,14 @@ public class SingleMovieController {
     @Operation(summary = "해당 영화 데이터 가져오기")
 
     public ResponseEntity moviePage(@PathVariable Long movieId, HttpServletRequest request){
+
         Optional<String> s = jwtService.extractAccessToken(request);
-        if(s.isPresent()){
+        if (s.isPresent()) {
             Optional<String> email = jwtService.extractEmail(s.get());
-            if(email.isPresent()) {
+            if (email.isPresent()) {
                 return singleMoviePageService.getReviewInformationAboutMovie(movieId, email.get());
             }
         }
-        log.info("로그인 상태가 아닙니다.");
         return singleMoviePageService.getReviewInformationAboutMovie(movieId, null);
     }
 

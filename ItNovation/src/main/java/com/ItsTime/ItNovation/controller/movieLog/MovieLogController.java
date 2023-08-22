@@ -1,6 +1,9 @@
 package com.ItsTime.ItNovation.controller.movieLog;
 
 
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
@@ -29,15 +32,13 @@ public class MovieLogController {
     @GetMapping("/{userId}")
     @Operation(summary = "특정 유저의 무비로그")
     public ResponseEntity getMovieLogResponse(@PathVariable Long userId, HttpServletRequest request) {
-        try {
+
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("no user"));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
             Optional<String> accessToken= jwtService.extractAccessToken(request);
 
             return movieLogService.getMovieLogResponse(user.getEmail(),accessToken);
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+
     }
 
 
