@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.service.bestUser;
+package com.ItsTime.ItNovation.service.top;
 
 import com.ItsTime.ItNovation.domain.bestUser.TopUserResponseDto;
 import com.ItsTime.ItNovation.domain.comment.CommentRepository;
