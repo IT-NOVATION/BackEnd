@@ -10,6 +10,7 @@ public enum ErrorCode {
 
      //400 Bad Request
      BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+     INCORRECT_EMAIL_CODE(HttpStatus.BAD_REQUEST, "잘못된 인증코드입니다."),
 
     /**
      * 401 Unauthorized
@@ -44,7 +45,8 @@ public enum ErrorCode {
     /**
      * 500 Internal Server Error
      */
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    SEND_MAIL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "메일 전송 오류입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
