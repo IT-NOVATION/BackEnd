@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.service.reviewlike;
+package com.ItsTime.ItNovation.service.movielog;
 
 import com.ItsTime.ItNovation.domain.reviewLike.ReviewLikeRepository;
 import lombok.RequiredArgsConstructor;

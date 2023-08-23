@@ -1,7 +1,8 @@
 package com.ItsTime.ItNovation.controller.push;
 
 
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.domain.follow.dto.TargetUserRequestDto;
 import com.ItsTime.ItNovation.domain.movieLike.dto.MovieLikeRequestDto;
 
@@ -37,7 +38,7 @@ public class PushController {
     public ResponseEntity pushReviewLike(@RequestBody  ReviewLikeRequestDto reviewLikeRequestDto, Authentication authentication){
         String email = authentication.getName();
         try {
-            User findUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage()));
+            User findUser = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
             log.info(String.valueOf(findUser.getId()));
             return pushService.pushReviewLike(reviewLikeRequestDto, findUser);
 

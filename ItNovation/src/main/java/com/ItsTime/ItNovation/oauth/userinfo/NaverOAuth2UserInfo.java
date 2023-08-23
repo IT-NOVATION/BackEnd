@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.oauth2.userinfo;
+package com.ItsTime.ItNovation.oauth.userinfo;
 
 import com.ItsTime.ItNovation.domain.user.Grade;
 import lombok.extern.slf4j.Slf4j;

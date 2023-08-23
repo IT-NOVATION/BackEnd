@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
      //400 Bad Request
+     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
 
     /**
      * 401 Unauthorized
@@ -23,7 +24,13 @@ public enum ErrorCode {
     NOT_MATCH_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "일치하지 않는 리프레시 토큰입니다."),
 
     //403 Forbidden
+    FORBIDDEN(HttpStatus.FORBIDDEN, "리소스 접근 권한이 없습니다."),
+
     //404 Not Found
+    ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND,"엔티티를 찾을 수 없습니다"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"유저가 존재하지 않습니다"),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,"리뷰가 존재하지 않습니다"),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND,"댓글이 존재하지 않습니다"),
 
     /**
      * 405 Method Not Allowed
@@ -31,7 +38,9 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "잘못된 HTTP method 요청입니다."),
 
     //409 Conflict
-
+    CONFLICT(HttpStatus.CONFLICT, "이미 존재하는 리소스입니다."),
+    NICKNAME_CONFLICT(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
+    SAME_NICKNAME_CONFLICT(HttpStatus.CONFLICT, "기존에 존재하는 닉네임과 일치합니다."),
     /**
      * 500 Internal Server Error
      */

@@ -1,7 +1,8 @@
-package com.ItsTime.ItNovation.service.follow;
+package com.ItsTime.ItNovation.service.movielog;
 
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
 
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
@@ -26,7 +27,7 @@ public class FollowService {
         Optional<User> findUser = userRepository.findById(userId);
         try {
             if (findUser.isEmpty()) {
-                throw new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage());
+                throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
             } else {
                 List<User> FollowerList = followRepository.findFollowersByUserId(findUser.get().getId());
                 return FollowerList;
@@ -42,7 +43,7 @@ public class FollowService {
         Optional<User> findUser = userRepository.findById(userId);
         try {
             if (findUser.isEmpty()) {
-                throw new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage());
+                throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
             } else {
                 List<User> FollowingList = followRepository.findFollowingsByUserId(findUser.get().getId());
                 return FollowingList;

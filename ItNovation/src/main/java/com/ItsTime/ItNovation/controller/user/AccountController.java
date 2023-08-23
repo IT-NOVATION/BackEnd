@@ -47,7 +47,6 @@ public class AccountController {
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN_VALUE);
         }else{
             log.info("엑세스 토큰: {}" ,accessToken.get());
-
             return userService.logout(accessToken.get());
         }
 

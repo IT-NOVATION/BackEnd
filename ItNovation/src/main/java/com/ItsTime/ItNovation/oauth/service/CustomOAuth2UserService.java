@@ -1,11 +1,10 @@
-package com.ItsTime.ItNovation.oauth2.service;
+package com.ItsTime.ItNovation.oauth.service;
 
 import com.ItsTime.ItNovation.domain.user.SocialType;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
-import com.ItsTime.ItNovation.oauth2.CustomOAuth2User;
-import com.ItsTime.ItNovation.oauth2.OAuthAttributes;
-import jakarta.servlet.http.HttpSession;
+import com.ItsTime.ItNovation.oauth.CustomOAuth2User;
+import com.ItsTime.ItNovation.oauth.OAuthAttributes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +12,6 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.service.movieLike;
+package com.ItsTime.ItNovation.service.movielog;
 
 
 import com.ItsTime.ItNovation.domain.movie.Movie;
@@ -19,8 +19,5 @@ public class MovieLikeService {
     public List<Movie> UserInterestedMovieList(Long userId){
         return movieLikeRepository.myInterestedMovie(userId);
     }
-    @Transactional
-    public int MovieLikeCountByUserIdAndMovieId(Long userId, Long movieId){
-        return movieLikeRepository.MovieLikeCountByUserIdAndMovieId(userId, movieId);
-    }
+
 }

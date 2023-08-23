@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.oauth2.handler;
+package com.ItsTime.ItNovation.oauth.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

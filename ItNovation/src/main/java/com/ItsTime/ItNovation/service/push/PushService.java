@@ -1,6 +1,8 @@
 package com.ItsTime.ItNovation.service.push;
 
 
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
 import com.ItsTime.ItNovation.domain.follow.dto.FollowStateResponseDto;
@@ -40,7 +42,7 @@ public class PushService {
         try {
             log.info(reviewLikeRequestDto.getReviewId().toString());
             Review review = reviewRepository.findById(reviewLikeRequestDto.getReviewId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 없어요!"));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.REVIEW_NOT_FOUND));
             Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByReviewIdAndUserId(
                     findUser.getId(), reviewLikeRequestDto.getReviewId());
             return getPushReviewLikeResponseDtoResponseEntity(review, findUser, reviewLike);
