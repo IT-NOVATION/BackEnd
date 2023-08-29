@@ -36,8 +36,8 @@ public class TodayPopularUserService {
     public ResponseEntity getTopFollowers(Optional<String> accessToken) {
 
         if (accessToken.isPresent()) {
-            Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
             try{
+                Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
                 extractedEmail.ifPresent(s -> nowUserEmail = s);
             }catch(UnauthorizedException e){
                 throw new UnauthorizedException(e.getErrorCode());
