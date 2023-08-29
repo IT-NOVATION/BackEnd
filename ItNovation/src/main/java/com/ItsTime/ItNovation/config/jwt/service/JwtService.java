@@ -96,9 +96,12 @@ public class JwtService {
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         log.info("accessToken 추출");
         try {
-            return Optional.ofNullable(request.getHeader(accessHeader))
+            Optional<String> token= Optional.ofNullable(request.getHeader(accessHeader))
                     .filter(accessToken -> accessToken.startsWith(BEARER))
                     .map(accessToken -> accessToken.replace(BEARER, ""));
+            if (logoutTokens.contains(token)) {
+                throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
+            } else return token;
         } catch (JWTDecodeException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
