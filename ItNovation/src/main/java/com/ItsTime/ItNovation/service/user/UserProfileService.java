@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.service.user;
 
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.domain.user.dto.UserProfileDto;
@@ -23,13 +24,13 @@ import java.util.Optional;
 public class UserProfileService {
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
 
     @Transactional
     public ResponseEntity userProfileMe(UserProfileDtoMe userProfileDtoMe, String email) {
         try{
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage()));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
             Optional<User> findUserByNickName = userRepository.findUserBySameNickName(userProfileDtoMe.getNickname());
 
             // 닉네임 중복검사
@@ -57,10 +58,10 @@ public class UserProfileService {
         if (Objects.equals(user.getId(), findUserByNickName.getId())) {
             user.update(userProfileDtoMe.getIntroduction(), userProfileDtoMe.getProfileImg(), userProfileDtoMe.getBgImg());
             userRepository.saveAndFlush(user);
-            return ResponseEntity.status(HttpStatus.OK).body(GeneralErrorCode.CONFLICT_NICKNAME.getMessage());
+            return ResponseEntity.status(HttpStatus.OK).body(ErrorCode.SAME_NICKNAME_CONFLICT);
         }
         log.info("중복되는 닉네임");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(GeneralErrorCode.DUPLICATED_NICKNAME.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorCode.NICKNAME_CONFLICT);
     }
 
     @Transactional
@@ -69,7 +70,7 @@ public class UserProfileService {
         try {
             String email = userProfileDto.getEmail();
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException(GeneralErrorCode.UNKNOWN_USER.getMessage()));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
             //TODO: 기존에 DB에 변경하려는 닉네임이 있는 경우 중복 알려주기
             Optional<User> findUserByNickName = userRepository.findUserBySameNickName(userProfileDto.getNickname());
@@ -93,10 +94,12 @@ public class UserProfileService {
     }
     private ResponseEntity<?> handleNickNameError(User user, User findUserByNickName) {
         if (Objects.equals(user.getId(), findUserByNickName.getId())) {
-            return ResponseEntity.status(HttpStatus.OK).body(GeneralErrorCode.CONFLICT_NICKNAME.getMessage());
+            return ResponseEntity.status(HttpStatus.OK).body(ErrorCode.SAME_NICKNAME_CONFLICT);
+
         }
         log.info("중복되는 닉네임");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(GeneralErrorCode.DUPLICATED_NICKNAME.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorCode.NICKNAME_CONFLICT);
+
     }
 
 }

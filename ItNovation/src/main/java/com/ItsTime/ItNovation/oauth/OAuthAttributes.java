@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.oauth2;
+package com.ItsTime.ItNovation.oauth;
 
 
 import com.ItsTime.ItNovation.domain.BaseTimeEntity;
@@ -6,16 +6,15 @@ import com.ItsTime.ItNovation.domain.user.Grade;
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.SocialType;
 import com.ItsTime.ItNovation.domain.user.User;
-import com.ItsTime.ItNovation.oauth2.userinfo.GoogleOAuth2UserInfo;
-import com.ItsTime.ItNovation.oauth2.userinfo.KakaoOAuth2UserInfo;
-import com.ItsTime.ItNovation.oauth2.userinfo.NaverOAuth2UserInfo;
-import com.ItsTime.ItNovation.oauth2.userinfo.OAuth2UserInfo;
+import com.ItsTime.ItNovation.oauth.userinfo.GoogleOAuth2UserInfo;
+import com.ItsTime.ItNovation.oauth.userinfo.KakaoOAuth2UserInfo;
+import com.ItsTime.ItNovation.oauth.userinfo.NaverOAuth2UserInfo;
+import com.ItsTime.ItNovation.oauth.userinfo.OAuth2UserInfo;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * 각 소셜별로 받아오는 데이터가 다르므로

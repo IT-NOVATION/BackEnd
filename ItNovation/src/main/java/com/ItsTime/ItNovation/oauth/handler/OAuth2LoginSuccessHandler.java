@@ -1,9 +1,9 @@
-package com.ItsTime.ItNovation.oauth2.handler;
+package com.ItsTime.ItNovation.oauth.handler;
 
 import com.ItsTime.ItNovation.domain.user.Role;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
-import com.ItsTime.ItNovation.oauth2.CustomOAuth2User;
+import com.ItsTime.ItNovation.oauth.CustomOAuth2User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

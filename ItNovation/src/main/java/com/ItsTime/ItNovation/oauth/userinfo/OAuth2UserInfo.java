@@ -1,6 +1,4 @@
-package com.ItsTime.ItNovation.oauth2.userinfo;
-
-import com.ItsTime.ItNovation.domain.user.Grade;
+package com.ItsTime.ItNovation.oauth.userinfo;
 
 import java.util.Map;
 

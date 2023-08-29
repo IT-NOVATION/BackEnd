@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.controller.mail;
 
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
+import com.ItsTime.ItNovation.common.exception.NotFoundException;
 import com.ItsTime.ItNovation.domain.mail.dto.CodeCheckRequestDto;
 import com.ItsTime.ItNovation.domain.mail.dto.PasswordFindRequestDto;
 import com.ItsTime.ItNovation.domain.mail.dto.RewritePasswordRequestDto;
@@ -40,7 +41,7 @@ public class EmailController {
         try {
 
             log.info(req.getEmail());
-            User findUser = userRepository.findByEmail(req.getEmail()).orElseThrow(() -> new IllegalStateException(GeneralErrorCode.UNKNOWN_USER.getMessage()));
+            User findUser = userRepository.findByEmail(req.getEmail()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
             log.info(findUser.getEmail());
             String authCode = emailService.sendMail(findUser.getEmail());
             authCodeMap.put(req.getEmail(), authCode);

@@ -1,5 +1,5 @@
 package com.ItsTime.ItNovation.service.movieTalk;
-import com.ItsTime.ItNovation.common.exception.GeneralErrorCode;
+import com.ItsTime.ItNovation.common.exception.ErrorCode;
 import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.follow.FollowRepository;
 import com.ItsTime.ItNovation.domain.follow.FollowState;
@@ -36,11 +36,11 @@ public class TodayPopularUserService {
     public ResponseEntity getTopFollowers(Optional<String> accessToken) {
 
         if (accessToken.isPresent()) {
-            Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
             try{
+                Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
                 extractedEmail.ifPresent(s -> nowUserEmail = s);
             }catch(UnauthorizedException e){
-
+                throw new UnauthorizedException(e.getErrorCode());
             }
 
         }
@@ -49,7 +49,7 @@ public class TodayPopularUserService {
         List<User> topPushUsers = followRepository.findTop3PushUsersByTargetUserCount(pageable);
 
         if (topPushUsers.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(GeneralErrorCode.NO_REVIEW.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorCode.REVIEW_NOT_FOUND);
         } else {
             List<TopFollowerResponseDto> topFollowerResponseDtoList=topPushUsers.stream().map(topPushUser -> {
                 log.info(String.valueOf(topPushUser.getId()));

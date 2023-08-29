@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.oauth2;
+package com.ItsTime.ItNovation.oauth;
 
 import com.ItsTime.ItNovation.domain.user.Role;
 import lombok.Getter;

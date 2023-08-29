@@ -1,6 +1,7 @@
 package com.ItsTime.ItNovation.controller.user;
 
 
+import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.domain.user.dto.*;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
 import com.ItsTime.ItNovation.service.user.UserLoginStateService;
@@ -53,19 +54,15 @@ public class UserController {
         return userProfileService.userProfile(userProfileDto);
     }
 
+    //TODO: 만료된 토큰 처리 해야함
+    //TODO: 토큰 추출 하는 부분 jwtservice 예외 핸들링에 추가적인 에러 처리 필요 여부 결정 해야함
     @GetMapping("/state")
     @Operation(summary = "사용자 로그인 상태")
     public ResponseEntity<LoginStateDto> userLoginState(HttpServletRequest request) {
-        log.info("loginstate");
-        try {
-            Optional<String> accessToken = jwtService.extractAccessToken(request);
-            if (accessToken.isEmpty()) {
-                return userLoginStateService.loginState(null);
-            } else {
-                return userLoginStateService.loginState(accessToken.get());
-            }
-        } catch (JWTDecodeException e) {
-            log.error("토큰 추출 오류: " + e.getMessage());
+        Optional<String> accessToken = jwtService.extractAccessToken(request);
+        if (accessToken.isPresent()) {
+            return userLoginStateService.loginState(accessToken.get());
+        } else {
             return userLoginStateService.loginState(null);
         }
 

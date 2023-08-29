@@ -1,4 +1,4 @@
-package com.ItsTime.ItNovation.service.singleMoviePage;
+package com.ItsTime.ItNovation.service.movie;
 
 
 import com.ItsTime.ItNovation.domain.actor.Actor;

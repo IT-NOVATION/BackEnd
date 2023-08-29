@@ -40,16 +40,15 @@ public class ReviewController {
     @Operation(summary="리뷰 읽기 페이지에서 리뷰 정보, 영화 정보 가져오기")
     @GetMapping("/info/{reviewId}")
     public ResponseEntity reviewRead(@PathVariable Long reviewId, HttpServletRequest request){
-        Optional<String> s = jwtService.extractAccessToken(request);
-        if(s.isPresent()){
-            Optional<String> email = jwtService.extractEmail(s.get());
-            try{
-                if(email.isPresent()) {
-                    return reviewService.reviewRead(reviewId, email.get());
-                }
-            }catch(UnauthorizedException e){
 
+        Optional<String> s = jwtService.extractAccessToken(request);
+        if (s.isPresent()) {
+            Optional<String> email = jwtService.extractEmail(s.get());
+
+            if (email.isPresent()) {
+                return reviewService.reviewRead(reviewId, email.get());
             }
+
 
         }
         return reviewService.reviewRead(reviewId, null);
@@ -69,16 +68,15 @@ public class ReviewController {
     public ResponseEntity reviewInfoLikeUser(@PathVariable Long reviewId, HttpServletRequest request){
 
         Optional<String> s = jwtService.extractAccessToken(request);
-        if(s.isPresent()){
+        if (s.isPresent()) {
             Optional<String> email = jwtService.extractEmail(s.get());
-            try{
-                if(email.isPresent()) {
-                    return reviewService.getLikeUsers(reviewId, email.get());
-                }
-            }catch(UnauthorizedException e){
 
+            if (email.isPresent()) {
+                return reviewService.getLikeUsers(reviewId, email.get());
             }
+
         }
+
         return reviewService.getLikeUsers(reviewId, null);
     }
 

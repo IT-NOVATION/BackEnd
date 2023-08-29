@@ -18,22 +18,22 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
 
     @Query("SELECT rl.review.user FROM ReviewLike rl " +
         "WHERE rl.reviewLike = true " +
-        "AND DATE(rl.createdDate) = :yesterday " +
+        "AND DATE(rl.createdDate) = :today " +
         "GROUP BY rl.review.user " +
         "ORDER BY COUNT(rl.review.user.id) DESC")
-    List<User> findTopUsersWithYesterdayDate(@Param("yesterday")LocalDate date,Pageable pageable);
+    List<User> findTopUsersWithYesterdayDate(@Param("today")LocalDate date,Pageable pageable);
 
 
     @Query("SELECT r FROM Review r " +
         "WHERE r.user.id = :userId " +
-        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = :yesterday) DESC")
-    List<Review> findTopReviewsByUserId(@Param("yesterday") LocalDate date, @Param("userId") Long userId, Pageable pageable);
+        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = :today) DESC")
+    List<Review> findTopReviewsByUserId(@Param("today") LocalDate date, @Param("userId") Long userId, Pageable pageable);
 
 
     @Query("SELECT r FROM Review r " +
         "WHERE r.user.id = :userId " +
-        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = :yesterday) DESC")
-    List<Review> bestReviewsByUserId(@Param("yesterday") LocalDate date, @Param("userId") Long userId);
+        "ORDER BY (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review = r AND rl.reviewLike = true AND DATE(rl.createdDate) = :today) DESC")
+    List<Review> bestReviewsByUserId(@Param("today") LocalDate date, @Param("userId") Long userId);
 
 
 

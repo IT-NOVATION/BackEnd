@@ -50,6 +50,7 @@ public class JwtService {
 
     public static final Set<String> logoutTokens = new HashSet<>(); // 로그아웃된 토큰 목록
     public void logout(String token) {
+        log.info(token);
         logoutTokens.add(token); // 로그아웃된 토큰을 블랙리스트나 로그아웃 목록에 추가
     }
 
@@ -96,12 +97,28 @@ public class JwtService {
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         log.info("accessToken 추출");
         try {
-            return Optional.ofNullable(request.getHeader(accessHeader))
-                    .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                    .map(refreshToken -> refreshToken.replace(BEARER, ""));
+            Optional<String> tokenOpt = Optional.ofNullable(request.getHeader(accessHeader))
+                    .filter(accessToken -> accessToken.startsWith(BEARER))
+                    .map(accessToken -> accessToken.replace(BEARER, ""));
+
+            if (tokenOpt.isPresent()) {
+                String token = tokenOpt.get();
+                log.info(token);
+                if (logoutTokens.contains(token)) {
+                    log.info("로그아웃된 토큰");
+                    throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
+                } else {
+                    return tokenOpt; // Optional 형식으로 반환
+                }
+            } else {
+                throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
+            }
         } catch (JWTDecodeException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }catch(TokenExpiredException e){
+            log.error(e.getMessage());
+            throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         }
 
     }
@@ -116,6 +133,9 @@ public class JwtService {
         } catch (JWTDecodeException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN_VALUE);
+        }catch(TokenExpiredException e){
+            log.error(e.getMessage());
+            throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         }
     }
     /**

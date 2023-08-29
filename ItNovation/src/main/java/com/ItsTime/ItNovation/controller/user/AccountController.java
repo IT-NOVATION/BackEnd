@@ -43,11 +43,9 @@ public class AccountController {
         log.info("로그아웃");
         Optional<String> accessToken = jwtService.extractAccessToken(request);
         if(accessToken.isEmpty()){
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN_VALUE);
         }else{
             log.info("엑세스 토큰: {}" ,accessToken.get());
-
             return userService.logout(accessToken.get());
         }
 
