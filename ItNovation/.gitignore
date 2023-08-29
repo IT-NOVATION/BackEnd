@@ -4,6 +4,8 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+.
+
 
 ### STS ###
 .apt_generated
@@ -16,6 +18,7 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+*.DS_Store
 
 ### IntelliJ IDEA ###
 .idea
