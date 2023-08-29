@@ -36,7 +36,7 @@ public class TodayBestReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
-    private final LocalDate today = LocalDate.now().minusDays(0);
+    private LocalDate yesterday = LocalDate.now().minusDays(-1);
     private String nowUserEmail = null;
     private final JwtService jwtService;
 
@@ -44,18 +44,12 @@ public class TodayBestReviewService {
     public ResponseEntity getBestReviewAndUser(Optional<String> accessToken) {
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
-            try{
-                extractedEmail.ifPresent(s -> nowUserEmail = s);
-            }catch(UnauthorizedException e){
-
-            }
-
-
+            extractedEmail.ifPresent(s -> nowUserEmail = s);
         }
         Pageable pageable = PageRequest.of(0, 3);
-
+        yesterday = LocalDate.now().minusDays(-1);
         List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(
-            today,
+                yesterday,
             pageable);
         try {
             List<TodayBestReviewResponseDto> todayBestReviewResponseDtos = madeResponse(
@@ -120,7 +114,7 @@ public class TodayBestReviewService {
     private List<TodayBestReviewDto> findTodayTop2Review(User user) {
         Pageable pageable = PageRequest.of(0, 2);
         List<TodayBestReviewDto> reviewDtos = new ArrayList<>();
-        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(today,
+        List<Review> top2ReviewsByUserId = reviewLikeRepository.findTopReviewsByUserId(yesterday,
             user.getId(), pageable);
 
         convertToTopBestReviewDtos(reviewDtos, top2ReviewsByUserId);
