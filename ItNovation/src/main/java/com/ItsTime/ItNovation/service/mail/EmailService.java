@@ -21,7 +21,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 public class EmailService {
 
     @Value("${spring.mail.username}")
-    private final String from;
+    private String from;
     private final String title = "MOVIELOG 비밀번호 교체 관련 인증 번호";
 
     private final JavaMailSender javaMailSender;
