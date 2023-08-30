@@ -40,14 +40,11 @@ public class TodayLatestReviewService {
 
     @Transactional
     public ResponseEntity getLatestReviews(Optional<String> accessToken) {
+        nowUserEmail = null;
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
+            extractedEmail.ifPresent(s -> nowUserEmail = s);
 
-            try{
-                extractedEmail.ifPresent(s -> nowUserEmail = s);
-            }catch(UnauthorizedException e){
-
-            }
         }
         List<User> recentReviewers = reviewRepository.findUsersWithNewestReview(PageRequest.of(0, 3));
         List<LatestReviewResponseDto> LatestReviewResponseList = new ArrayList<>();
