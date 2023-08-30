@@ -1,9 +1,8 @@
 package com.ItsTime.ItNovation.controller.top;
 
 
-import com.ItsTime.ItNovation.common.exception.UnauthorizedException;
 import com.ItsTime.ItNovation.config.jwt.service.JwtService;
-import com.ItsTime.ItNovation.service.top.TodayBestUserService;
+import com.ItsTime.ItNovation.service.top.YesterdayBestUserService;
 import com.ItsTime.ItNovation.service.top.TopKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class TopController {
     private final TopKeywordService topKeywordService;
-    private final TodayBestUserService todayBestUserService;
+    private final YesterdayBestUserService yesterdayBestUserService;
     private final JwtService jwtService;
 
     @GetMapping("/movie-keyword/{movieId}")
@@ -40,12 +39,12 @@ public class TopController {
         if (s.isPresent()) {
             Optional<String> email = jwtService.extractEmail(s.get());
             if (email.isPresent()) {
-                return todayBestUserService.getBestUserInfo(email.get());
+                return yesterdayBestUserService.getBestUserInfo(email.get());
             }
 
         }
 
-        return todayBestUserService.getBestUserInfo(null);
+        return yesterdayBestUserService.getBestUserInfo(null);
     }
 
 }
