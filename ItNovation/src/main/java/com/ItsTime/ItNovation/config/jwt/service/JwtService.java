@@ -107,12 +107,9 @@ public class JwtService {
                 if (logoutTokens.contains(token)) {
                     log.info("로그아웃된 토큰");
                     throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
-                } else {
-                    return tokenOpt; // Optional 형식으로 반환
                 }
-            } else {
-                throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
             }
+            return tokenOpt;
         } catch (JWTDecodeException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
