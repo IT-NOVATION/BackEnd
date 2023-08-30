@@ -42,6 +42,7 @@ public class TodayBestReviewService {
 
     @Transactional
     public ResponseEntity getBestReviewAndUser(Optional<String> accessToken) {
+        nowUserEmail = null;
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
             extractedEmail.ifPresent(s -> nowUserEmail = s);
