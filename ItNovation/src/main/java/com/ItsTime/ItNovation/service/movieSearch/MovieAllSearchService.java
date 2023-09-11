@@ -29,8 +29,7 @@ public class MovieAllSearchService {
     public ResponseEntity getMoiveSearchResponseByReviewOrder(int page) {
         try{
 
-            List<Movie> movieList = movieRepository.findAll();
-            movieList.sort(Comparator.comparingInt((Movie m) -> m.getReviews().size()).reversed());
+            List<Movie> movieList = movieRepository.findMoviesWithSortedReviewCount();
 
             List<MovieSearchDto> movieSearchDtoList = new ArrayList<>();
             int pageSize = 16;
