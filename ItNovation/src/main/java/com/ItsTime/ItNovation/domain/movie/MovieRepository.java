@@ -27,14 +27,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     @Query("SELECT m FROM Movie m WHERE m.id = :id")
     Optional<Movie> findByMovieId(Long id);
 
-    @Query("SELECT m FROM Movie m ORDER BY (SELECT COUNT(r) FROM m.reviews r) DESC")
-    List<Movie> findMoviesWithReviewCount(Pageable pageable);
-//    @Query("SELECT m FROM Movie m LEFT JOIN m.reviews r GROUP BY m ORDER BY COUNT(r) DESC")
-//    List<Movie> findMoviesWithReviewCount(Pageable pageable);
-
-
-    @Query("select m from Movie m")
-    List<Movie> movieAllMovieByPageable(Pageable pageable);
+    @Query("SELECT m FROM Movie m ORDER BY size(m.reviews) DESC")
+    List<Movie> findMoviesWithSortedReviewCount();
 
     @Query("select m from Movie m order by m.movieDate desc")
     List<Movie> moviesByReleaseDate(Pageable pageable);
