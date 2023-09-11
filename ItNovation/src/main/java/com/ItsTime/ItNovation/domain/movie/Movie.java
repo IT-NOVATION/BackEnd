@@ -43,7 +43,7 @@ public class Movie {
 
 
     @OneToMany(mappedBy = "movie")
-    public List<Review> reviews = new ArrayList<Review>();
+    private List<Review> reviews = new ArrayList<Review>();
 
     @Builder
     public Movie(Long real_movieId, String title, String movieImg, String movieBgImg,
