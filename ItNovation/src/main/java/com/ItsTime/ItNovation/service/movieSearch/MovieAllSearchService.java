@@ -29,15 +29,12 @@ public class MovieAllSearchService {
     public ResponseEntity getMoiveSearchResponseByReviewOrder(int page) {
         try{
             Pageable pageable = PageRequest.of(page - 1, 16);
-            List<Movie> movieList = movieRepository.findMoviesWithReviewCount(pageable);
-//            for (int i = 0; i <movieList.size() ; i++) {
-//                if (movieList.get(i).getReviews().size() > 1) {
-//                    log.info(String.valueOf(movieList.get(i).getReviews().get(1)));
-//                }
-//            }
+            List<Movie> movieList = movieRepository.movieAllMovieByPageable(pageable);
+
             List<MovieSearchDto> movieSearchDtoList = new ArrayList<>();
             int lastPage = getLastPage();
             MovieSearchResponseDto movieSearchResponseDto = getMovieSearchResponseDto(page, movieList, movieSearchDtoList, lastPage);
+
             return ResponseEntity.status(HttpStatus.OK).body(movieSearchResponseDto);
         }catch (Exception e){
             return ResponseEntity.status(400).body("영화를 조회하는데 오류가 발생했습니다.");
@@ -54,6 +51,7 @@ public class MovieAllSearchService {
 
             movieSearchDtoList.add(movieSearchDto);
         }
+        Collections.sort(movieSearchDtoList, Comparator.comparingInt(MovieSearchDto::getReviewCount).reversed());
         return MovieSearchResponseDto
                 .builder().moiveSearchDtoList(movieSearchDtoList)
                 .lastPage(lastPage)
