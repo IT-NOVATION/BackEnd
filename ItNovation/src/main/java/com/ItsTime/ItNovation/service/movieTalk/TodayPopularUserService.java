@@ -34,15 +34,10 @@ public class TodayPopularUserService {
 
     @Transactional
     public ResponseEntity getTopFollowers(Optional<String> accessToken) {
-
+        nowUserEmail = null;
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
-            try{
-                extractedEmail.ifPresent(s -> nowUserEmail = s);
-            }catch(UnauthorizedException e){
-                throw new UnauthorizedException(e.getErrorCode());
-            }
-
+            extractedEmail.ifPresent(s -> nowUserEmail = s);
         }
         log.info(nowUserEmail);
         Pageable pageable = PageRequest.of(0, 2);

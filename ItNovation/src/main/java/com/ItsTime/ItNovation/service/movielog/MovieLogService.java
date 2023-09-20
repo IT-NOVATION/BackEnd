@@ -51,9 +51,8 @@ public class MovieLogService {
             Boolean isLoginedUserFollowsNowUser = false;
 
             if (accessToken.isPresent()) {
-                Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
-
-                try {
+                try{
+                    Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
                     extractedEmail.ifPresent(s -> nowUserEmail = s);
                 } catch (UnauthorizedException e) {
                     throw new UnauthorizedException(e.getErrorCode());

@@ -36,26 +36,21 @@ public class TodayBestReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
-    private final LocalDate today = LocalDate.now().minusDays(0);
+    private LocalDate today = LocalDate.now().minusDays(0);
     private String nowUserEmail = null;
     private final JwtService jwtService;
 
     @Transactional
     public ResponseEntity getBestReviewAndUser(Optional<String> accessToken) {
+        nowUserEmail = null;
         if (accessToken.isPresent()) {
             Optional<String> extractedEmail = jwtService.extractEmail(accessToken.get());
-            try{
-                extractedEmail.ifPresent(s -> nowUserEmail = s);
-            }catch(UnauthorizedException e){
-
-            }
-
-
+            extractedEmail.ifPresent(s -> nowUserEmail = s);
         }
         Pageable pageable = PageRequest.of(0, 3);
-
+        today = LocalDate.now().minusDays(0);
         List<User> top3UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(
-            today,
+                today,
             pageable);
         try {
             List<TodayBestReviewResponseDto> todayBestReviewResponseDtos = madeResponse(

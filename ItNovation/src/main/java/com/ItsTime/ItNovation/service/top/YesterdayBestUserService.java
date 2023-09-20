@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TodayBestUserService {
+public class YesterdayBestUserService {
 
 
     private final ReviewLikeRepository reviewLikeRepository;
@@ -36,7 +36,7 @@ public class TodayBestUserService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
 
-    private final LocalDate yesterday = LocalDate.now().minusDays(1);
+    private  LocalDate yesterday = LocalDate.now().minusDays(1);
 
     /**
      * Todo -> 전날 기준 집계해서 top User 뽑는 방식으로 고려
@@ -45,9 +45,9 @@ public class TodayBestUserService {
     @Transactional
     public ResponseEntity getBestUserInfo(String email) {
         Pageable pageable = PageRequest.of(0, 5);
-        log.info("hello");
+        yesterday = LocalDate.now().minusDays(1);
         List<User> top5UsersWithTodayDate = reviewLikeRepository.findTopUsersWithYesterdayDate(yesterday,
-            pageable); // -> 이거 전날 기준으로 고쳐야 함!
+            pageable);
         System.out.println("top5UsersWithTodayDate = " + top5UsersWithTodayDate);
 
         List<TopUserResponseDto> top5UserResponseDtos = new ArrayList<>();
@@ -76,7 +76,6 @@ public class TodayBestUserService {
     private void madeInternalResponseDto(List<TopUserReviewDto> topUserReviewDtos,
         List<TopUserResponseDto> top5UserResponseDtos, User user, User loginUser) {
         Long following = (long) user.getFollowStates().size();
-        log.info(yesterday.toString());
         Long followers = followRepository.countByFollowedUserId(user.getId());
         List<Review> reviews = reviewLikeRepository.bestReviewsByUserId(yesterday, user.getId());
         addBestReview(topUserReviewDtos, reviews);

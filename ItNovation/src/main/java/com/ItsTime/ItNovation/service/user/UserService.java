@@ -71,7 +71,7 @@ public class UserService {
 
     }
 
-    @Transactional
+
     public ResponseEntity logout(String accessToken) {
 
         log.info("엑세스 토큰: {}", accessToken);
