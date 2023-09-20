@@ -9,6 +9,8 @@ import com.ItsTime.ItNovation.domain.user.User;
 import com.ItsTime.ItNovation.domain.user.UserRepository;
 import com.ItsTime.ItNovation.service.mail.EmailService;
 import com.ItsTime.ItNovation.service.user.UserService;
+import jakarta.mail.MessagingException;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,41 +39,35 @@ public class EmailController {
 
     @PostMapping("/email-send")
     @Operation(summary = "메일 보내기")
-    public ResponseEntity<String> mailConfirm(@RequestBody PasswordFindRequestDto req){
+    public ResponseEntity<String> mailSend(@RequestBody PasswordFindRequestDto req){
         try {
-
-            log.info(req.getEmail());
             User findUser = userRepository.findByEmail(req.getEmail()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-            log.info(findUser.getEmail());
             String authCode = emailService.sendMail(findUser.getEmail());
             authCodeMap.put(req.getEmail(), authCode);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatusCode.valueOf(400));
+        }catch (MessagingException | UnsupportedEncodingException e){
+            return new ResponseEntity<>(ErrorCode.SEND_MAIL_ERROR.getHttpStatus());
         }
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 
     @PostMapping("/final-check")
     @Operation(summary = "입력된 인증번호와 비교하기")
-
     public ResponseEntity<String> checkCode(@RequestBody CodeCheckRequestDto checkRequestDto){
         String sendedCode = checkRequestDto.getCode();
         String email = checkRequestDto.getEmail();
         if(emailService.isCodeSame(sendedCode, email, authCodeMap)){
             return new ResponseEntity<>(HttpStatusCode.valueOf(200));
         }
-        return new ResponseEntity<>(HttpStatusCode.valueOf(400));
+        return new ResponseEntity<>(ErrorCode.INCORRECT_EMAIL_CODE.getHttpStatus());
     }
 
 
 
     @PostMapping("/rewrite-pw")
     @Operation(summary = "재발급 받은 패스워드로 사용자 정보 업데이트하기")
-
     public ResponseEntity<String> rewritePassword(@RequestBody RewritePasswordRequestDto rewritePasswordRequestDto){
         String email = rewritePasswordRequestDto.getEmail();
         String updatePassword = rewritePasswordRequestDto.getPassword();
-
         return userService.updatePassword(email, updatePassword);
     }
 
